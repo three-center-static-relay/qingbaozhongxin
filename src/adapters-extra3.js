@@ -1,0 +1,24 @@
+const MAX_BYTES=1500000,TIMEOUT_MS=12000;
+const clamp=(n,a,b,d)=>{n=Number(n);return Number.isFinite(n)?Math.max(a,Math.min(b,Math.trunc(n))):d};
+const text=(v,n=300)=>String(v??"").trim().slice(0,n);
+const required=(o,k)=>{const v=o?.[k];if(v===undefined||v===null||String(v).trim()==="")throw Object.assign(new Error(`ARG_REQUIRED:${k}`),{status:400});return v};
+async function getJson(url,headers={}){const c=new AbortController(),t=setTimeout(()=>c.abort(),TIMEOUT_MS);try{const r=await fetch(url,{headers:{accept:"application/json",...headers},signal:c.signal});const raw=await r.text();if(new TextEncoder().encode(raw).length>MAX_BYTES)throw Object.assign(new Error("UPSTREAM_RESPONSE_TOO_LARGE"),{status:502});let body;try{body=raw?JSON.parse(raw):null}catch{throw Object.assign(new Error("UPSTREAM_BAD_JSON"),{status:502})}if(!r.ok)throw Object.assign(new Error("UPSTREAM_HTTP_ERROR"),{status:502,details:{http_status:r.status,body}});return body}catch(e){if(e?.name==="AbortError")throw Object.assign(new Error("UPSTREAM_TIMEOUT"),{status:504});throw e}finally{clearTimeout(t)}}
+function coord(v){const s=text(v,40);if(!/^-?\d{1,3}(?:\.\d{1,6})?,-?\d{1,2}(?:\.\d{1,6})?$/.test(s))throw Object.assign(new Error("INVALID_COORDINATE"),{status:400});const [lon,lat]=s.split(",").map(Number);if(lon<-180||lon>180||lat<-90||lat>90)throw Object.assign(new Error("INVALID_COORDINATE"),{status:400});return s}
+function amapOk(body){if(String(body?.status)!=="1"||String(body?.infocode||"")!=="10000")throw Object.assign(new Error("UPSTREAM_BUSINESS_ERROR"),{status:502,details:{status:body?.status,info:body?.info,infocode:body?.infocode}});return body}
+async function amap(path,params,env){if(!env.AMAP_API_KEY)throw Object.assign(new Error("UPSTREAM_AUTH_FAILED"),{status:503});const u=new URL(`https://restapi.amap.com${path}`);u.searchParams.set("key",String(env.AMAP_API_KEY));u.searchParams.set("output","JSON");for(const[k,v]of Object.entries(params||{}))if(v!==undefined&&v!==null&&String(v)!=="")u.searchParams.set(k,String(v));return amapOk(await getJson(u))}
+export const OPERATIONS={gdelt:["articles"],amap:["geocode","reverse_geocode","place_text","driving","walking","distance","weather"]};
+export async function runAdapter(provider,operation,args,env){
+  if(!OPERATIONS[provider]?.includes(operation))throw Object.assign(new Error("ADAPTER_OPERATION_NOT_APPROVED"),{status:403});
+  if(provider==="gdelt"){
+    const query=text(required(args,"query"),400),limit=clamp(args.limit,1,50,20),u=new URL("https://api.gdeltproject.org/api/v2/doc/doc");u.searchParams.set("query",query);u.searchParams.set("mode","artlist");u.searchParams.set("format","json");u.searchParams.set("maxrecords",String(limit));u.searchParams.set("sort","datedesc");const span=text(args.timespan||"24h",12);if(!/^\d{1,3}(?:min|h|day|week|month)s?$/i.test(span))throw Object.assign(new Error("INVALID_TIMESPAN"),{status:400});u.searchParams.set("timespan",span);const body=await getJson(u);return{provider,operation,items:body?.articles||[],count:body?.articles?.length||0};
+  }
+  if(provider==="amap"){
+    if(operation==="geocode"){const address=text(required(args,"address"),200);return{provider,operation,data:await amap("/v3/geocode/geo",{address,city:args.city?text(args.city,40):undefined},env)}}
+    if(operation==="reverse_geocode"){return{provider,operation,data:await amap("/v3/geocode/regeo",{location:coord(required(args,"location")),radius:clamp(args.radius,0,3000,1000),extensions:args.extensions==="all"?"all":"base"},env)}}
+    if(operation==="place_text"){const keywords=text(required(args,"keywords"),80);return{provider,operation,data:await amap("/v5/place/text",{keywords,region:args.region?text(args.region,40):undefined,city_limit:args.city_limit===true?"true":undefined,page_size:clamp(args.limit,1,25,10),page_num:1},env)}}
+    if(operation==="driving"||operation==="walking"){const path=operation==="driving"?"/v5/direction/driving":"/v5/direction/walking";return{provider,operation,data:await amap(path,{origin:coord(required(args,"origin")),destination:coord(required(args,"destination")),alternative_route:clamp(args.alternative_route,1,3,1)},env)}}
+    if(operation==="distance"){const origins=Array.isArray(args.origins)?args.origins.slice(0,20).map(coord).join("|"):coord(required(args,"origins"));const type=[0,1,3].includes(Number(args.type))?Number(args.type):1;return{provider,operation,data:await amap("/v3/distance",{origins,destination:coord(required(args,"destination")),type},env)}}
+    if(operation==="weather"){const city=text(required(args,"city"),12);if(!/^\d{6}$/.test(city))throw Object.assign(new Error("INVALID_ADCODE"),{status:400});return{provider,operation,data:await amap("/v3/weather/weatherInfo",{city,extensions:args.extensions==="all"?"all":"base"},env)}}
+  }
+  throw Object.assign(new Error("ADAPTER_NOT_IMPLEMENTED"),{status:501});
+}
