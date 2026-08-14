@@ -1,4 +1,4 @@
-export const CATALOG_VERSION="2026-08-15.2";
+export const CATALOG_VERSION="2026-08-15.3";
 export const EXCLUDED_PROVIDERS=["datacommons","faostat","agt_stock","baichuan","taobao"];
 
 export const CATALOG={
@@ -20,7 +20,7 @@ export const CATALOG={
   fred:{category:"macro",access:"key",secrets:["FRED_API_KEY"],adapter:"fred.series_observations"},
   worldbank:{category:"macro",access:"public",adapter:"worldbank.indicator"},
   imf:{category:"macro",access:"public",adapter:"catalog-only"},
-  oecd:{category:"macro",access:"public",adapter:"catalog-only"},
+  oecd:{category:"macro",access:"public",adapter:"oecd.sdmx_data"},
   bis:{category:"macro",access:"public",adapter:"catalog-only"},
   wto:{category:"trade",access:"public",adapter:"catalog-only"},
   eia:{category:"energy",access:"key",secrets:["EIA_API_KEY"],adapter:"catalog-only"},
@@ -33,7 +33,7 @@ export const CATALOG={
   opensky:{category:"aviation",access:"key",secret_groups:[["OPENSKY_CLIENT_ID","OPENSKY_CLIENT_SECRET"]],adapter:"catalog-only"},
   worldpop:{category:"population",access:"public",adapter:"catalog-only"},
   night_lights:{category:"remote-sensing",access:"external-runtime",adapter:"catalog-only"},
-  who_gho:{category:"health",access:"public",adapter:"catalog-only"},
+  who_gho:{category:"health",access:"public",adapter:"who_gho.indicator"},
   clinicaltrials:{category:"health",access:"public",adapter:"clinicaltrials.studies"},
   biomcp:{category:"biomed-mcp",access:"external-mcp",adapter:"catalog-only"},
   huggingface:{category:"ai-catalog",access:"optional-key",secrets:["HUGGINGFACE_TOKEN"],adapter:"huggingface.models"},
@@ -48,8 +48,8 @@ export const CATALOG={
   gapup_mcp:{category:"mcp",access:"external-mcp",adapter:"catalog-only"},
   newsapi:{category:"news",access:"key",secrets:["NEWSAPI_KEY"],adapter:"catalog-only"},
   gdelt:{category:"news",access:"public",adapter:"catalog-only"},
-  wikipedia:{category:"knowledge",access:"public",adapter:"catalog-only"},
-  wikidata:{category:"knowledge",access:"public",adapter:"catalog-only"},
+  wikipedia:{category:"knowledge",access:"public",adapter:"wikipedia.search"},
+  wikidata:{category:"knowledge",access:"public",adapter:"wikidata.search_items"},
   llamaparse:{category:"document-parser",access:"key",secrets:["LLAMA_CLOUD_API_KEY"],adapter:"catalog-only"},
   mcp_registry:{category:"registry",access:"public",adapter:"mcp_registry.search"},
   apis_guru:{category:"registry",access:"public",adapter:"apis_guru.providers"},
@@ -78,12 +78,12 @@ export const CATALOG={
 
 function anyGroup(env,groups){return groups?.some(g=>g.every(k=>Boolean(env[k])))}
 export function statusFor(env,name){
-  const p=CATALOG[name]; if(!p)return null;
+  const p=CATALOG[name];if(!p)return null;
   let configured=false;
-  if(["public","external-runtime","external-mcp","external-source"].includes(p.access)) configured=true;
-  else if(p.secret_groups) configured=anyGroup(env,p.secret_groups);
-  else if(p.access==="optional-key") configured=true;
+  if(["public","external-runtime","external-mcp","external-source"].includes(p.access))configured=true;
+  else if(p.secret_groups)configured=anyGroup(env,p.secret_groups);
+  else if(p.access==="optional-key")configured=true;
   else configured=(p.secrets||[]).every(k=>Boolean(env[k]));
-  return {configured,category:p.category,access:p.access,adapter:p.adapter,live_adapter:p.adapter!=="catalog-only"};
+  return{configured,category:p.category,access:p.access,adapter:p.adapter,live_adapter:p.adapter!=="catalog-only"};
 }
 export function allStatuses(env){return Object.fromEntries(Object.keys(CATALOG).map(k=>[k,statusFor(env,k)]))}
