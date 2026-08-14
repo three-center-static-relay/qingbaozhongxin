@@ -1,0 +1,9 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "intelligence-worker-test",
+  "main": "src/guard.js",
+  "compatibility_date": "2026-08-14",
+  "durable_objects": {"bindings": [{"name": "CENTER_GATE", "class_name": "CenterGate"}]},
+  "exports": {"CenterGate": {"type": "durable-object", "storage": "sqlite"}},
+  "vars": {"RATE_LIMIT_PER_MIN": "300"}
+}
