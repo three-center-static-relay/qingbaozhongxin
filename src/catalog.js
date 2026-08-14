@@ -1,4 +1,4 @@
-export const CATALOG_VERSION="2026-08-15.3";
+export const CATALOG_VERSION="2026-08-15.4";
 export const EXCLUDED_PROVIDERS=["datacommons","faostat","agt_stock","baichuan","taobao"];
 
 export const CATALOG={
@@ -23,14 +23,14 @@ export const CATALOG={
   oecd:{category:"macro",access:"public",adapter:"oecd.sdmx_data"},
   bis:{category:"macro",access:"public",adapter:"catalog-only"},
   wto:{category:"trade",access:"public",adapter:"catalog-only"},
-  eia:{category:"energy",access:"key",secrets:["EIA_API_KEY"],adapter:"catalog-only"},
+  eia:{category:"energy",access:"key",secrets:["EIA_API_KEY"],adapter:"eia.seriesid"},
   adb:{category:"macro",access:"public",adapter:"catalog-only"},
   un_comtrade:{category:"trade",access:"optional-key",secrets:["UN_COMTRADE_API_KEY"],adapter:"catalog-only"},
   qweather:{category:"weather",access:"key",secret_groups:[["QWEATHER_JWT"],["QWEATHER_API_KEY"]],adapter:"catalog-only"},
   xweather:{category:"weather",access:"key",secrets:["XWEATHER_API_KEY"],adapter:"catalog-only"},
   open_meteo:{category:"weather",access:"public",adapter:"open_meteo.forecast"},
   overture_maps:{category:"geo",access:"external-runtime",adapter:"catalog-only"},
-  opensky:{category:"aviation",access:"key",secret_groups:[["OPENSKY_CLIENT_ID","OPENSKY_CLIENT_SECRET"]],adapter:"catalog-only"},
+  opensky:{category:"aviation",access:"key",secret_groups:[["OPENSKY_CLIENT_ID","OPENSKY_CLIENT_SECRET"]],adapter:"opensky.states"},
   worldpop:{category:"population",access:"public",adapter:"catalog-only"},
   night_lights:{category:"remote-sensing",access:"external-runtime",adapter:"catalog-only"},
   who_gho:{category:"health",access:"public",adapter:"who_gho.indicator"},
@@ -46,7 +46,7 @@ export const CATALOG={
   worldbank_documents:{category:"documents",access:"public",adapter:"catalog-only"},
   east_asia_econ:{category:"regional-economy",access:"external-source",adapter:"catalog-only"},
   gapup_mcp:{category:"mcp",access:"external-mcp",adapter:"catalog-only"},
-  newsapi:{category:"news",access:"key",secrets:["NEWSAPI_KEY"],adapter:"catalog-only"},
+  newsapi:{category:"news",access:"key",secrets:["NEWSAPI_KEY"],adapter:"newsapi.everything"},
   gdelt:{category:"news",access:"public",adapter:"catalog-only"},
   wikipedia:{category:"knowledge",access:"public",adapter:"wikipedia.search"},
   wikidata:{category:"knowledge",access:"public",adapter:"wikidata.search_items"},
