@@ -1,9 +1,0 @@
-name: org-actions-disabled-probe
-on:
-  push:
-    branches: [main]
-jobs:
-  probe:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo org-actions-disabled-probe
