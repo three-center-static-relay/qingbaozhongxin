@@ -31,7 +31,7 @@ export const CATALOG={
   crossref:{...BASE_CATALOG.crossref,integration:"official-rest",scope:"global-scholarly-metadata"},
   openalex:{...BASE_CATALOG.openalex,integration:"official-rest",registration_url:"https://openalex.org/settings/api",free_tier:"1-usd-daily-api-credit"},
   semantic_scholar:{...BASE_CATALOG.semantic_scholar,integration:"official-rest",registration_url:"https://www.semanticscholar.org/product/api#api-key-form"},
-  unpaywall:{...BASE_CATALOG.unpaywall,integration:"official-rest",scope:"global-scholarly-metadata"},
+  unpaywall:{...BASE_CATALOG.unpaywall,integration:"official-rest",scope:"open-access-resolution"},
   openaire:{...BASE_CATALOG.openaire,integration:"official-rest",scope:"europe-global-research-products"},
   base:{category:"literature-oa-aggregator",access:"public",adapter:"catalog-only",integration:"official-oai-pmh",scope:"repository-aggregator-metadata",endpoint:"https://oai.base-search.net/oai"},
   core:{category:"literature-oa-aggregator",access:"public",adapter:"catalog-only",integration:"official-rest",scope:"open-access-metadata-and-fulltext",registration_url:"https://core.ac.uk/services/api",note:"free-access-subject-to-current-terms-and-rate-limits"},
