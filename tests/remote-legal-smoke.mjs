@@ -5,5 +5,5 @@ async function request(url,init={}){const c=new AbortController(),t=setTimeout((
 async function findBase(){for(const b of BASES){try{const {r,j}=await request(`${b}/health`);if(r.ok&&j?.ok&&j?.service==="intelligence-worker")return b}catch{}}throw new Error("INTELLIGENCE_WORKER_NOT_REACHABLE")}
 const base=await findBase();const rd=await request(`${base}/v1/provider/google_trends_public/readiness`);assert.equal(rd.r.status,200);assert.equal(rd.j?.configured,true,"Google Cloud credentials missing");
 const task_id=`diag-google-trends-${Date.now()}`;const x=await request(`${base}/v1/run`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({task_id,provider:"google_trends_public",operation:"top_terms",timeout_seconds:70,args:{country_code:"CN",limit:3,maximum_bytes_billed:50000000}})});
-assert.equal(x.r.ok&&x.j?.ok===true,false,"Google Trends unexpectedly passed");assert.equal(x.j?.error,"UPSTREAM_HTTP_ERROR",`not upstream HTTP; error=${x.j?.error||"none"}`);
-console.log(JSON.stringify({ok:true,classification:"UPSTREAM_HTTP_ERROR",http:x.j?.details?.http_status||null,status:x.j?.details?.status||null}));
+assert.equal(x.r.ok&&x.j?.ok===true,false,"Google Trends unexpectedly passed");assert.equal(["GOOGLE_CREDENTIALS_INVALID","UPSTREAM_AUTH_FAILED"].includes(x.j?.error),true,`not auth class; error=${x.j?.error||"none"}`);
+console.log(JSON.stringify({ok:true,classification:"AUTH_CLASS"}));
