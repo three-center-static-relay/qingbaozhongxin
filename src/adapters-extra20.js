@@ -14,10 +14,10 @@ async function fetchJson(url,init={}){
   }catch(e){if(e?.name==="AbortError")throw Object.assign(new Error("UPSTREAM_TIMEOUT"),{status:504});throw e}finally{clearTimeout(t)}
 }
 function safeToken(v,name,n=120){const s=required(v,name).slice(0,n);if(!/^[A-Za-z0-9_.:-]+$/.test(s))throw Object.assign(new Error(`INVALID_${name.toUpperCase()}`),{status:400});return s}
-export const OPERATIONS={osf:["search_public"],ensembl:["lookup_symbol"],reactome:["query_id"]};
+export const OPERATIONS={osf_public:["search_public"],ensembl:["lookup_symbol"],reactome:["query_id"]};
 export async function runAdapter(provider,operation,args){
   if(!OPERATIONS[provider]?.includes(operation))throw Object.assign(new Error("ADAPTER_OPERATION_NOT_APPROVED"),{status:403});
-  if(provider==="osf"){
+  if(provider==="osf_public"){
     const q=required(args?.query,"query"),limit=clamp(args?.limit,1,25,10),u=new URL("https://api.osf.io/v2/nodes/");
     u.searchParams.set("filter[title]",q);u.searchParams.set("page[size]",String(limit));
     const body=await fetchJson(u);return {provider,operation,items:body?.data||[],links:body?.links||null,meta:body?.meta||null};
