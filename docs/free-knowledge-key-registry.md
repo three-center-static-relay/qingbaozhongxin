@@ -29,6 +29,8 @@ This registry covers free/public knowledge sources that need or benefit from cre
 | DigitalNZ | `DIGITALNZ_API_KEY` | Optional for regular/higher-volume API usage | https://digitalnz.org/api_keys/edit |
 | Zenodo | `ZENODO_TOKEN` | Optional for public search; required for account-scoped operations | https://zenodo.org/account/settings/applications/tokens/new/ |
 | Deutsche Digitale Bibliothek | `DDB_API_KEY` | Free key after creating a DDB user account; generate it under Meine DDB | https://www.deutsche-digitale-bibliothek.de/content/hilfe?lang=en |
+| Harvard Art Museums | `HARVARD_ART_MUSEUMS_API_KEY` | Free key; API is non-commercial and rate-limited | https://www.harvardartmuseums.org/collections/api |
+| Trove | `TROVE_API_KEY` | Free key for eligible use; current Trove terms must be checked before harvesting content | https://help.nla.gov.au/trove/building-with-trove/api |
 
 ## Shared key rule
 
