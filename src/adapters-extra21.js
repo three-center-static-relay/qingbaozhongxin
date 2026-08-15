@@ -3,7 +3,7 @@ const DLR_STAC_BASE="https://geoservice.dlr.de/eoc/ogc/stac/v1";
 const TIMEOUT_MS=15000,MAX_RESPONSE_BYTES=1000000,MAX_GEOJSON_BYTES=220000,MAX_POINTS=6000;
 
 const SOURCE_INFO={
-  worldpop:{role:"polygon-population-and-demographics",access:"open-free",publisher:"WorldPop / University of Southampton",coverage:"global",auth:"none-required; optional free API key raises limits",endpoint:WORLDPOP_BASE,capabilities:["polygon-population","population-density","age-sex-breakdown"],years:"2015-2030",resolutions:["100m","1km"],anonymous_daily_limit:1000,api_key_daily_limit:10000,arbitrary_url:false},
+  worldpop:{role:"polygon-population-and-demographics",access:"open-free",publisher:"WorldPop / University of Southampton",coverage:"global",auth:"none-required; optional free API key raises limits",endpoint:WORLDPOP_BASE,capabilities:["polygon-population","population-density","age-sex-pyramid"],years:"2015-2030",resolutions:["100m","1km"],anonymous_daily_limit:1000,api_key_daily_limit:10000,age_range_policy:"request-full-pyramid-then-aggregate-downstream-for-stability",arbitrary_url:false},
   ghsl:{
     provider:"ghsl",role:"population-built-environment-urban-structure",access:"open-free",publisher:"European Commission Joint Research Centre",coverage:"global",auth:"none",bulk_only:true,
     capabilities:["resident-population","residential-vs-nonresidential-built-surface","built-volume","building-height","building-function","settlement-classification","functional-urban-areas","urban-centre-indicators"],
@@ -13,7 +13,7 @@ const SOURCE_INFO={
   copernicus_lcfm:{
     provider:"copernicus_lcfm",role:"annual-land-cover-urban-change",access:"open-free",publisher:"Copernicus Land Monitoring Service",coverage:"global",auth:"none-for-public-product-metadata; CDSE account may be used for bulk delivery",bulk_only:true,
     capabilities:["10m-land-cover","urbanisation-change","annual-land-cover-series"],
-    products:["Global Dynamic Land Cover 10m annual 2020-2026"],
+    products:["Global Dynamic Land Cover 10m annual service 2020-2026"],
     endpoint:"https://land.copernicus.eu/en/products/global-dynamic-land-cover",arbitrary_url:false
   },
   overture_maps:{
@@ -27,9 +27,9 @@ const SOURCE_INFO={
     dataset:"NASA/VIIRS/002/VNP46A2",resolution_m:500,cadence:"daily",arbitrary_url:false
   },
   foursquare_os_places:{
-    provider:"foursquare_os_places",role:"open-commercial-poi-corroboration",access:"open-free",publisher:"Foursquare",coverage:"global",auth:"free-portal-token-for-Iceberg; public PMTiles also published",bulk_only:true,
+    provider:"foursquare_os_places",role:"open-commercial-poi-corroboration",access:"open-free",publisher:"Foursquare",coverage:"global",auth:"free-portal-token-for-Iceberg",bulk_only:true,
     capabilities:["commercial-poi","categories","chains","place-status","monthly-deltas"],
-    license:"Apache-2.0",portal:"https://places.foursquare.com/",docs:"https://docs.foursquare.com/data-products/docs/access-fsq-os-places",pmtiles:"s3://fsq-os-places-us-east-1/release/vector-tiles/latest/fsq-os-places.pmtiles",arbitrary_url:false,
+    license:"Apache-2.0",portal:"https://places.foursquare.com/",docs:"https://docs.foursquare.com/data-products/docs/access-fsq-os-places",arbitrary_url:false,
     caution:"corroborating POI layer; do not double-count records also sourced through Overture"
   },
   dlr_wsf:{
@@ -53,7 +53,7 @@ function validateGeoJSON(g){
 }
 function year(v){const n=Number(v);if(!Number.isInteger(n)||n<2015||n>2030)err("INVALID_YEAR",400,{allowed:"2015-2030"});return n}
 function resolution(v){const s=String(v||"100m");if(!["100m","1km"].includes(s))err("INVALID_RESOLUTION",400,{allowed:["100m","1km"]});return s}
-function ageRange(v){if(v===undefined)return undefined;if(!Array.isArray(v)||v.length!==2)err("INVALID_AGE_RANGE");const a=v.map(Number);if(!a.every(Number.isInteger)||a[0]<0||a[1]>100||a[0]>a[1])err("INVALID_AGE_RANGE");return a}
+function ageRange(v){if(v!==undefined)err("AGE_RANGE_NOT_SUPPORTED_USE_FULL_PYRAMID",400,{reason:"WorldPop current production datasets may reject non-standard age-band boundaries; request the full pyramid and aggregate downstream"});return undefined}
 function sex(v){const s=String(v||"both").toLowerCase();if(!["male","female","both"].includes(s))err("INVALID_SEX");return s}
 function taskId(v){const s=String(v||"").trim();if(!/^[A-Za-z0-9-]{8,100}$/.test(s))err("INVALID_TASK_ID");return s}
 
@@ -74,7 +74,7 @@ async function worldpop(operation,args,env){
   const headers={accept:"application/json"};const key=String(env?.WORLDPOP_API_KEY||"").trim();if(key)headers["X-API-Key"]=key;
   if(operation==="task_status")return{provider:"worldpop",operation,result:await requestJson(`${WORLDPOP_BASE}/tasks/${encodeURIComponent(taskId(args?.task_id))}`,{headers})};
   const geojson=validateGeoJSON(args?.geojson),payload={geojson,year:year(args?.year),resolution:resolution(args?.resolution)};
-  if(operation==="agesex_submit"){const ar=ageRange(args?.age_range);if(ar)payload.age_range=ar;payload.sex=sex(args?.sex)}
+  if(operation==="agesex_submit"){ageRange(args?.age_range);payload.sex=sex(args?.sex)}
   const path=operation==="population_submit"?"population":operation==="agesex_submit"?"agesex":null;if(!path)err("ADAPTER_OPERATION_NOT_APPROVED",403);
   headers["content-type"]="application/json";const body=await requestJson(`${WORLDPOP_BASE}/${path}`,{method:"POST",headers,body:JSON.stringify(payload)});
   return{provider:"worldpop",operation,authenticated:Boolean(key),result:body}
