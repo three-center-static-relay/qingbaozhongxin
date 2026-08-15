@@ -28,9 +28,13 @@ const keySources={
   materials_project:"MATERIALS_PROJECT_API_KEY"
 };
 for(const [provider,secret] of Object.entries(keySources)){
-  assert.ok(CATALOG[provider],`missing key source: ${provider}`);
-  assert.ok(CATALOG[provider].secrets?.includes(secret),`missing secret ${secret} for ${provider}`);
-  assert.equal(CATALOG[provider].adapter,"catalog-only",`unverified key provider unexpectedly live: ${provider}`);
+  const entry=CATALOG[provider];
+  assert.ok(entry,`missing key source: ${provider}`);
+  assert.ok(entry.secrets?.includes(secret),`missing secret ${secret} for ${provider}`);
+  assert.notEqual(entry.arbitrary_url,true,`key source unexpectedly allows arbitrary URL: ${provider}`);
+  if(entry.adapter!=="catalog-only"){
+    assert.ok(Array.isArray(OPERATIONS[provider])&&OPERATIONS[provider].length>0,`graduated live key provider has no approved operations: ${provider}`);
+  }
 }
 
 for(const provider of ["abs_australia","destatis_genesis","insee_france","istat_italy","cbs_netherlands","scb_sweden","ssb_norway","statfin_finland","statbank_denmark","gleif_lei","bank_canada_valet","us_census_api","us_bls_api","us_treasury_fiscaldata","faa_aerodata","noaa_accessais","copernicus_marine","emodnet","argo_gdac","gebco","world_bank_pink_sheet","imf_commodity_prices","jodi_oil_gas","nih_reporter","cdc_open_data","cms_data","usaspending","ted_eu_procurement","usgs_earthquake","gdacs","reliefweb","nomad_materials","aflowlib"]){
@@ -43,4 +47,4 @@ assert.ok(routing.domains.health_medicine_biomedical.length>=10);
 assert.ok(routing.domains.satellite_geospatial_population.length>=10);
 assert.ok(routing.advanced_economy_country_hubs.US.length>=10);
 assert.match(routing.market_data_note,/real-time exchange-grade/i);
-console.log(JSON.stringify({ok:true,live:Object.keys(live).length,key_sources:Object.keys(keySources).length,domains:Object.keys(routing.domains).length,country_hubs:Object.keys(routing.advanced_economy_country_hubs).length}));
+console.log(JSON.stringify({ok:true,live:Object.keys(live).length,key_sources:Object.keys(keySources).length,domains:Object.keys(routing.domains).length,country_hubs:Object.keys(routing.advanced_economy_country_hubs).length,key_sources_can_graduate_to_verified_live:true}));
