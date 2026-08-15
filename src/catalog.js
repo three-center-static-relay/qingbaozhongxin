@@ -1,5 +1,5 @@
 import {CATALOG as BASE_CATALOG,EXCLUDED_PROVIDERS as BASE_EXCLUDED} from "./catalog-base.js";
-export const CATALOG_VERSION="2026-08-15.19";
+export const CATALOG_VERSION="2026-08-15.20";
 export const EXCLUDED_PROVIDERS=BASE_EXCLUDED;
 export const CATALOG={
   ...BASE_CATALOG,
@@ -22,7 +22,7 @@ export const CATALOG={
   tencent_maps:{category:"maps-cn-mcp",access:"key",secret_groups:[["TENCENT_LBS_API_KEY"],["TENCENT_MAP_API_KEY"]],adapter:"tencent_maps.multi",integration:"official-mcp+webservice"},
   tianditu:{category:"maps-cn-official",access:"key",secret_groups:[["TIANDITU_TK"],["TIANDITU_API_KEY"]],adapter:"tianditu.search"},
   aifin_market:{category:"finance-cn-mcp",access:"key",secrets:["WIND_API_KEY"],adapter:"catalog-only",integration:"official-skill-mcp"},
-  pkulaw:{category:"legal-cn",access:"key",secrets:["BROWSERFABRIC_API_KEY"],optional_secrets:["PKULAW_BROWSERFABRIC_CONTEXT_ID"],adapter:"browserfabric.read-with-optional-persistent-context",integration:"browserfabric",scope:"pkulaw-fixed-domains-read-only",auth_note:"context-id optional for public read; required to restore a previously authenticated PKULaw login state"},
+  pkulaw:{category:"legal-cn",access:"key",secret_groups:[["PKULAW_MCP_TOKEN"],["PKULAW_API_TOKEN"],["BROWSERFABRIC_API_KEY"]],adapter:"pkulaw.official-mcp",integration:"official-mcp-streamable-http",scope:"fixed-official-mcp-services-read-only",endpoint:"https://apim-gateway.pkulaw.com/",auth_note:"preferred secret PKULAW_MCP_TOKEN; PKULAW_API_TOKEN supported; BROWSERFABRIC_API_KEY retained temporarily only as a legacy secret-name alias"},
   yuandian:{category:"legal-cn",access:"key",secret_groups:[["YD_API_KEY"],["YUANDIAN_API_KEY"]],adapter:"yuandian.official-api",integration:"official-rest+mcp",scope:"law-case-enterprise-read-only"},
   wikidata:{category:"global-knowledge-graph",access:"public",adapter:"wikidata.public-read",integration:"official-sparql+entitydata",scope:"anonymous-read-only"},
   copernicus_cds:{category:"climate-global-official",access:"key",secret_groups:[["COPERNICUS_CDS_API_KEY"],["CDS_API_KEY"]],adapter:"copernicus_cds.catalog+retrieve",integration:"official-rest",scope:"catalog-read+bounded-retrieval-job-control-no-binary-proxy",terms:"dataset-terms-must-be-accepted-manually-before-download"},
