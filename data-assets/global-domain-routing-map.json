@@ -1,0 +1,50 @@
+{
+  "schema_version":"2026-08-15.1",
+  "rule":"Prefer authoritative official sources, then independent official cross-checks, then research/open-data infrastructure, then community mirrors. Community copies never outrank the originating authority.",
+  "domains":{
+    "macro_and_national_accounts":["world_bank_data_catalog","imf_data","oecd_data_explorer","fred","ons_uk","statcan","abs_australia","estat_japan","destatis_genesis","insee_france","istat_italy","cbs_netherlands","scb_sweden","ssb_norway","statfin_finland","statbank_denmark","us_bea_api"],
+    "central_bank_and_financial_system":["bis_statistics","ecb_data","fred","bank_canada_valet","bank_england_iadb","boj_timeseries","rba_statistics","us_treasury_fiscaldata"],
+    "companies_and_financial_disclosures":["sec_edgar","companies_house_uk","gleif_lei","opendart_korea","edinet_japan","qichacha"],
+    "trade_supply_chain_industry":["un_comtrade","world_trade_organization_stats","oecd_data_explorer","us_census_api","eurostat","estat_japan","kosis_korea","world_bank_data_catalog"],
+    "stock_finance_and_derivatives_public_data":["sec_edgar","ecb_data","bis_statistics","fred","cftc_cot","google_patents_public","alpha_vantage","eodhd","baostock","tushare"],
+    "energy_power_oil_gas":["eia_open_data","jodi_oil_gas","world_bank_pink_sheet","imf_commodity_prices","oecd_data_explorer","un_data_family"],
+    "commodities_agriculture_food":["world_bank_pink_sheet","imf_commodity_prices","fao_agris_faostat_family","usda_nass_quickstats","un_comtrade","world_trade_organization_stats"],
+    "aviation_airspace":["opensky","faa_aerodata","icao_reference_trial","estat_japan","statfin_finland"],
+    "marine_shipping_ocean":["noaa_accessais","copernicus_marine","emodnet","argo_gdac","gebco","un_comtrade","world_trade_organization_stats"],
+    "satellite_geospatial_population":["earthengine","nasa_earthdata","copernicus_data_space","usgs_science_data_catalog","worldpop","ghsl","copernicus_lcfm","night_lights","dlr_wsf","overture_maps","openstreetmap","foursquare_os_places"],
+    "weather_climate_disaster":["noaa_ncei","copernicus_data_space","nasa_earthdata","usgs_earthquake","gdacs","reliefweb","earthengine"],
+    "health_medicine_biomedical":["who_data","clinicaltrials","openfda","ncbi_entrez","europe_pmc","pubchem","chembl","rcsb_pdb","ensembl","reactome","nih_reporter","cdc_open_data","cms_data"],
+    "materials_science_engineering":["materials_project","nomad_materials","aflowlib","zenodo","figshare","osf_public","dataverse_network"],
+    "research_replication_and_long_tail":["google_dataset_search","re3data","data_cite","zenodo","figshare","osf_public","harvard_dataverse","dryad","pangaea","kaggle","huggingface_datasets","openml"],
+    "government_spending_procurement_policy":["usaspending","ted_eu_procurement","world_bank_data_catalog","federal_register","congress_gov","regulations_gov","eurlex_cellar","uk_legislation"],
+    "population_labor_households_social":["world_bank_data_catalog","ilo_stat","ons_uk","statcan","abs_australia","estat_japan","destatis_genesis","insee_france","istat_italy","cbs_netherlands","scb_sweden","ssb_norway","statfin_finland","statbank_denmark","cfps"]
+  },
+  "advanced_economy_country_hubs":{
+    "US":["data_gov_us","us_census_api","us_bls_api","us_bea_api","sec_edgar","us_treasury_fiscaldata","eia_open_data","noaa_ncei","nasa_earthdata","usgs_science_data_catalog","faa_aerodata","clinicaltrials","openfda","cdc_open_data","cms_data","usaspending"],
+    "UK":["ons_uk","companies_house_uk","bank_england_iadb","uk_legislation"],
+    "Canada":["statcan","bank_canada_valet"],
+    "Australia":["abs_australia","rba_statistics"],
+    "Japan":["estat_japan","edinet_japan","boj_timeseries"],
+    "South_Korea":["kosis_korea","opendart_korea"],
+    "Germany":["destatis_genesis","data_europa_eu","ecb_data","eurostat"],
+    "France":["insee_france","data_europa_eu","ecb_data","eurostat"],
+    "Italy":["istat_italy","data_europa_eu","ecb_data","eurostat"],
+    "Netherlands":["cbs_netherlands","data_europa_eu","ecb_data","eurostat"],
+    "Sweden":["scb_sweden","data_europa_eu","eurostat"],
+    "Norway":["ssb_norway","oecd_data_explorer"],
+    "Finland":["statfin_finland","data_europa_eu","ecb_data","eurostat"],
+    "Denmark":["statbank_denmark","data_europa_eu","ecb_data","eurostat"],
+    "Switzerland":["bfs_switzerland","oecd_data_explorer","bis_statistics"],
+    "Austria":["statistik_austria","data_europa_eu","ecb_data","eurostat"],
+    "Spain":["ine_spain","data_europa_eu","ecb_data","eurostat"],
+    "Ireland":["cso_ireland","data_europa_eu","ecb_data","eurostat"],
+    "New_Zealand":["stats_nz","oecd_data_explorer"],
+    "Singapore":["singstat","world_bank_data_catalog","imf_data"]
+  },
+  "all_country_fallback":["world_bank_data_catalog","imf_data","un_data_family","un_comtrade","world_trade_organization_stats","who_data","fao_agris_faostat_family","ilo_stat","worldpop","ghsl","nasa_earthdata","copernicus_data_space"],
+  "market_data_note":"Free public sources cover filings, fundamentals, macro/central-bank data, regulatory positioning and some quotes. Complete real-time exchange-grade equities/futures/order-book data are commonly licensed/proprietary and must not be represented as globally free.",
+  "restricted_reference_sources":{
+    "icao_reference_trial":"ICAO API offers only a limited free trial (100 calls); catalog/reference only, not long-term-free production.",
+    "iea_world_energy_statistics":"IEA terms can require paid licensing for modelling/derived-product uses; reference only unless rights are separately obtained."
+  }
+}
