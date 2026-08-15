@@ -2,7 +2,7 @@ import {CATALOG as EXISTING_CATALOG,EXCLUDED_PROVIDERS as EXISTING_EXCLUDED} fro
 import {GLOBAL_HIGH_VALUE_CATALOG} from "./catalog-global-highvalue.js";
 import {SPLUS_CATALOG} from "./catalog-splus.js";
 import {AIFIN_CATALOG} from "./catalog-aifin.js";
-export const CATALOG_VERSION="2026-08-15.32";
+export const CATALOG_VERSION="2026-08-15.33";
 export const EXCLUDED_PROVIDERS=EXISTING_EXCLUDED;
 export const CATALOG={
   ...EXISTING_CATALOG,
@@ -26,6 +26,12 @@ export const CATALOG={
   reliefweb:{...(GLOBAL_HIGH_VALUE_CATALOG.reliefweb||EXISTING_CATALOG.reliefweb||{}),category:"global-humanitarian-reports-disasters",access:"key",secrets:["RELIEFWEB_APPNAME"],adapter:"reliefweb.v2",integration:"UN-OCHA-official-api-v2",scope:"bounded-reports-and-disasters",endpoint:"https://api.reliefweb.int/v2",free_tier:"1000-calls-per-day;1000-max-upstream-records;worker-caps-100",arbitrary_url:false},
   gdacs:{...(GLOBAL_HIGH_VALUE_CATALOG.gdacs||EXISTING_CATALOG.gdacs||{}),category:"global-disaster-alerts",access:"public",adapter:"gdacs.latest",integration:"UN-EU-official-gdacs",scope:"latest-bounded-disaster-alert-feed+source-info",endpoint:"https://www.gdacs.org",arbitrary_url:false},
   cdc_open_data:{...(GLOBAL_HIGH_VALUE_CATALOG.cdc_open_data||EXISTING_CATALOG.cdc_open_data||{}),category:"us-public-health-open-data",access:"public",optional_secrets:["CDC_APP_TOKEN"],adapter:"cdc.socrata-bounded",integration:"official-CDC-Socrata",scope:"dataset-metadata-and-bounded-row-query-without-raw-SoQL",endpoint:"https://data.cdc.gov",arbitrary_url:false},
+  pubchem:{...EXISTING_CATALOG.pubchem,access:"public",adapter:"pubchem.deep-live",integration:"official-pug-rest",scope:"compound-properties-by-cid-or-name-synonyms-gene-summary",endpoint:"https://pubchem.ncbi.nlm.nih.gov/rest/pug",arbitrary_url:false},
+  chembl:{...EXISTING_CATALOG.chembl,access:"public",adapter:"chembl.deep-live",integration:"official-ebi-chembl-rest",scope:"molecules-targets-search-bioactivities-mechanisms-status",endpoint:"https://www.ebi.ac.uk/chembl/api/data",arbitrary_url:false},
+  ensembl:{category:"genomics-reference-knowledge",access:"public",adapter:"ensembl.rest",integration:"official-rest",scope:"species-stable-id-lookup-symbol-xrefs-id-xrefs",endpoint:"https://rest.ensembl.org",arbitrary_url:false},
+  reactome:{category:"curated-biological-pathway-knowledge",access:"public",adapter:"reactome.content-service",integration:"official-content-service-rest",scope:"database-version-stable-id-query-participating-physical-entities",endpoint:"https://reactome.org/ContentService",license_note:"open-data; cite primary sources when available",arbitrary_url:false},
+  rcsb_pdb:{...EXISTING_CATALOG.rcsb_pdb,access:"public",adapter:"rcsb_pdb.deep-live",integration:"official-data-api-rest-v1",scope:"entry-pubmed-polymer-entity-chemical-component",endpoint:"https://data.rcsb.org/rest/v1/core",arbitrary_url:false},
+  uniprot:{...EXISTING_CATALOG.uniprot,access:"public",adapter:"uniprot.search+entry+gene-search",integration:"official-rest",scope:"protein-sequence-function-structured-gene-search-pdb-crossrefs",endpoint:"https://rest.uniprot.org",arbitrary_url:false},
   worldpop:{...EXISTING_CATALOG.worldpop,category:"population-open-global",access:"public",optional_secrets:["WORLDPOP_API_KEY"],adapter:"open_location.worldpop-v2",integration:"official-rest-v2",scope:"polygon-population-density-age-sex-2015-2030",endpoint:"https://api.worldpop.org/v2",free_tier:"1000-requests-per-day-anonymous;10000-with-free-approved-key",arbitrary_url:false},
   overture_maps:{...EXISTING_CATALOG.overture_maps,category:"open-global-poi-buildings-transport",access:"external-runtime",adapter:"open_location.source-info",integration:"official-cloud-geoparquet",scope:"places-buildings-transportation-divisions-base-gers",endpoint:"https://docs.overturemaps.org/getting-data/cloud-sources/",billing:"free-public-AWS-Azure-data",arbitrary_url:false},
   night_lights:{...EXISTING_CATALOG.night_lights,category:"open-global-activity-proxy",access:"external-runtime",adapter:"open_location.source-info",integration:"nasa-black-marble-vnp46a2",scope:"daily-global-500m-nighttime-activity-proxy",earth_engine_collection:"NASA/VIIRS/002/VNP46A2",billing:"NASA-data-free",arbitrary_url:false},
