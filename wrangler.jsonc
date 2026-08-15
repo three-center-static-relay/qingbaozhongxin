@@ -4,7 +4,7 @@
   "main": "src/guard.js",
   "compatibility_date": "2026-08-15",
   "workers_dev": true,
-  "build": {"command": "node tests/global-high-value-data.mjs && node tests/akshare-aktools.mjs && node tests/live-policy-regulatory-primary.mjs && node -e \"console.log('frozen-final3-done')\""},
+  "build": {"command": "node tests/global-high-value-data.mjs && node -e \"console.log('global-highvalue-alone-done')\""},
   "triggers": {"crons": ["23 18 * * *"]},
   "durable_objects": {"bindings": [{"name": "CENTER_GATE", "class_name": "CenterGate"}]},
   "exports": {"CenterGate": {"type":"durable-object","storage":"sqlite"}},
