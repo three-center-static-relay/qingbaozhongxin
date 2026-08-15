@@ -1,0 +1,6 @@
+export const POLICY_REGULATORY_CATALOG={
+  federal_register:{category:"us-policy-regulatory-primary",access:"public",adapter:"federal_register.live",integration:"official-federalregister-gov-api-v1",scope:"documents-document-agencies-read-only",endpoint:"https://www.federalregister.gov/api/v1",legal_note:"informational API; cross-check controlling legal text against official Federal Register/govinfo",arbitrary_url:false},
+  congress_gov:{category:"us-legislation-primary",access:"key",secrets:["CONGRESS_GOV_API_KEY"],adapter:"congress_gov.v3",integration:"official-congress-gov-api-v3",scope:"bills-bill-actions-read-only",endpoint:"https://api.congress.gov/v3",arbitrary_url:false},
+  regulations_gov:{category:"us-rulemaking-primary",access:"key",secrets:["REGULATIONS_GOV_API_KEY"],adapter:"regulations_gov.v4",integration:"official-regulations-gov-api-v4",scope:"documents-dockets-read-only-comments-not-exposed",endpoint:"https://api.regulations.gov/v4",arbitrary_url:false},
+  splus_policy_regulatory_primary:{category:"policy-regulatory-routing",access:"public",adapter:"splus_policy_regulatory_primary.catalog",integration:"fixed-read-only-provider-catalog",scope:"federal-register-congress-regulations-gov",arbitrary_url:false}
+};
