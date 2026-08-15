@@ -10,6 +10,8 @@ const text=(v,n=500)=>String(v??"").replace(/\s+/g," ").trim().slice(0,n);
 const hasSensitive=v=>SENSITIVE_META.some(x=>String(v||"").toLowerCase().includes(x.toLowerCase()));
 
 export const PORTALS=Object.freeze([
+  {id:"kaggle_datasets",platform:"Kaggle 中国公开数据集兜底",region:"GLOBAL",kind:"dataset",priority:"S+",always:true,url:"https://www.kaggle.com/datasets?tags=3024-China",domain:"kaggle.com",path_hints:["/datasets/"],tags:["China","dataset","business","finance","industry"]},
+  {id:"kaggle_notebooks",platform:"Kaggle 中国公开 Notebook 兜底",region:"GLOBAL",kind:"notebook",priority:"S+",always:true,url:"https://www.kaggle.com/code?searchQuery=China",domain:"kaggle.com",path_hints:["/code/"],tags:["China","notebook","template","EDA","machine-learning"]},
   {id:"tianchi_portal",platform:"Tianchi/阿里云天池",region:"CN",kind:"dataset",priority:"S+",url:"https://tianchi.aliyun.com/dataset/public",domain:"tianchi.aliyun.com",path_hints:["/dataset/"],tags:["China","dataset","competition","notebook","industry"]},
   {id:"datafountain_portal",platform:"DataFountain",region:"CN",kind:"dataset",priority:"S",url:"https://www.datafountain.cn/datasets?view=latest",domain:"datafountain.cn",path_hints:["/datasets","/dataset"],tags:["China","dataset","competition","industry"]},
   {id:"heywhale_dataset_portal",platform:"和鲸 HeyWhale 数据集",region:"CN",kind:"dataset",priority:"S+",url:"https://www.heywhale.com/home/dataset",domain:"heywhale.com",path_hints:["/home/dataset","/m/","/dataset"],tags:["China","dataset","data-science","notebook"]},
@@ -42,7 +44,7 @@ function allowedLink(portal,raw){
 function portalCandidate(portal,title,url){
   const joined=`${title} ${url}`;
   if(hasSensitive(joined))return null;
-  const c={source:portal.id,type:portal.kind,id:url,title:text(title,260)||portal.platform,description:`${portal.platform} metadata discovery candidate`,query:"fixed-domain-portal-rotation",url,tags:portal.tags||[],license:null,updated_at:null,popularity:0,china_match:portal.region==="CN",risk_flags:[]};
+  const c={source:portal.id,type:portal.kind,id:url,title:text(title,260)||portal.platform,description:`${portal.platform} metadata discovery candidate`,query:"fixed-domain-portal-rotation",url,tags:portal.tags||[],license:null,updated_at:null,popularity:0,china_match:portal.region==="CN"||portal.tags?.includes("China"),risk_flags:[]};
   c.score=scoreCandidate(c)+(portal.priority==="S+"?8:portal.priority==="S"?4:0);
   return c;
 }
@@ -74,8 +76,8 @@ async function collectOne(portal){
 }
 function dayIndex(ts=Date.now()){return Math.floor(Number(ts)/86400000)}
 export function portalsForDay(ts=Date.now()){
-  const cn=PORTALS.filter(x=>x.region==="CN"),global=PORTALS.filter(x=>x.region==="GLOBAL"),d=dayIndex(ts);
-  return[cn[d%cn.length],global[d%global.length]];
+  const always=PORTALS.filter(x=>x.always===true),cn=PORTALS.filter(x=>x.region==="CN"&&x.always!==true),global=PORTALS.filter(x=>x.region==="GLOBAL"&&x.always!==true),d=dayIndex(ts);
+  return[...always,cn[d%cn.length],global[d%global.length]];
 }
 function gate(env){return env.CENTER_GATE.get(env.CENTER_GATE.idFromName("global"))}
 async function g(env,path,method="GET",body){const init={method,headers:{"content-type":"application/json"}};if(body!==undefined)init.body=JSON.stringify(body);const r=await gate(env).fetch(new Request(`https://gate.internal${path}`,init));return{http:r.status,...await r.json().catch(()=>({ok:false,error:"GATE_BAD_RESPONSE"}))}}
@@ -87,9 +89,9 @@ export async function runPortalRadar(env,{trigger="cloudflare-cron",scheduled_ti
   }
   const current=await g(env,"/radar/latest"),old=current?.snapshot||null;
   const candidates=mergeCandidates(old?.candidates||[],items);
-  const snapshot={...(old||{}),schema_version:old?.schema_version||"2026-08-16.2",metadata_only:true,raw_dataset_mirror:false,raw_notebook_copy:false,portal_radar:true,portal_trigger:trigger,portal_collected_at:new Date().toISOString(),portal_outcomes:outcomes,candidates};
+  const snapshot={...(old||{}),schema_version:old?.schema_version||"2026-08-16.3",metadata_only:true,raw_dataset_mirror:false,raw_notebook_copy:false,portal_radar:true,portal_trigger:trigger,portal_collected_at:new Date().toISOString(),portal_outcomes:outcomes,candidates};
   const saved=await g(env,"/radar/latest","POST",snapshot);
   return{ok:Boolean(saved?.ok),portal_radar:true,selected:selected.map(x=>x.id),new_candidates:items.length,candidate_count:candidates.length,outcomes,save_http:saved?.http};
 }
-export function portalRadarMeta(){return{mode:"fixed-domain-rotating-metadata-only",reader:"Jina public Reader",arbitrary_target:false,raw_page_archive:false,portals_total:PORTALS.length,china_portals:PORTALS.filter(x=>x.region==="CN").length,global_portals:PORTALS.filter(x=>x.region==="GLOBAL").length,per_portal_limit:PER_PORTAL_LIMIT,sensitive_metadata_filter:true,scheduled_portals_per_day:2,portals:PORTALS.map(({id,platform,region,kind,priority,url})=>({id,platform,region,kind,priority,url}))}}
+export function portalRadarMeta(){const always=PORTALS.filter(x=>x.always===true);return{mode:"fixed-domain-rotating-metadata-only",reader:"Jina public Reader",arbitrary_target:false,raw_page_archive:false,portals_total:PORTALS.length,china_portals:PORTALS.filter(x=>x.region==="CN").length,global_portals:PORTALS.filter(x=>x.region==="GLOBAL").length,always_daily_portals:always.map(x=>x.id),per_portal_limit:PER_PORTAL_LIMIT,sensitive_metadata_filter:true,scheduled_portals_per_day:always.length+2,portals:PORTALS.map(({id,platform,region,kind,priority,url,always})=>({id,platform,region,kind,priority,url,always:Boolean(always)}))}}
 export const __test={collectOne,allowedLink,hasSensitive};
