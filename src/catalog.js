@@ -1,5 +1,5 @@
 import {CATALOG as BASE_CATALOG,EXCLUDED_PROVIDERS as BASE_EXCLUDED} from "./catalog-base.js";
-export const CATALOG_VERSION="2026-08-15.10";
+export const CATALOG_VERSION="2026-08-15.11";
 export const EXCLUDED_PROVIDERS=BASE_EXCLUDED;
 export const CATALOG={
   ...BASE_CATALOG,
@@ -18,7 +18,10 @@ export const CATALOG={
   baidu_maps:{category:"maps-cn",access:"key",secret_groups:[["BAIDU_MAP_AK"],["BAIDU_MAP_API_KEY"]],adapter:"baidu_maps.geocode+reverse"},
   tencent_maps:{category:"maps-cn-mcp",access:"key",secret_groups:[["TENCENT_LBS_API_KEY"],["TENCENT_MAP_API_KEY"]],adapter:"tencent_maps.multi",integration:"official-mcp+webservice"},
   tianditu:{category:"maps-cn-official",access:"key",secret_groups:[["TIANDITU_TK"],["TIANDITU_API_KEY"]],adapter:"tianditu.search"},
-  aifin_market:{category:"finance-cn-mcp",access:"key",secrets:["WIND_API_KEY"],adapter:"catalog-only",integration:"official-skill-mcp"}
+  aifin_market:{category:"finance-cn-mcp",access:"key",secrets:["WIND_API_KEY"],adapter:"catalog-only",integration:"official-skill-mcp"},
+  pkulaw:{category:"legal-cn",access:"key",secret_groups:[["BROWSERFABRIC_API_KEY","PKULAW_BROWSERFABRIC_CONTEXT_ID"]],adapter:"browserfabric.authenticated-read",integration:"browserfabric-persistent-context",scope:"pkulaw-fixed-domains-read-only"},
+  originp:{category:"finance-intelligence-cn",access:"key",secret_groups:[["BROWSERFABRIC_API_KEY","ORIGINP_BROWSERFABRIC_CONTEXT_ID"]],adapter:"browserfabric.authenticated-read",integration:"browserfabric-persistent-context",scope:"originp-fixed-domains-read-only"},
+  wikidata:{category:"global-knowledge-graph",access:"public",adapter:"wikidata.public-read",integration:"official-sparql+entitydata",scope:"anonymous-read-only"}
 };
 function anyGroup(env,groups){return groups?.some(g=>g.every(k=>Boolean(env[k])))}
 export function statusFor(env,name){
