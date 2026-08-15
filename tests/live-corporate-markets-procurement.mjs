@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import {OPERATIONS,runAdapter} from "../src/adapters.js";
 import {CATALOG,CATALOG_VERSION,statusFor} from "../src/catalog.js";
 
-assert.equal(CATALOG_VERSION,"2026-08-15.34");
+assert.match(CATALOG_VERSION,/^2026-08-15\.\d+$/);
+assert.ok(Number(CATALOG_VERSION.split(".").at(-1))>=34,`corporate/markets/procurement requires catalog revision >=34, got ${CATALOG_VERSION}`);
 for(const p of ["companies_house_uk","opendart_korea","cftc_cot","ted_eu_procurement","splus_corporate_markets_procurement"]){assert.ok(CATALOG[p],`missing ${p}`);assert.equal(statusFor({},p)?.live_adapter,true,`${p} must be live`)}
 assert.equal(statusFor({},"companies_house_uk")?.configured,false);assert.equal(statusFor({COMPANIES_HOUSE_API_KEY:"x"},"companies_house_uk")?.configured,true);
 assert.equal(statusFor({},"opendart_korea")?.configured,false);assert.equal(statusFor({OPENDART_API_KEY:"x"},"opendart_korea")?.configured,true);

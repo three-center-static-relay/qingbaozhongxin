@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import {OPERATIONS,runAdapter} from "../src/adapters.js";
 import {CATALOG,CATALOG_VERSION,statusFor} from "../src/catalog.js";
 
-assert.equal(CATALOG_VERSION,"2026-08-15.33");
+assert.match(CATALOG_VERSION,/^2026-08-15\.\d+$/);
+assert.ok(Number(CATALOG_VERSION.split(".").at(-1))>=33,`biomed knowledge requires catalog revision >=33, got ${CATALOG_VERSION}`);
 for(const p of ["pubchem","chembl","ensembl","reactome","rcsb_pdb","uniprot","splus_biomed_knowledge"]){assert.ok(CATALOG[p],`missing ${p}`);assert.equal(statusFor({},p)?.live_adapter,true,`${p} must be live`)}
 assert.ok(OPERATIONS.pubchem.includes("compound_by_name"),"legacy PubChem operation lost");
 assert.ok(OPERATIONS.pubchem.includes("compound_properties_cid"));
