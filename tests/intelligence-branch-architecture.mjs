@@ -1,0 +1,15 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const branches=JSON.parse(fs.readFileSync(new URL("../data-assets/intelligence-branch-registry.json",import.meta.url),"utf8"));
+const medical=JSON.parse(fs.readFileSync(new URL("../data-assets/top-hospital-medical-branch.json",import.meta.url),"utf8"));
+const index=fs.readFileSync(new URL("../src/index.js",import.meta.url),"utf8");
+assert.equal(branches.center,"intelligence-center");
+assert.equal(branches.root_service,"intelligence-worker");
+assert.ok(index.includes('SERVICE="intelligence-worker"'));
+assert.ok(branches.branches.every(x=>x.type==="intelligence-subdomain"&&x.replaces_center===false));
+for(const id of ["nasa-earth-space","top-hospital-medical","finance-markets","law-policy","geospatial-location","global-advisory"])assert.ok(branches.branches.some(x=>x.id===id),`missing branch ${id}`);
+assert.equal(medical.parent,"intelligence-center");assert.equal(medical.replaces_center,false);
+const tools=Object.values(medical.medical_tool_registry).flat().map(x=>x.tool);
+for(const t of ["BioMCP","MONAI Core","MONAI Label","MONAI Deploy","pydicom","NiBabel","SimpleITK","OpenSlide","TorchIO","nnU-Net","TotalSegmentator","MedSAM / MedSAM2","TorchXRayVision","3D Slicer","OHIF Viewer","Cornerstone3D","Orthanc","dcm4chee","DCMTK","QuPath","HL7 FHIR","LOINC","SNOMED CT","OHDSI OMOP CDM","HAPI FHIR","OpenMRS"])assert.ok(tools.includes(t),`missing medical tool ${t}`);
+for(const d of ["mimic-iv","mimic-cxr","eicu","chexpert","tcia","nih-chestxray14","gdc-tcga"])assert.ok(medical.hospital_and_research_dataset_sources.some(x=>x.id===d),`missing medical dataset ${d}`);
+console.log(JSON.stringify({ok:true,root:branches.root_service,branches:branches.branches.length,medical_tools:tools.length,medical_datasets:medical.hospital_and_research_dataset_sources.length}));
