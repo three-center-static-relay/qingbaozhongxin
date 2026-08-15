@@ -1,16 +1,19 @@
 import {CATALOG as BASE_CATALOG,EXCLUDED_PROVIDERS as BASE_EXCLUDED} from "./catalog-base.js";
-export const CATALOG_VERSION="2026-08-15.12";
+export const CATALOG_VERSION="2026-08-15.13";
 export const EXCLUDED_PROVIDERS=BASE_EXCLUDED;
 export const CATALOG={
   ...BASE_CATALOG,
   gdelt:{...BASE_CATALOG.gdelt,adapter:"gdelt.articles"},
-  bigquery:{category:"google-public-data",access:"key",secret_groups:[["GOOGLE_CLOUD_ACCESS_TOKEN"],["GOOGLE_CLOUD_CREDENTIALS"]],adapter:"bigquery.public-query+tables",integration:"official-rest",scope:"bigquery-public-data-only"},
+  bigquery:{category:"google-public-data",access:"key",secret_groups:[["GOOGLE_CLOUD_ACCESS_TOKEN"],["GOOGLE_CLOUD_CREDENTIALS"]],adapter:"bigquery.public-query+tables",integration:"official-rest",scope:"approved-public-projects-only"},
   earthengine:{category:"google-public-geospatial",access:"key",secret_groups:[["GOOGLE_CLOUD_ACCESS_TOKEN"],["GOOGLE_CLOUD_CREDENTIALS"]],adapter:"earthengine.public-assets",integration:"official-rest",scope:"earthengine-public-assets-only"},
+  google_trends_public:{category:"google-first-party-search-trends",access:"key",secret_groups:[["GOOGLE_CLOUD_ACCESS_TOKEN"],["GOOGLE_CLOUD_CREDENTIALS"]],adapter:"bigquery.google-trends",integration:"official-bigquery-public-dataset",scope:"top-and-rising-terms"},
+  google_patents_public:{category:"google-public-patents",access:"key",secret_groups:[["GOOGLE_CLOUD_ACCESS_TOKEN"],["GOOGLE_CLOUD_CREDENTIALS"]],adapter:"bigquery.google-patents",integration:"official-google-patents-public-dataset",scope:"read-only-bounded-query"},
+  google_earth_observation:{category:"google-public-geospatial-curated",access:"key",secret_groups:[["GOOGLE_CLOUD_ACCESS_TOKEN"],["GOOGLE_CLOUD_CREDENTIALS"]],adapter:"earthengine.curated-high-value",integration:"official-earthengine-rest",scope:"public-assets-only"},
   youtube:{category:"google-public-media",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"youtube.data-v3",integration:"official-rest"},
   google_books:{category:"google-public-books",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"google_books.v1",integration:"official-rest"},
   google_factcheck:{category:"google-public-verification",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"google_factcheck.claim-search",integration:"official-rest"},
   google_civic:{category:"google-public-civic",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"google_civic.v2",integration:"official-rest",scope:"us-civic-data"},
-  google_knowledge_graph:{category:"google-public-knowledge",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"google_knowledge_graph.entity-search",integration:"official-rest"},
+  google_knowledge_graph:{category:"google-public-knowledge",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"google_knowledge_graph.entity-search",integration:"official-rest",scope:"legacy-read-only-noncritical"},
   google_crux:{category:"google-public-web-intel",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"google_crux.record+history",integration:"official-rest",scope:"aggregated-user-experience"},
   google_pagespeed:{category:"google-public-web-intel",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"google_pagespeed.v5",integration:"official-rest"},
   google_trends_alpha:{category:"google-public-trends",access:"key",secrets:["GOOGLE_TRENDS_API_KEY"],adapter:"catalog-only",integration:"official-alpha",permission:"limited-alpha-access-required"},
