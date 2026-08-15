@@ -1,4 +1,4 @@
-export const CATALOG_VERSION="2026-08-15.6";
+export const CATALOG_VERSION="2026-08-15.7";
 export const EXCLUDED_PROVIDERS=["datacommons","faostat","agt_stock","baichuan","taobao"];
 
 export const CATALOG={
@@ -90,6 +90,15 @@ export const CATALOG={
   openfda:{category:"health-regulatory-open-data",access:"optional-key",secret_groups:[["DATA_GOV_API_KEY"],["OPENFDA_API_KEY"]],adapter:"catalog-only",integration:"official-rest",scope:"drugs-devices-food-public-fda-data",registration_url:"https://api.data.gov/signup/",note:"anonymous-usage-supported-with-lower-daily-limit"},
   congress_gov:{category:"government-legislative-knowledge-us",access:"key",secret_groups:[["DATA_GOV_API_KEY"],["CONGRESS_API_KEY"]],adapter:"catalog-only",integration:"official-rest-v3",scope:"bills-members-amendments-committees-congressional-data",registration_url:"https://api.congress.gov/sign-up"},
   regulations_gov:{category:"government-regulatory-knowledge-us",access:"key",secret_groups:[["DATA_GOV_API_KEY"],["REGULATIONS_GOV_API_KEY"]],adapter:"catalog-only",integration:"official-rest",scope:"rulemaking-documents-dockets-comments",registration_url:"https://api.data.gov/signup/"},
+  ncbi_entrez:{category:"biomedical-multidatabase",access:"public",optional_secrets:["NCBI_API_KEY","NCBI_EMAIL"],adapter:"ncbi_entrez.search",integration:"official-eutils",scope:"pubmed-pmc-gene-protein-nucleotide-sra-geo-biosample-bioproject-clinvar",endpoint:"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"},
+  dbpedia_lookup:{category:"global-knowledge-graph",access:"public",adapter:"dbpedia_lookup.search",integration:"official-lookup",scope:"wikipedia-derived-entities-and-identifiers",endpoint:"https://lookup.dbpedia.org/api/search"},
+  rijksmuseum:{category:"museum-open-collection-netherlands",access:"public",adapter:"rijksmuseum.search",integration:"official-search-api+linked-open-data",scope:"museum-collection-objects",endpoint:"https://data.rijksmuseum.nl/search/collection"},
+  rijksmuseum_library_sru:{category:"library-art-history-netherlands",access:"public",adapter:"catalog-only",integration:"official-sru",scope:"rijksmuseum-library-bibliographic-records",endpoint:"http://library.rijksmuseum.nl:9998/biblios"},
+  pangaea:{category:"research-data-earth-environment",access:"public",adapter:"catalog-only",integration:"official-oai-pmh",scope:"open-earth-environmental-research-metadata",endpoint:"https://ws.pangaea.de/oai/"},
+  deutsche_digitale_bibliothek:{category:"digital-library-archive-museum-germany",access:"key",secrets:["DDB_API_KEY"],adapter:"catalog-only",integration:"official-rest+oai-pmh",scope:"german-cultural-and-scientific-heritage",endpoint:"https://api.deutsche-digitale-bibliothek.de/",registration_url:"https://www.deutsche-digitale-bibliothek.de/content/hilfe?lang=en",note:"create-free-user-account-then-generate-api-key-under-Meine-DDB"},
+  getty_vocabularies:{category:"cultural-heritage-authority-knowledge",access:"public",adapter:"catalog-only",integration:"official-linked-open-data+sparql+downloads",scope:"aat-tgn-ulan-art-architecture-people-places-terms",endpoint:"http://vocab.getty.edu/sparql",terms:"ODC-By-1.0"},
+  getty_collection:{category:"museum-provenance-open-data",access:"public",adapter:"catalog-only",integration:"official-rest+sparql",scope:"getty-museum-collection-and-provenance-index",endpoint:"https://data.getty.edu/"},
+  musicbrainz:{category:"music-metadata-knowledge",access:"external-source",adapter:"catalog-only",integration:"official-rest-v2",scope:"artists-recordings-releases-works-events-labels-places",endpoint:"https://musicbrainz.org/ws/2/",terms:"free-non-commercial;maximum-one-request-per-second;meaningful-user-agent-required"},
   anthropic_mcp_examples:{category:"mcp-reference",access:"public",adapter:"catalog-only"}
 };
 
