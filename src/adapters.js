@@ -21,8 +21,12 @@ import {OPERATIONS as EXTRA19_OPERATIONS,runAdapter as runExtra19} from "./adapt
 import {OPERATIONS as EXTRA20_OPERATIONS,runAdapter as runExtra20} from "./adapters-extra20.js";
 import {OPERATIONS as EXTRA21_OPERATIONS,runAdapter as runExtra21} from "./adapters-extra21.js";
 import {OPERATIONS as EXTRA22_OPERATIONS,runAdapter as runExtra22} from "./adapters-extra22.js";
-export const OPERATIONS={...CORE_OPERATIONS,...EXTRA_OPERATIONS,...EXTRA2_OPERATIONS,...EXTRA3_OPERATIONS,...EXTRA4_OPERATIONS,...EXTRA5_OPERATIONS,...EXTRA6_OPERATIONS,...EXTRA7_OPERATIONS,...EXTRA8_OPERATIONS,...EXTRA9_OPERATIONS,...EXTRA10_OPERATIONS,...EXTRA11_OPERATIONS,...EXTRA12_OPERATIONS,...EXTRA13_OPERATIONS,...EXTRA14_OPERATIONS,...EXTRA15_OPERATIONS,...EXTRA16_OPERATIONS,...EXTRA17_OPERATIONS,...EXTRA18_OPERATIONS,...EXTRA19_OPERATIONS,...EXTRA20_OPERATIONS,...EXTRA21_OPERATIONS,...EXTRA22_OPERATIONS};
+import {OPERATIONS as EXTRA23_OPERATIONS,runAdapter as runExtra23} from "./adapters-extra23.js";
+import {OPERATIONS as EXTRA24_OPERATIONS,runAdapter as runExtra24} from "./adapters-extra24.js";
+export const OPERATIONS={...CORE_OPERATIONS,...EXTRA_OPERATIONS,...EXTRA2_OPERATIONS,...EXTRA3_OPERATIONS,...EXTRA4_OPERATIONS,...EXTRA5_OPERATIONS,...EXTRA6_OPERATIONS,...EXTRA7_OPERATIONS,...EXTRA8_OPERATIONS,...EXTRA9_OPERATIONS,...EXTRA10_OPERATIONS,...EXTRA11_OPERATIONS,...EXTRA12_OPERATIONS,...EXTRA13_OPERATIONS,...EXTRA14_OPERATIONS,...EXTRA15_OPERATIONS,...EXTRA16_OPERATIONS,...EXTRA17_OPERATIONS,...EXTRA18_OPERATIONS,...EXTRA19_OPERATIONS,...EXTRA20_OPERATIONS,...EXTRA21_OPERATIONS,...EXTRA22_OPERATIONS,...EXTRA23_OPERATIONS,...EXTRA24_OPERATIONS};
 export async function runAdapter(provider,operation,args,env){
+  if(EXTRA24_OPERATIONS[provider]?.includes(operation))return runExtra24(provider,operation,args,env);
+  if(EXTRA23_OPERATIONS[provider]?.includes(operation))return runExtra23(provider,operation,args,env);
   if(EXTRA22_OPERATIONS[provider]?.includes(operation))return runExtra22(provider,operation,args,env);
   if(EXTRA21_OPERATIONS[provider]?.includes(operation))return runExtra21(provider,operation,args,env);
   if(EXTRA20_OPERATIONS[provider]?.includes(operation))return runExtra20(provider,operation,args,env);
