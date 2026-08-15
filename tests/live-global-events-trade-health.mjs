@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import {OPERATIONS,runAdapter} from "../src/adapters.js";
 import {CATALOG,CATALOG_VERSION,statusFor} from "../src/catalog.js";
+import {assertCatalogAtLeast} from "./catalog-version-utils.mjs";
 
-assert.match(CATALOG_VERSION,/^2026-08-15\.\d+$/);
-assert.ok(Number(CATALOG_VERSION.split(".").at(-1))>=32,`global events/trade/health requires catalog revision >=32, got ${CATALOG_VERSION}`);
+assertCatalogAtLeast(CATALOG_VERSION,"2026-08-15.32","global events/trade/health");
 for(const p of ["un_comtrade","reliefweb","gdacs","cdc_open_data","splus_global_events_trade_health"]){assert.ok(CATALOG[p],`missing ${p}`);assert.equal(statusFor({},p)?.live_adapter,true,`${p} must be live`)}
 assert.equal(statusFor({},"un_comtrade")?.configured,true);
 assert.equal(statusFor({},"reliefweb")?.configured,false);
