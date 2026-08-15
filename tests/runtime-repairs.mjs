@@ -9,7 +9,7 @@ try{
     if(body.method==="tools/call")return json({jsonrpc:"2.0",id:2,result:{content:[{type:"text",text:"劳动合同法测试结果"}],isError:false}});
     throw new Error(`unexpected pkulaw call ${JSON.stringify(body)}`)
   };
-  const pk=await runAdapter("pkulaw","mcp_call",{service:"mcp-law",tool:"get_law_list",arguments:{title:"劳动合同法"}},{PKULAW_MCP_TOKEN:"unit-token"});
+  const pk=await runAdapter("pkulaw","mcp_call",{service:"mcp-law",tool:"get_law_list",arguments:{title:"劳动合同法"}},{PKULAW_MCP_TOKEN:"Bearer unit-token"});
   assert.equal(pk.integration,"official-cli-direct-jsonrpc");assert.equal(pk.data?.content?.[0]?.text,"劳动合同法测试结果");assert.equal(pkCalls.length,2);
   for(const call of pkCalls){assert.equal(call.headers.authorization,"Bearer unit-token");assert.equal(call.headers["mcp-session-id"],undefined);assert.equal(call.headers["mcp-protocol-version"],undefined);assert.equal(call.body.jsonrpc,"2.0");assert.ok(Number.isInteger(call.body.id))}
   assert.equal(pkCalls[0].body.method,"tools/list");assert.equal(pkCalls[1].body.method,"tools/call");assert.deepEqual(pkCalls[1].body.params,{name:"get_law_list",arguments:{title:"劳动合同法"}});
@@ -20,5 +20,5 @@ try{
   const civic=await runAdapter("google_civic","elections",{},env);assert.equal(civic.items.length,1);assert.equal(gCalls[0].searchParams.get("key"),"civic-key");
   const kg=await runAdapter("google_knowledge_graph","search",{query:"China",limit:1},env);assert.equal(kg.items.length,1);assert.equal(gCalls[1].searchParams.get("key"),"kg-key");
   const ps=await runAdapter("google_pagespeed","analyze",{url:"https://example.com",strategy:"mobile",category:"performance"},env);assert.equal(ps.data.id,"https://example.com");assert.equal(ps.timeout_ms,35000);assert.equal(gCalls[2].searchParams.get("key"),"pagespeed-key");assert.equal(gCalls[3].searchParams.has("key"),false);
-  console.log(JSON.stringify({ok:true,suite:"runtime-repairs",pkulaw_official_cli_direct_jsonrpc:true,pkulaw_timeout_ms:60000,google_provider_specific_keys:true,pagespeed_timeout_ms:35000,pagespeed_optional_key_fallback:true}));
+  console.log(JSON.stringify({ok:true,suite:"runtime-repairs",pkulaw_official_cli_direct_jsonrpc:true,pkulaw_bearer_prefix_normalized:true,pkulaw_timeout_ms:60000,google_provider_specific_keys:true,pagespeed_timeout_ms:35000,pagespeed_optional_key_fallback:true}));
 }finally{globalThis.fetch=realFetch}
