@@ -1,5 +1,5 @@
 import {CATALOG as BASE_CATALOG,EXCLUDED_PROVIDERS as BASE_EXCLUDED} from "./catalog-base.js";
-export const CATALOG_VERSION="2026-08-15.9";
+export const CATALOG_VERSION="2026-08-15.10";
 export const EXCLUDED_PROVIDERS=BASE_EXCLUDED;
 export const CATALOG={
   ...BASE_CATALOG,
@@ -10,6 +10,9 @@ export const CATALOG={
   google_books:{category:"google-public-books",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"google_books.v1",integration:"official-rest"},
   google_factcheck:{category:"google-public-verification",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"google_factcheck.claim-search",integration:"official-rest"},
   google_civic:{category:"google-public-civic",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"google_civic.v2",integration:"official-rest",scope:"us-civic-data"},
+  google_knowledge_graph:{category:"google-public-knowledge",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"google_knowledge_graph.entity-search",integration:"official-rest"},
+  google_crux:{category:"google-public-web-intel",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"google_crux.record+history",integration:"official-rest",scope:"aggregated-user-experience"},
+  google_pagespeed:{category:"google-public-web-intel",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"google_pagespeed.v5",integration:"official-rest"},
   google_trends_alpha:{category:"google-public-trends",access:"key",secrets:["GOOGLE_TRENDS_API_KEY"],adapter:"catalog-only",integration:"official-alpha",permission:"limited-alpha-access-required"},
   amap:{category:"maps-cn",access:"key",secrets:["AMAP_API_KEY"],adapter:"amap.multi"},
   baidu_maps:{category:"maps-cn",access:"key",secret_groups:[["BAIDU_MAP_AK"],["BAIDU_MAP_API_KEY"]],adapter:"baidu_maps.geocode+reverse"},
