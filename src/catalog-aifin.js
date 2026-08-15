@@ -1,4 +1,5 @@
 import {AKSHARE_CATALOG} from "./catalog-akshare.js";
+import {POLICY_REGULATORY_CATALOG} from "./catalog-policy-regulatory.js";
 export const AIFIN_CATALOG={
   aifin_market:{
     category:"finance-cn-ai-agent-mcp",
@@ -18,5 +19,6 @@ export const AIFIN_CATALOG={
     execution_policy:"Direct calls use only seven fixed official Wind MCP endpoints and the official 34-tool allowlist. No remote skill installation, no child process, no arbitrary URL, no automatic tools/call retry.",
     arbitrary_url:false
   },
-  ...AKSHARE_CATALOG
+  ...AKSHARE_CATALOG,
+  ...POLICY_REGULATORY_CATALOG
 };
