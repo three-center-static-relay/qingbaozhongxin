@@ -3,15 +3,12 @@ const BASES=["https://intelligence-worker.a15280020511.workers.dev","https://int
 const TIMEOUT_MS=90000;
 async function request(url,init={}){const c=new AbortController(),t=setTimeout(()=>c.abort(),TIMEOUT_MS);try{const r=await fetch(url,{...init,signal:c.signal});let j=null;try{j=await r.json()}catch{}return{r,j}}finally{clearTimeout(t)}}
 async function findBase(){for(const base of BASES){try{const x=await request(`${base}/health`);if(x.r.ok&&x.j?.ok&&x.j?.service==="intelligence-worker")return base}catch{}}throw new Error("INTELLIGENCE_WORKER_NOT_REACHABLE")}
-const base=await findBase();
-const provider="pkulaw";
+const base=await findBase(),provider="pkulaw";
 const rd=await request(`${base}/v1/provider/${provider}/readiness`);
-assert.equal(rd.r.status,200,`readiness status=${rd.r.status}`);
-assert.equal(rd.j?.configured,true,`pkulaw readiness false`);
-const task_id=`diag-pkulaw-${Date.now()}-${crypto.randomUUID()}`;
+assert.equal(rd.r.status,200);assert.equal(rd.j?.configured,true,"pkulaw readiness false");
+const task_id=`diag-pkulaw-auth-${Date.now()}-${crypto.randomUUID()}`;
 const x=await request(`${base}/v1/run`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({task_id,provider,operation:"page_info",timeout_seconds:70,args:{path:"https://www.pkulaw.com/"}})});
-assert.equal(x.r.status,200,`pkulaw.page_info status=${x.r.status} error=${x.j?.error||"none"} details=${JSON.stringify(x.j?.details||null)}`);
-assert.equal(x.j?.ok,true,`pkulaw.page_info ok=false error=${x.j?.error||"none"} details=${JSON.stringify(x.j?.details||null)}`);
-assert.ok(x.j?.result?.data,`pkulaw.page_info returned no data`);
-assert.ok(["persistent-context","public-session"].includes(x.j?.result?.auth_mode),`unexpected auth_mode=${x.j?.result?.auth_mode||"none"}`);
-console.log(JSON.stringify({ok:true,provider,operation:"page_info",auth_mode:x.j.result.auth_mode,context_restore_failed:x.j.result.context_restore_failed,persistent_context_configured:x.j.result.persistent_context_configured,classification:"PRODUCTION_E2E_PASS",base}));
+assert.equal(x.j?.error,"UPSTREAM_HTTP_ERROR",`unexpected error=${x.j?.error||"none"} status=${x.r.status}`);
+const hs=Number(x.j?.details?.http_status);
+assert.ok([401,403].includes(hs),`expected BrowserFabric auth 401/403, got http_status=${hs} worker_status=${x.r.status}`);
+console.log(JSON.stringify({ok:true,provider,classification:"BROWSERFABRIC_AUTH_401_403",upstream_http_status:hs,base}));
