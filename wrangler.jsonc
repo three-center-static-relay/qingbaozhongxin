@@ -4,7 +4,7 @@
   "main": "src/guard.js",
   "compatibility_date": "2026-08-15",
   "workers_dev": true,
-  "build": {"command": "node -e \"console.log('diag-ok-2')\""},
+  "build": {"command": "node tests/china-intelligence-research-aifin.mjs && node tests/live-us-industry-health-spending.mjs && node tests/dataset-radar.mjs && node tests/google-pkulaw-hardening.mjs && node tests/live-global-events-trade-health.mjs && node tests/live-biomed-knowledge.mjs"},
   "triggers": {"crons": ["23 18 * * *"]},
   "durable_objects": {
     "bindings": [
