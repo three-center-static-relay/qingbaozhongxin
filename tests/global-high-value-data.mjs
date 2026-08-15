@@ -30,6 +30,19 @@ const keySources={
 for(const [provider,secret] of Object.entries(keySources)){
   assert.ok(CATALOG[provider],`missing key source: ${provider}`);
   assert.ok(CATALOG[provider].secrets?.includes(secret),`missing secret ${secret} for ${provider}`);
+}
+
+const promotedKeyedLive={
+  opendart_korea:["disclosures","company","major_accounts"],
+  companies_house_uk:["search_companies","company_profile"],
+  us_bea_api:["data"],
+  usda_nass_quickstats:["query"]
+};
+for(const [provider,ops] of Object.entries(promotedKeyedLive)){
+  assert.notEqual(CATALOG[provider].adapter,"catalog-only",`promoted keyed provider regressed to catalog-only: ${provider}`);
+  for(const op of ops)assert.ok(OPERATIONS[provider]?.includes(op),`missing promoted operation ${provider}.${op}`);
+}
+for(const provider of ["estat_japan","kosis_korea","edinet_japan","eia_open_data","materials_project"]){
   assert.equal(CATALOG[provider].adapter,"catalog-only",`unverified key provider unexpectedly live: ${provider}`);
 }
 
@@ -43,4 +56,4 @@ assert.ok(routing.domains.health_medicine_biomedical.length>=10);
 assert.ok(routing.domains.satellite_geospatial_population.length>=10);
 assert.ok(routing.advanced_economy_country_hubs.US.length>=10);
 assert.match(routing.market_data_note,/real-time exchange-grade/i);
-console.log(JSON.stringify({ok:true,live:Object.keys(live).length,key_sources:Object.keys(keySources).length,domains:Object.keys(routing.domains).length,country_hubs:Object.keys(routing.advanced_economy_country_hubs).length}));
+console.log(JSON.stringify({ok:true,live:Object.keys(live).length,key_sources:Object.keys(keySources).length,promoted_keyed_live:Object.keys(promotedKeyedLive).length,domains:Object.keys(routing.domains).length,country_hubs:Object.keys(routing.advanced_economy_country_hubs).length}));
