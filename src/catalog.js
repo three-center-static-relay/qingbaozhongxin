@@ -1,12 +1,18 @@
 import {CATALOG as EXISTING_CATALOG,EXCLUDED_PROVIDERS as EXISTING_EXCLUDED} from "./catalog-prelocation.js";
 import {GLOBAL_HIGH_VALUE_CATALOG} from "./catalog-global-highvalue.js";
 import {SPLUS_CATALOG} from "./catalog-splus.js";
-export const CATALOG_VERSION="2026-08-15.28";
+export const CATALOG_VERSION="2026-08-15.29";
 export const EXCLUDED_PROVIDERS=EXISTING_EXCLUDED;
 export const CATALOG={
   ...EXISTING_CATALOG,
   ...GLOBAL_HIGH_VALUE_CATALOG,
   ...SPLUS_CATALOG,
+  worldbank:{...EXISTING_CATALOG.worldbank,adapter:"worldbank.indicator+metadata+topic+multi-indicator",integration:"official-indicators-api-v2",scope:"countries-indicators-topics-single-and-bounded-multi-indicator",arbitrary_url:false},
+  imf:{...EXISTING_CATALOG.imf,adapter:"imf.datamapper-v2",integration:"official-datamapper-v2",scope:"indicators-countries-regions-groups-bounded-timeseries",endpoint:"https://www.imf.org/external/datamapper/api/v2",arbitrary_url:false},
+  bis:{...EXISTING_CATALOG.bis,adapter:"bis.sdmx-v2",integration:"official-sdmx-rest-v2",scope:"structures-and-bounded-data-queries",endpoint:"https://stats.bis.org/api/v2",arbitrary_url:false},
+  fred:{...EXISTING_CATALOG.fred,adapter:"fred.series+search+observations+vintages",integration:"official-fred-api",scope:"series-metadata-search-observations-vintage-dates",arbitrary_url:false},
+  eia:{...EXISTING_CATALOG.eia,adapter:"eia.v2-route+data+seriesid",integration:"official-api-v2",scope:"bounded-route-discovery-and-data-with-secret-redaction",endpoint:"https://api.eia.gov/v2",arbitrary_url:false},
+  us_treasury_fiscaldata:{...GLOBAL_HIGH_VALUE_CATALOG.us_treasury_fiscaldata,access:"public",adapter:"us_treasury_fiscaldata.live",integration:"official-fiscaldata-rest",scope:"debt-to-penny-average-interest-rates-treasury-auctions",endpoint:"https://api.fiscaldata.treasury.gov/services/api/fiscal_service",arbitrary_url:false},
   worldpop:{...EXISTING_CATALOG.worldpop,category:"population-open-global",access:"public",optional_secrets:["WORLDPOP_API_KEY"],adapter:"open_location.worldpop-v2",integration:"official-rest-v2",scope:"polygon-population-density-age-sex-2015-2030",endpoint:"https://api.worldpop.org/v2",free_tier:"1000-requests-per-day-anonymous;10000-with-free-approved-key",arbitrary_url:false},
   overture_maps:{...EXISTING_CATALOG.overture_maps,category:"open-global-poi-buildings-transport",access:"external-runtime",adapter:"open_location.source-info",integration:"official-cloud-geoparquet",scope:"places-buildings-transportation-divisions-base-gers",endpoint:"https://docs.overturemaps.org/getting-data/cloud-sources/",billing:"free-public-AWS-Azure-data",arbitrary_url:false},
   night_lights:{...EXISTING_CATALOG.night_lights,category:"open-global-activity-proxy",access:"external-runtime",adapter:"open_location.source-info",integration:"nasa-black-marble-vnp46a2",scope:"daily-global-500m-nighttime-activity-proxy",earth_engine_collection:"NASA/VIIRS/002/VNP46A2",billing:"NASA-data-free",arbitrary_url:false},
