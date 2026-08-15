@@ -7,8 +7,10 @@ import {OPERATIONS as EXTRA5_OPERATIONS,runAdapter as runExtra5} from "./adapter
 import {OPERATIONS as EXTRA6_OPERATIONS,runAdapter as runExtra6} from "./adapters-extra6.js";
 import {OPERATIONS as EXTRA7_OPERATIONS,runAdapter as runExtra7} from "./adapters-extra7.js";
 import {OPERATIONS as EXTRA8_OPERATIONS,runAdapter as runExtra8} from "./adapters-extra8.js";
-export const OPERATIONS={...CORE_OPERATIONS,...EXTRA_OPERATIONS,...EXTRA2_OPERATIONS,...EXTRA3_OPERATIONS,...EXTRA4_OPERATIONS,...EXTRA5_OPERATIONS,...EXTRA6_OPERATIONS,...EXTRA7_OPERATIONS,...EXTRA8_OPERATIONS};
+import {OPERATIONS as EXTRA9_OPERATIONS,runAdapter as runExtra9} from "./adapters-extra9.js";
+export const OPERATIONS={...CORE_OPERATIONS,...EXTRA_OPERATIONS,...EXTRA2_OPERATIONS,...EXTRA3_OPERATIONS,...EXTRA4_OPERATIONS,...EXTRA5_OPERATIONS,...EXTRA6_OPERATIONS,...EXTRA7_OPERATIONS,...EXTRA8_OPERATIONS,...EXTRA9_OPERATIONS};
 export async function runAdapter(provider,operation,args,env){
+  if(EXTRA9_OPERATIONS[provider]?.includes(operation))return runExtra9(provider,operation,args,env);
   if(EXTRA8_OPERATIONS[provider]?.includes(operation))return runExtra8(provider,operation,args,env);
   if(EXTRA7_OPERATIONS[provider]?.includes(operation))return runExtra7(provider,operation,args,env);
   if(EXTRA6_OPERATIONS[provider]?.includes(operation))return runExtra6(provider,operation,args,env);
