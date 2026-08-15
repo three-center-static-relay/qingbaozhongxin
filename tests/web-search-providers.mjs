@@ -1,9 +1,15 @@
 import assert from "node:assert/strict";
 import {OPERATIONS,runAdapter} from "../src/adapters-extra39.js";
+import {OPERATIONS as ALL_OPERATIONS,runAdapter as runAll} from "../src/adapters.js";
 import {WEB_SEARCH_CATALOG} from "../src/catalog-web-search.js";
+import {CATALOG} from "../src/catalog.js";
 
 for(const p of ["exa","tavily","firecrawl","jina"]){
   assert.deepEqual(OPERATIONS[p],["search"]);
+  assert.deepEqual(ALL_OPERATIONS[p],["search"]);
+  assert.ok(CATALOG[p],`${p} must be aggregated into the live catalog`);
+  assert.equal(CATALOG[p].arbitrary_url,false);
+  assert.equal(CATALOG[p].write,false);
   assert.equal(WEB_SEARCH_CATALOG[p].arbitrary_url,false);
   assert.equal(WEB_SEARCH_CATALOG[p].write,false);
   assert.ok(WEB_SEARCH_CATALOG[p].secrets?.length===1);
@@ -21,10 +27,10 @@ try{
     throw new Error(`unexpected host ${u.hostname}`)
   };
   const env={EXA_API_KEY:"exa-key",TAVILY_API_KEY:"tv-key",FIRECRAWL_API_KEY:"fc-key",JINA_API_KEY:"jina-key"};
-  const exa=await runAdapter("exa","search",{query:"test",limit:3},env);assert.equal(exa.items.length,1);assert.equal(exa.items[0].highlights[0],"h1");
-  const tavily=await runAdapter("tavily","search",{query:"test",limit:3},env);assert.equal(tavily.items.length,1);assert.equal(tavily.usage.credits,1);
-  const firecrawl=await runAdapter("firecrawl","search",{query:"test",limit:3},env);assert.equal(firecrawl.items.length,1);assert.equal(firecrawl.success,true);
-  const jina=await runAdapter("jina","search",{query:"test"},env);assert.equal(jina.items.length,1);
+  const exa=await runAll("exa","search",{query:"test",limit:3},env);assert.equal(exa.items.length,1);assert.equal(exa.items[0].highlights[0],"h1");
+  const tavily=await runAll("tavily","search",{query:"test",limit:3},env);assert.equal(tavily.items.length,1);assert.equal(tavily.usage.credits,1);
+  const firecrawl=await runAll("firecrawl","search",{query:"test",limit:3},env);assert.equal(firecrawl.items.length,1);assert.equal(firecrawl.success,true);
+  const jina=await runAll("jina","search",{query:"test"},env);assert.equal(jina.items.length,1);
   assert.equal(calls.length,4);
   assert.equal(calls[0].u.href,"https://api.exa.ai/search");assert.equal(calls[0].headers["x-api-key"],"exa-key");assert.equal(calls[0].body.contents.highlights,true);assert.equal(calls[0].body.numResults,3);
   assert.equal(calls[1].u.href,"https://api.tavily.com/search");assert.equal(calls[1].headers.authorization,"Bearer tv-key");assert.equal(calls[1].body.search_depth,"basic");assert.equal(calls[1].body.include_answer,false);assert.equal(calls[1].body.include_raw_content,false);
@@ -34,5 +40,5 @@ try{
   await assert.rejects(()=>runAdapter("tavily","search",{query:"x"},{}),/UPSTREAM_AUTH_FAILED/);
   await assert.rejects(()=>runAdapter("firecrawl","search",{query:"x"},{}),/UPSTREAM_AUTH_FAILED/);
   await assert.rejects(()=>runAdapter("jina","search",{query:"x"},{}),/UPSTREAM_AUTH_FAILED/);
-  console.log(JSON.stringify({ok:true,suite:"web-search-providers",providers:["exa","tavily","firecrawl","jina"],operations:"search-only",arbitrary_url:false,write:false,bounded:true}));
+  console.log(JSON.stringify({ok:true,suite:"web-search-providers",providers:["exa","tavily","firecrawl","jina"],operations:"search-only",catalog_aggregated:true,aggregate_router:true,arbitrary_url:false,write:false,bounded:true}));
 }finally{globalThis.fetch=realFetch}
