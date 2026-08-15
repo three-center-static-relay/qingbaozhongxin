@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import {runAdapter as run22,NASA_HIGH_VALUE} from "../src/adapters-extra22.js";
-import {runAdapter as run23} from "../src/adapters-extra23.js";
+import {runAdapter as run23,NASA_HIGH_VALUE} from "../src/adapters-extra23.js";
+import {runAdapter as run24} from "../src/adapters-extra24.js";
 import {CATALOG,statusFor} from "../src/catalog.js";
 
 for(const p of ["nasa_cmr","nasa_stac","nasa_power","nasa_firms","nasa_gibs","nasa_harmony","nasa_ads"]){assert.ok(CATALOG[p],`missing ${p}`);assert.notEqual(CATALOG[p].adapter,"catalog-only",`${p} must be callable`);assert.equal(CATALOG[p].arbitrary_url,false,`${p} must deny arbitrary URLs`)}
@@ -18,11 +18,11 @@ try{
     if(u.includes("/api/countries"))return new Response('id;abreviation;name;extent\n45;CHN;China;BOX(73 18,135 54)',{status:200,headers:{"content-type":"text/csv"}});
     return new Response(JSON.stringify({}),{status:200,headers:{"content-type":"application/json"}});
   };
-  const cmr=await run22("nasa_cmr","preset",{dataset:"merra2",limit:5},{});assert.equal(cmr.items.length,1);assert.match(seen.at(-1).u,/keyword=MERRA-2/);
-  const power=await run23("nasa_power","point_daily",{latitude:26.08,longitude:119.30,start:"2026-08-01",end:"2026-08-02",parameters:["T2M","PRECTOTCORR"]},{});assert.ok(power.data.properties);assert.match(seen.at(-1).u,/parameters=T2M%2CPRECTOTCORR/);
-  const gibs=await run23("nasa_gibs","layers",{query:"modis",limit:10},{});assert.deepEqual(gibs.items,["MODIS_Terra_Test"]);assert.equal(gibs.items.includes("250m"),false);
-  const countries=await run23("nasa_firms","countries",{},{});assert.equal(countries.items[0].abreviation,"CHN");
-  await assert.rejects(()=>run23("nasa_firms","area",{bbox:[118,25,120,27]},{}),/UPSTREAM_AUTH_FAILED/);
-  await assert.rejects(()=>run23("nasa_firms","area",{bbox:[70,15,135,55],source:"VIIRS_NOAA20_NRT"},{NASA_FIRMS_MAP_KEY:"abcdefgh12345678"}),/BBOX_TOO_LARGE/);
+  const cmr=await run23("nasa_cmr","preset",{dataset:"merra2",limit:5},{});assert.equal(cmr.items.length,1);assert.match(seen.at(-1).u,/keyword=MERRA-2/);
+  const power=await run24("nasa_power","point_daily",{latitude:26.08,longitude:119.30,start:"2026-08-01",end:"2026-08-02",parameters:["T2M","PRECTOTCORR"]},{});assert.ok(power.data.properties);assert.match(seen.at(-1).u,/parameters=T2M%2CPRECTOTCORR/);
+  const gibs=await run24("nasa_gibs","layers",{query:"modis",limit:10},{});assert.deepEqual(gibs.items,["MODIS_Terra_Test"]);assert.equal(gibs.items.includes("250m"),false);
+  const countries=await run24("nasa_firms","countries",{},{});assert.equal(countries.items[0].abreviation,"CHN");
+  await assert.rejects(()=>run24("nasa_firms","area",{bbox:[118,25,120,27]},{}),/UPSTREAM_AUTH_FAILED/);
+  await assert.rejects(()=>run24("nasa_firms","area",{bbox:[70,15,135,55],source:"VIIRS_NOAA20_NRT"},{NASA_FIRMS_MAP_KEY:"abcdefgh12345678"}),/BBOX_TOO_LARGE/);
   console.log(JSON.stringify({ok:true,suite:"nasa-high-value",cmr:true,power:true,gibs:true,firms_fail_closed:true,presets:Object.keys(NASA_HIGH_VALUE).length}));
 }finally{globalThis.fetch=oldFetch}
