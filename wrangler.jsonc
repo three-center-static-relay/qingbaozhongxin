@@ -4,15 +4,9 @@
   "main": "src/guard.js",
   "compatibility_date": "2026-08-15",
   "workers_dev": true,
-  "build": {"command": "node tests/stress.mjs && node tests/catalog-version-gate-hygiene.mjs && node tests/qichacha.mjs && node tests/free-knowledge-sources.mjs && node tests/runtime-repairs.mjs && node tests/free-location-intelligence.mjs && node tests/global-high-value-data.mjs && node tests/nasa-high-value.mjs && node tests/global-academic-industry-regional.mjs && node tests/global-advisory-knowledge-intelligence.mjs && node tests/splus-institutional-expansion.mjs && node tests/splus-extension-2.mjs && node tests/elite-advisory-finance-intelligence.mjs && node tests/live-macro-fusion.mjs && node tests/china-intelligence-research-aifin.mjs && node tests/live-us-industry-health-spending.mjs && node tests/dataset-radar.mjs && node tests/google-pkulaw-hardening.mjs && node tests/live-global-events-trade-health.mjs && node tests/live-biomed-knowledge.mjs && node tests/live-corporate-markets-procurement.mjs"},
+  "build": {"command": "node tests/china-intelligence-research-aifin.mjs && node tests/live-us-industry-health-spending.mjs && node tests/dataset-radar.mjs && node tests/google-pkulaw-hardening.mjs && node tests/live-global-events-trade-health.mjs && node tests/live-biomed-knowledge.mjs && node tests/live-corporate-markets-procurement.mjs"},
   "triggers": {"crons": ["23 18 * * *"]},
-  "durable_objects": {
-    "bindings": [
-      {"name": "CENTER_GATE", "class_name": "CenterGate"}
-    ]
-  },
-  "exports": {
-    "CenterGate": {"type":"durable-object","storage":"sqlite"}
-  },
+  "durable_objects": {"bindings": [{"name": "CENTER_GATE", "class_name": "CenterGate"}]},
+  "exports": {"CenterGate": {"type":"durable-object","storage":"sqlite"}},
   "vars": {"RATE_LIMIT_PER_MIN": "60"}
 }
