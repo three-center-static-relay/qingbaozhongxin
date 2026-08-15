@@ -1,4 +1,4 @@
-export const CATALOG_VERSION="2026-08-15.5";
+export const CATALOG_VERSION="2026-08-15.6";
 export const EXCLUDED_PROVIDERS=["datacommons","faostat","agt_stock","baichuan","taobao"];
 
 export const CATALOG={
@@ -78,6 +78,19 @@ export const CATALOG={
   agris:{category:"literature-agriculture-global",access:"external-source",adapter:"catalog-only",integration:"official-search+open-metadata-network",scope:"food-agriculture-forestry-fisheries-environment-literature",endpoint:"https://www.fao.org/agris/",terms:"free-search-metadata-license-varies-by-provider"},
   epo_ops:{category:"patent-global",access:"key",secret_groups:[["EPO_OPS_CONSUMER_KEY","EPO_OPS_CONSUMER_SECRET"]],adapter:"catalog-only",integration:"official-rest-oauth",scope:"worldwide-patent-bibliographic-legal-event-fulltext-image-data",registration_url:"https://developers.epo.org/user/register",free_tier:"non-paying-up-to-4GB-per-week"},
   epo_linked_data:{category:"patent-linked-open-data",access:"public",adapter:"catalog-only",integration:"official-linked-data-api",scope:"ep-patent-publications-applications-citations-classifications",endpoint:"https://data.epo.org/linked-data/"},
+
+  dryad:{category:"research-data-repository",access:"public",adapter:"dryad.search",integration:"official-rest-v2",scope:"published-research-datasets",endpoint:"https://datadryad.org/api/v2/search"},
+  art_institute_chicago:{category:"museum-open-collection",access:"public",adapter:"art_institute_chicago.search",integration:"official-rest",scope:"artworks-artists-places-publications-articles",endpoint:"https://api.artic.edu/api/v1/"},
+  vam_collections:{category:"museum-open-collection-uk",access:"public",adapter:"vam_collections.search",integration:"official-rest-v2",scope:"victoria-and-albert-museum-collections",endpoint:"https://api.vam.ac.uk/v2/objects/search"},
+  gbif_species:{category:"biodiversity-taxonomy-knowledge",access:"public",adapter:"gbif_species.search",integration:"official-rest",scope:"species-name-usages-taxonomy",endpoint:"https://api.gbif.org/v1/species/search"},
+  pubchem:{category:"chemistry-knowledge",access:"public",adapter:"pubchem.compound_by_name",integration:"official-pug-rest",scope:"compound-properties-identifiers-cross-references",endpoint:"https://pubchem.ncbi.nlm.nih.gov/rest/pug/"},
+  chembl:{category:"bioactivity-drug-discovery-knowledge",access:"public",adapter:"chembl.search",integration:"official-rest",scope:"molecules-targets-assays-activities-documents",endpoint:"https://www.ebi.ac.uk/chembl/api/data/"},
+  harvard_dataverse:{category:"research-data-repository",access:"public",adapter:"harvard_dataverse.search",integration:"official-dataverse-search-api",scope:"public-datasets-files-dataverses",endpoint:"https://dataverse.harvard.edu/api/search"},
+  rcsb_pdb:{category:"structural-biology-knowledge",access:"public",adapter:"rcsb_pdb.search",integration:"official-search-api-v2",scope:"protein-and-nucleic-acid-structures",endpoint:"https://search.rcsb.org/rcsbsearch/v2/query"},
+  re3data:{category:"research-data-repository-registry",access:"public",adapter:"catalog-only",integration:"official-rest-v4",scope:"global-research-data-repository-registry",endpoint:"https://www.re3data.org/api/v40/repositories"},
+  openfda:{category:"health-regulatory-open-data",access:"optional-key",secret_groups:[["DATA_GOV_API_KEY"],["OPENFDA_API_KEY"]],adapter:"catalog-only",integration:"official-rest",scope:"drugs-devices-food-public-fda-data",registration_url:"https://api.data.gov/signup/",note:"anonymous-usage-supported-with-lower-daily-limit"},
+  congress_gov:{category:"government-legislative-knowledge-us",access:"key",secret_groups:[["DATA_GOV_API_KEY"],["CONGRESS_API_KEY"]],adapter:"catalog-only",integration:"official-rest-v3",scope:"bills-members-amendments-committees-congressional-data",registration_url:"https://api.congress.gov/sign-up"},
+  regulations_gov:{category:"government-regulatory-knowledge-us",access:"key",secret_groups:[["DATA_GOV_API_KEY"],["REGULATIONS_GOV_API_KEY"]],adapter:"catalog-only",integration:"official-rest",scope:"rulemaking-documents-dockets-comments",registration_url:"https://api.data.gov/signup/"},
   anthropic_mcp_examples:{category:"mcp-reference",access:"public",adapter:"catalog-only"}
 };
 
