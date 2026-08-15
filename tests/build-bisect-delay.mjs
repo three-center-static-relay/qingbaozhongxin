@@ -1,2 +1,2 @@
-await new Promise(resolve=>setTimeout(resolve,20000));
-console.log(JSON.stringify({ok:true,suite:"temporary-build-bisect-delay",seconds:20}));
+await new Promise(resolve=>setTimeout(resolve,12000));
+console.log(JSON.stringify({ok:true,suite:"temporary-build-bisect-delay",seconds:12}));
