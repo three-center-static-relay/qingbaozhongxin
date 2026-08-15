@@ -2,6 +2,7 @@ export const AKSHARE_CATALOG={
   akshare:{
     category:"finance-cn-open-source-research-data",
     access:"config",
+    secrets:["AKTOOLS_BASE_URL"],
     config_vars:["AKTOOLS_BASE_URL"],
     adapter:"akshare.aktools-http",
     integration:"official-akshare+official-aktools-http",
@@ -17,6 +18,7 @@ export const AKSHARE_CATALOG={
   aktools:{
     category:"finance-cn-http-runtime",
     access:"config",
+    secrets:["AKTOOLS_BASE_URL"],
     config_vars:["AKTOOLS_BASE_URL"],
     adapter:"akshare.aktools-http",
     integration:"official-aktools-fastapi-http",
