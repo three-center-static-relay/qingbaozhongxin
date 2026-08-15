@@ -25,7 +25,15 @@ export const NASA_HIGH_VALUE={
   black_marble:{label:"Black Marble",keyword:"Black Marble",domain:"nighttime-lights",value:"human-activity-commercial-urban-intensity"},
   modis:{label:"MODIS",keyword:"MODIS",domain:"land-ocean-atmosphere",value:"vegetation-fire-temperature-aerosol-land-cover"},
   viirs:{label:"VIIRS",keyword:"VIIRS",domain:"land-atmosphere-night-lights",value:"fire-night-lights-aerosol-ocean-color"},
-  landsat:{label:"Landsat",keyword:"Landsat",domain:"land-imagery",value:"urban-change-land-cover-surface-temperature"}
+  landsat:{label:"Landsat",keyword:"Landsat",domain:"land-imagery",value:"urban-change-land-cover-surface-temperature"},
+  ceres:{label:"CERES",keyword:"CERES",domain:"earth-radiation-budget",value:"solar-longwave-cloud-radiative-flux-energy-climate"},
+  airs:{label:"AIRS",keyword:"AIRS",domain:"atmospheric-sounding",value:"temperature-humidity-trace-gases-weather-climate"},
+  oco2_oco3:{label:"OCO-2 / OCO-3",keyword:"OCO",domain:"carbon-dioxide",value:"co2-carbon-cycle-emissions-atmospheric-composition"},
+  pace:{label:"PACE",keyword:"PACE",domain:"ocean-color-aerosol-cloud",value:"ocean-ecosystems-water-quality-aerosol-cloud"},
+  icesat2:{label:"ICESat-2",keyword:"ICESat-2",domain:"elevation-cryosphere",value:"ice-elevation-canopy-height-surface-change"},
+  srtm:{label:"SRTM",keyword:"SRTM",domain:"elevation",value:"terrain-topography-hydrology-visibility-site-analysis"},
+  gldas:{label:"GLDAS",keyword:"GLDAS",domain:"land-surface-model",value:"soil-moisture-runoff-evapotranspiration-energy-water-balance"},
+  hls:{label:"Harmonized Landsat Sentinel",keyword:"HLS",domain:"harmonized-optical-imagery",value:"high-frequency-land-change-agriculture-urban-monitoring"}
 };
 function cmrParams(args,kind){const u=new URL(`${CMR_BASE}/${kind}.json`),limit=clamp(args?.limit,1,100,20);u.searchParams.set("page_size",String(limit));if(args?.page_num)u.searchParams.set("page_num",String(clamp(args.page_num,1,500,1)));if(args?.query)u.searchParams.set("keyword",text(args.query,240));if(args?.provider)u.searchParams.append("provider",safeToken(args.provider,"provider",100));if(args?.concept_id)u.searchParams.append(kind==="granules"?"collection_concept_id":"concept_id",safeToken(args.concept_id,"concept_id",120));if(args?.short_name)u.searchParams.append("short_name",text(args.short_name,180));if(args?.temporal)u.searchParams.set("temporal",temporal(args.temporal));if(args?.bbox)u.searchParams.append("bounding_box[]",bbox(args.bbox));if(args?.point)u.searchParams.set("point",point(args.point));if(args?.downloadable===true)u.searchParams.set("downloadable","true");if(args?.cloud_hosted===true)u.searchParams.set("cloud_hosted","true");return u}
 function entries(body){return Array.isArray(body?.feed?.entry)?body.feed.entry:Array.isArray(body?.items)?body.items:[]}
