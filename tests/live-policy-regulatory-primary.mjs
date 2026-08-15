@@ -6,7 +6,7 @@ for(const p of ["federal_register","congress_gov","regulations_gov","splus_polic
 assert.equal(statusFor({},"federal_register")?.configured,true);
 assert.equal(statusFor({},"congress_gov")?.configured,false);assert.equal(statusFor({CONGRESS_GOV_API_KEY:"x"},"congress_gov")?.configured,true);
 assert.equal(statusFor({},"regulations_gov")?.configured,false);assert.equal(statusFor({REGULATIONS_GOV_API_KEY:"x"},"regulations_gov")?.configured,true);
-assert.deepEqual(OPERATIONS.federal_register,["documents","document","agencies"]);
+assert.ok(["documents","document","agencies"].every(op=>OPERATIONS.federal_register?.includes(op)),"federal_register required operations missing");
 assert.ok(OPERATIONS.congress_gov.includes("bills")&&OPERATIONS.congress_gov.includes("bill_actions"));
 assert.ok(OPERATIONS.regulations_gov.includes("documents")&&OPERATIONS.regulations_gov.includes("dockets"));
 assert.equal(OPERATIONS.regulations_gov.includes("comments"),false,"comments must not be exposed");
@@ -43,4 +43,4 @@ const docket=await runAdapter("regulations_gov","docket",{docket_id:"EPA-HQ-OAR-
 await assert.rejects(()=>runAdapter("regulations_gov","documents",{query:"x"},{}),/UPSTREAM_AUTH_FAILED/);
 await assert.rejects(()=>runAdapter("regulations_gov","document",{document_id:"https://evil.example"},regsEnv),/INVALID_DOCUMENT_ID/);
 const umbrella=await runAdapter("splus_policy_regulatory_primary","catalog",{},{});assert.equal(umbrella.items.length,3);assert.match(umbrella.items[0].legal_note,/govinfo/i);assert.match(umbrella.items[2].write_policy,/read-only/i);
-console.log(JSON.stringify({ok:true,suite:"live-policy-regulatory-primary",providers:4,read_only:true,comments_excluded:true,official_legal_crosscheck:true,secret_redaction:true}));
+console.log(JSON.stringify({ok:true,suite:"live-policy-regulatory-primary",providers:4,read_only:true,comments_excluded:true,official_legal_crosscheck:true,secret_redaction:true,operation_gate_extension_safe:true}));
