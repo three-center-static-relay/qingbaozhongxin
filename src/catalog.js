@@ -1,5 +1,5 @@
 import {CATALOG as BASE_CATALOG,EXCLUDED_PROVIDERS as BASE_EXCLUDED} from "./catalog-base.js";
-export const CATALOG_VERSION="2026-08-15.21";
+export const CATALOG_VERSION="2026-08-15.22";
 export const EXCLUDED_PROVIDERS=BASE_EXCLUDED;
 export const CATALOG={
   ...BASE_CATALOG,
@@ -12,17 +12,17 @@ export const CATALOG={
   youtube:{category:"google-public-media",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"youtube.data-v3",integration:"official-rest",scope:"public-read-only"},
   google_books:{category:"google-public-books",access:"optional-key",secrets:["GOOGLE_API_KEY"],adapter:"google_books.v1",integration:"official-rest",scope:"public-volumes-read-only"},
   google_factcheck:{category:"google-public-verification",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"google_factcheck.claim-search",integration:"official-rest"},
-  google_civic:{category:"google-public-civic",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"google_civic.v2",integration:"official-rest",scope:"us-civic-data"},
-  google_knowledge_graph:{category:"google-public-knowledge",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"google_knowledge_graph.entity-search",integration:"official-rest",scope:"legacy-read-only-noncritical"},
+  google_civic:{category:"google-public-civic",access:"key",secret_groups:[["GOOGLE_CIVIC_API_KEY"],["GOOGLE_API_KEY"]],adapter:"google_civic.v2",integration:"official-rest",scope:"us-civic-data",auth_note:"prefer a Civic-only restricted key; shared GOOGLE_API_KEY remains supported"},
+  google_knowledge_graph:{category:"google-public-knowledge",access:"key",secret_groups:[["GOOGLE_KNOWLEDGE_GRAPH_API_KEY"],["GOOGLE_API_KEY"]],adapter:"google_knowledge_graph.entity-search",integration:"official-rest",scope:"legacy-read-only-noncritical",auth_note:"prefer a Knowledge-Graph-only restricted key; shared GOOGLE_API_KEY remains supported"},
   google_crux:{category:"google-public-web-intel",access:"key",secrets:["GOOGLE_API_KEY"],adapter:"google_crux.record+history",integration:"official-rest",scope:"aggregated-user-experience"},
-  google_pagespeed:{category:"google-public-web-intel",access:"optional-key",secrets:["GOOGLE_API_KEY"],adapter:"google_pagespeed.v5",integration:"official-rest",scope:"public-web-analysis"},
+  google_pagespeed:{category:"google-public-web-intel",access:"optional-key",secrets:["GOOGLE_API_KEY"],optional_secrets:["GOOGLE_PAGESPEED_API_KEY"],adapter:"google_pagespeed.v5",integration:"official-rest",scope:"public-web-analysis",auth_note:"anonymous access supported; GOOGLE_PAGESPEED_API_KEY preferred when configured"},
   google_trends_alpha:{category:"google-public-trends",access:"key",secrets:["GOOGLE_TRENDS_API_KEY"],adapter:"catalog-only",integration:"official-alpha",permission:"limited-alpha-access-required"},
   amap:{category:"maps-cn",access:"key",secrets:["AMAP_API_KEY"],adapter:"amap.multi"},
   baidu_maps:{category:"maps-cn",access:"key",secret_groups:[["BAIDU_MAP_AK"],["BAIDU_MAP_API_KEY"]],adapter:"baidu_maps.geocode+reverse"},
   tencent_maps:{category:"maps-cn-mcp",access:"key",secret_groups:[["TENCENT_LBS_API_KEY"],["TENCENT_MAP_API_KEY"]],adapter:"tencent_maps.multi",integration:"official-mcp+webservice"},
   tianditu:{category:"maps-cn-official",access:"key",secret_groups:[["TIANDITU_TK"],["TIANDITU_API_KEY"]],adapter:"tianditu.search"},
   aifin_market:{category:"finance-cn-mcp",access:"key",secrets:["WIND_API_KEY"],adapter:"catalog-only",integration:"official-skill-mcp"},
-  pkulaw:{category:"legal-cn",access:"key",secret_groups:[["PKULAW_MCP_TOKEN"],["PKULAW_API_TOKEN"],["BROWSERFABRIC_API_KEY"]],adapter:"pkulaw.official-mcp",integration:"official-mcp-streamable-http",scope:"fixed-official-mcp-services-read-only",endpoint:"https://apim-gateway.pkulaw.com/",auth_note:"preferred secret PKULAW_MCP_TOKEN; PKULAW_API_TOKEN supported; BROWSERFABRIC_API_KEY retained temporarily only as a legacy secret-name alias"},
+  pkulaw:{category:"legal-cn",access:"key",secret_groups:[["PKULAW_MCP_TOKEN"],["PKULAW_API_TOKEN"],["BROWSERFABRIC_API_KEY"]],adapter:"pkulaw.official-cli-direct-jsonrpc",integration:"official-cli-direct-jsonrpc",scope:"10-fixed-official-mcp-services-tools-list-and-tool-call",endpoint:"https://apim-gateway.pkulaw.com/",auth_note:"preferred secret PKULAW_MCP_TOKEN; PKULAW_API_TOKEN supported; BROWSERFABRIC_API_KEY retained temporarily only as a legacy secret-name alias"},
   yuandian:{category:"legal-cn",access:"key",secret_groups:[["YD_API_KEY"],["YUANDIAN_API_KEY"]],adapter:"yuandian.official-api",integration:"official-rest+mcp",scope:"law-case-enterprise-read-only"},
   wikidata:{category:"global-knowledge-graph",access:"public",adapter:"wikidata.public-read",integration:"official-sparql+entitydata",scope:"anonymous-read-only"},
   copernicus_cds:{category:"climate-global-official",access:"key",secret_groups:[["COPERNICUS_CDS_API_KEY"],["CDS_API_KEY"]],adapter:"copernicus_cds.catalog+retrieve",integration:"official-rest",scope:"catalog-read+bounded-retrieval-job-control-no-binary-proxy",terms:"dataset-terms-must-be-accepted-manually-before-download"},
@@ -31,7 +31,7 @@ export const CATALOG={
   crossref:{...BASE_CATALOG.crossref,integration:"official-rest",scope:"global-scholarly-metadata"},
   openalex:{...BASE_CATALOG.openalex,integration:"official-rest",registration_url:"https://openalex.org/settings/api",free_tier:"1-usd-daily-api-credit"},
   semantic_scholar:{...BASE_CATALOG.semantic_scholar,integration:"official-rest",registration_url:"https://www.semanticscholar.org/product/api#api-key-form"},
-  unpaywall:{...BASE_CATALOG.unpaywall,integration:"official-rest",scope:"open-access-resolution"},
+  unpaywall:{...BASE_CATALOG.unpaywall,integration:"official-rest",scope:"global-scholarly-metadata"},
   openaire:{...BASE_CATALOG.openaire,integration:"official-rest",scope:"europe-global-research-products"},
   base:{category:"literature-oa-aggregator",access:"public",adapter:"catalog-only",integration:"official-oai-pmh",scope:"repository-aggregator-metadata",endpoint:"https://oai.base-search.net/oai"},
   core:{category:"literature-oa-aggregator",access:"public",adapter:"catalog-only",integration:"official-rest",scope:"open-access-metadata-and-fulltext",registration_url:"https://core.ac.uk/services/api",note:"free-access-subject-to-current-terms-and-rate-limits"},
