@@ -3,14 +3,19 @@ const text=(v,n=300)=>String(v??"").trim().slice(0,n);
 const clamp=(n,a,b,d)=>{n=Number(n);return Number.isFinite(n)?Math.max(a,Math.min(b,Math.trunc(n))):d};
 const required=(o,k)=>{const v=o?.[k];if(v===undefined||v===null||String(v).trim()==="")throw Object.assign(new Error(`ARG_REQUIRED:${k}`),{status:400});return v};
 function googleKey(env){return env.GOOGLE_API_KEY||""}
-async function getJson(url){const c=new AbortController(),t=setTimeout(()=>c.abort(),TIMEOUT_MS);try{const r=await fetch(url,{headers:{accept:"application/json"},signal:c.signal}),raw=await r.text();if(new TextEncoder().encode(raw).length>MAX_BYTES)throw Object.assign(new Error("UPSTREAM_RESPONSE_TOO_LARGE"),{status:502});let body;try{body=raw?JSON.parse(raw):null}catch{throw Object.assign(new Error("UPSTREAM_BAD_JSON"),{status:502})}if(!r.ok)throw Object.assign(new Error("UPSTREAM_HTTP_ERROR"),{status:502,details:{http_status:r.status,error:body?.error?.message||body?.error||null}});return body}catch(e){if(e?.name==="AbortError")throw Object.assign(new Error("UPSTREAM_TIMEOUT"),{status:504});throw e}finally{clearTimeout(t)}}
+async function requestJson(url,init={}){const c=new AbortController(),t=setTimeout(()=>c.abort(),TIMEOUT_MS);try{const r=await fetch(url,{...init,headers:{accept:"application/json",...(init.headers||{})},signal:c.signal}),raw=await r.text();if(new TextEncoder().encode(raw).length>MAX_BYTES)throw Object.assign(new Error("UPSTREAM_RESPONSE_TOO_LARGE"),{status:502});let body;try{body=raw?JSON.parse(raw):null}catch{throw Object.assign(new Error("UPSTREAM_BAD_JSON"),{status:502})}if(!r.ok)throw Object.assign(new Error("UPSTREAM_HTTP_ERROR"),{status:502,details:{http_status:r.status,error:body?.error?.message||body?.error||null}});return body}catch(e){if(e?.name==="AbortError")throw Object.assign(new Error("UPSTREAM_TIMEOUT"),{status:504});throw e}finally{clearTimeout(t)}}
+const getJson=url=>requestJson(url);
 function keyed(base,env){const key=googleKey(env);if(!key)throw Object.assign(new Error("UPSTREAM_AUTH_FAILED"),{status:503});const u=new URL(base);u.searchParams.set("key",key);return u}
-function pageToken(v){const s=text(v,256);if(s) return s}
+function pageToken(v){const s=text(v,256);if(s)return s}
+function safePublicUrl(v){let u;try{u=new URL(String(v))}catch{throw Object.assign(new Error("INVALID_URL"),{status:400})}if(!["http:","https:"].includes(u.protocol)||u.username||u.password)throw Object.assign(new Error("INVALID_URL"),{status:400});if(["localhost","127.0.0.1","::1"].includes(u.hostname)||u.hostname.endsWith(".local"))throw Object.assign(new Error("POLICY_DENIED_URL"),{status:403});return u.toString()}
 export const OPERATIONS={
   youtube:["search","video","channel","playlist_items"],
   google_books:["search","volume"],
   google_factcheck:["search"],
-  google_civic:["elections","divisions","voter_info"]
+  google_civic:["elections","divisions","voter_info"],
+  google_knowledge_graph:["search"],
+  google_crux:["record","history"],
+  google_pagespeed:["analyze"]
 };
 export async function runAdapter(provider,operation,args,env){
   if(!OPERATIONS[provider]?.includes(operation))throw Object.assign(new Error("ADAPTER_OPERATION_NOT_APPROVED"),{status:403});
@@ -32,5 +37,11 @@ export async function runAdapter(provider,operation,args,env){
     if(operation==="divisions"){const u=keyed("https://www.googleapis.com/civicinfo/v2/divisions",env);u.searchParams.set("query",text(required(args,"query"),200));const body=await getJson(u);return{provider,operation,items:body?.results||[]}}
     if(operation==="voter_info"){const u=keyed("https://www.googleapis.com/civicinfo/v2/voterinfo",env);u.searchParams.set("address",text(required(args,"address"),300));if(args.election_id)u.searchParams.set("electionId",text(args.election_id,40));if(args.official_only===true)u.searchParams.set("officialOnly","true");return{provider,operation,data:await getJson(u)}}
   }
+  if(provider==="google_knowledge_graph"){
+    const u=keyed("https://kgsearch.googleapis.com/v1/entities:search",env);u.searchParams.set("query",text(required(args,"query"),300));u.searchParams.set("limit",String(clamp(args.limit,1,500,20)));u.searchParams.set("indent","false");if(args.languages)u.searchParams.set("languages",Array.isArray(args.languages)?args.languages.map(x=>text(x,12)).filter(Boolean).join(","):text(args.languages,80));if(args.types)for(const type of (Array.isArray(args.types)?args.types:[args.types]).slice(0,10))u.searchParams.append("types",text(type,80));if(args.prefix===true)u.searchParams.set("prefix","true");const body=await getJson(u);return{provider,operation,items:body?.itemListElement||[]}}
+  if(provider==="google_crux"){
+    const key=googleKey(env);if(!key)throw Object.assign(new Error("UPSTREAM_AUTH_FAILED"),{status:503});const endpoint=operation==="history"?"https://chromeuxreport.googleapis.com/v1/records:queryHistoryRecord":"https://chromeuxreport.googleapis.com/v1/records:queryRecord",u=new URL(endpoint);u.searchParams.set("key",key);const payload={};if(args.origin)payload.origin=safePublicUrl(args.origin);else if(args.url)payload.url=safePublicUrl(args.url);else throw Object.assign(new Error("ARG_REQUIRED:origin_or_url"),{status:400});if(args.form_factor&&["PHONE","DESKTOP","TABLET"].includes(String(args.form_factor).toUpperCase()))payload.formFactor=String(args.form_factor).toUpperCase();if(Array.isArray(args.metrics)&&args.metrics.length)payload.metrics=args.metrics.slice(0,20).map(x=>text(x,100));const body=await requestJson(u,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});return{provider,operation,data:body}}
+  if(provider==="google_pagespeed"){
+    const u=keyed("https://www.googleapis.com/pagespeedonline/v5/runPagespeed",env);u.searchParams.set("url",safePublicUrl(required(args,"url")));if(["mobile","desktop"].includes(String(args.strategy||"").toLowerCase()))u.searchParams.set("strategy",String(args.strategy).toLowerCase());for(const category of (Array.isArray(args.categories)?args.categories:[args.category]).filter(Boolean).slice(0,5)){const c=String(category).toUpperCase();if(["PERFORMANCE","ACCESSIBILITY","BEST_PRACTICES","SEO"].includes(c))u.searchParams.append("category",c)}if(args.locale)u.searchParams.set("locale",text(args.locale,20));const body=await getJson(u);return{provider,operation,data:{id:body?.id||null,analysisUTCTimestamp:body?.analysisUTCTimestamp||null,lighthouseResult:body?.lighthouseResult||null,loadingExperience:body?.loadingExperience||null,originLoadingExperience:body?.originLoadingExperience||null}}}
   throw Object.assign(new Error("ADAPTER_NOT_IMPLEMENTED"),{status:501});
 }
