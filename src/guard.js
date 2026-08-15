@@ -28,4 +28,24 @@ async function selftest(env,ctx){
   const ok=r.ok&&body?.ok===true&&nonempty&&hasDigest&&terminal&&released;
   return json({ok,business_e2e:true,cost_class:"public-zero-key",provider:"worldbank",operation:"indicator",task_id:taskId,http_status:r.status,nonempty,result_digest:hasDigest?body.result_digest:null,terminal_status:task?.task?.status||null,lock_released:released,elapsed_ms:Date.now()-started},ok?200:503);
 }
-export default{async fetch(req,env,ctx){try{const u=new URL(req.url);if(req.method==="POST"&&u.pathname==="/v1/cancel")return await cancel(req,env);if(req.method==="POST"&&u.pathname==="/v1/selftest"){if(u.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"selftest is service-binding internal only"},403);return await selftest(env,ctx)}return await base.fetch(req,env,ctx)}catch(e){return json({ok:false,error:e?.message||"INTERNAL_ERROR",message:"Request failed"},e?.status||500)}}};
+async function readiness(provider,env,ctx){const r=await base.fetch(new Request(`https://intelligence.internal/v1/provider/${encodeURIComponent(provider)}/readiness`),env,ctx);const b=await r.json().catch(()=>null);return{http:r.status,configured:b?.configured===true,live_adapter:b?.live_adapter===true,operations:b?.operations||[]}}
+async function probe(provider,operation,args,env,ctx){const ready=await readiness(provider,env,ctx);if(!ready.configured)return{provider,operation,status:"NOT_CONFIGURED",...ready};if(!ready.operations.includes(operation))return{provider,operation,status:"NO_LIVE_OPERATION",...ready};const taskId=`diag-google-${provider}-${crypto.randomUUID()}`;const req=new Request("https://intelligence.internal/v1/run",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({task_id:taskId,provider,operation,timeout_seconds:45,args})});const started=Date.now(),r=await base.fetch(req,env,ctx),b=await r.json().catch(()=>null);return{provider,operation,status:r.ok&&b?.ok===true?"PASS":"FAIL",configured:true,http:r.status,error:b?.error||null,message:b?.message||null,details:b?.details||null,elapsed_ms:Date.now()-started}}
+async function googleSuite(env,ctx){
+  const tests=[
+    ["youtube","search",{query:"NASA",type:"video",limit:1}],
+    ["google_books","search",{query:"China",limit:1}],
+    ["google_factcheck","search",{query:"climate change",limit:1}],
+    ["google_civic","elections",{}],
+    ["google_knowledge_graph","search",{query:"Google",limit:1}],
+    ["google_crux","record",{url:"https://www.google.com/",form_factor:"PHONE"}],
+    ["google_pagespeed","analyze",{url:"https://www.google.com/",strategy:"mobile",categories:["PERFORMANCE"]}],
+    ["bigquery","query",{query:"SELECT word, word_count FROM `bigquery-public-data.samples.shakespeare` LIMIT 1",maximum_bytes_billed:10000000}],
+    ["earthengine","asset_get",{asset:"COPERNICUS/S2_SR_HARMONIZED"}]
+  ];
+  const results=[];for(const t of tests)results.push(await probe(t[0],t[1],t[2],env,ctx));
+  const trends=await readiness("google_trends_alpha",env,ctx);
+  results.push({provider:"google_trends_alpha",operation:null,status:trends.configured?"CATALOG_ONLY":"NOT_CONFIGURED",...trends});
+  const pass=results.filter(x=>x.status==="PASS").length,fail=results.filter(x=>x.status==="FAIL").length,not_configured=results.filter(x=>x.status==="NOT_CONFIGURED").length;
+  return json({ok:fail===0,diagnostic:"google-suite-20260815",pass,fail,not_configured,results},200)
+}
+export default{async fetch(req,env,ctx){try{const u=new URL(req.url);if(req.method==="POST"&&u.pathname==="/v1/cancel")return await cancel(req,env);if(req.method==="POST"&&u.pathname==="/v1/selftest"){if(u.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"selftest is service-binding internal only"},403);return await selftest(env,ctx)}if(req.method==="GET"&&u.pathname==="/v1/diag/google-suite-20260815-1504")return await googleSuite(env,ctx);return await base.fetch(req,env,ctx)}catch(e){return json({ok:false,error:e?.message||"INTERNAL_ERROR",message:"Request failed"},e?.status||500)}}};
