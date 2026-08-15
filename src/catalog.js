@@ -1,5 +1,5 @@
 import {CATALOG as BASE_CATALOG,EXCLUDED_PROVIDERS as BASE_EXCLUDED} from "./catalog-base.js";
-export const CATALOG_VERSION="2026-08-15.16";
+export const CATALOG_VERSION="2026-08-15.17";
 export const EXCLUDED_PROVIDERS=BASE_EXCLUDED;
 export const CATALOG={
   ...BASE_CATALOG,
@@ -25,7 +25,48 @@ export const CATALOG={
   pkulaw:{category:"legal-cn",access:"key",secrets:["BROWSERFABRIC_API_KEY"],optional_secrets:["PKULAW_BROWSERFABRIC_CONTEXT_ID"],adapter:"browserfabric.read-with-optional-persistent-context",integration:"browserfabric",scope:"pkulaw-fixed-domains-read-only",auth_note:"context-id optional for public read; required to restore a previously authenticated PKULaw login state"},
   yuandian:{category:"legal-cn",access:"key",secret_groups:[["YD_API_KEY"],["YUANDIAN_API_KEY"]],adapter:"yuandian.official-api",integration:"official-rest+mcp",scope:"law-case-enterprise-read-only"},
   wikidata:{category:"global-knowledge-graph",access:"public",adapter:"wikidata.public-read",integration:"official-sparql+entitydata",scope:"anonymous-read-only"},
-  copernicus_cds:{category:"climate-global-official",access:"key",secret_groups:[["COPERNICUS_CDS_API_KEY"],["CDS_API_KEY"]],adapter:"copernicus_cds.catalog+retrieve",integration:"official-rest",scope:"catalog-read+bounded-retrieval-job-control-no-binary-proxy",terms:"dataset-terms-must-be-accepted-manually-before-download"}
+  copernicus_cds:{category:"climate-global-official",access:"key",secret_groups:[["COPERNICUS_CDS_API_KEY"],["CDS_API_KEY"]],adapter:"copernicus_cds.catalog+retrieve",integration:"official-rest",scope:"catalog-read+bounded-retrieval-job-control-no-binary-proxy",terms:"dataset-terms-must-be-accepted-manually-before-download"},
+
+  crossref:{...BASE_CATALOG.crossref,integration:"official-rest",scope:"global-scholarly-metadata"},
+  openalex:{...BASE_CATALOG.openalex,integration:"official-rest",registration_url:"https://openalex.org/settings/api",free_tier:"1-usd-daily-api-credit"},
+  semantic_scholar:{...BASE_CATALOG.semantic_scholar,integration:"official-rest",registration_url:"https://www.semanticscholar.org/product/api#api-key-form"},
+  unpaywall:{...BASE_CATALOG.unpaywall,integration:"official-rest",scope:"open-access-resolution"},
+  openaire:{...BASE_CATALOG.openaire,integration:"official-rest",scope:"europe-global-research-products"},
+  base:{category:"literature-oa-aggregator",access:"public",adapter:"catalog-only",integration:"official-oai-pmh",scope:"repository-aggregator-metadata",endpoint:"https://oai.base-search.net/oai"},
+  core:{category:"literature-oa-aggregator",access:"public",adapter:"catalog-only",integration:"official-rest",scope:"open-access-metadata-and-fulltext",registration_url:"https://core.ac.uk/services/api",note:"free-access-subject-to-current-terms-and-rate-limits"},
+  doaj:{category:"literature-open-access",access:"public",adapter:"catalog-only",integration:"official-api+oai-pmh+data-dump",scope:"open-access-journals-and-articles",endpoint:"https://doaj.org/api"},
+  europe_pmc:{category:"literature-biomedical",access:"public",adapter:"europe_pmc.search",integration:"official-rest",scope:"biomedical-literature-preprints-fulltext-links"},
+  pubmed:{category:"literature-biomedical",access:"optional-key",secrets:["NCBI_API_KEY"],optional_secrets:["NCBI_EMAIL"],adapter:"pubmed.search",integration:"official-ncbi-eutils",scope:"pubmed-index",registration_url:"https://www.ncbi.nlm.nih.gov/account/settings/"},
+  datacite:{category:"research-metadata",access:"public",adapter:"datacite.search",integration:"official-rest",scope:"doi-research-outputs"},
+  zenodo:{category:"research-repository",access:"optional-key",secrets:["ZENODO_TOKEN"],adapter:"zenodo.search",integration:"official-rest",scope:"public-records"},
+  figshare:{category:"research-repository",access:"public",adapter:"figshare.search",integration:"official-rest",scope:"public-articles-datasets"},
+  arxiv:{category:"preprint-global",access:"public",adapter:"arxiv.search",integration:"official-atom-api",scope:"preprints"},
+  biorxiv:{category:"preprint-biomedical",access:"public",adapter:"biorxiv.recent",integration:"official-rest",scope:"recent-preprints"},
+  medrxiv:{category:"preprint-medical",access:"public",adapter:"medrxiv.recent",integration:"official-rest",scope:"recent-preprints"},
+  dblp:{category:"literature-computer-science",access:"public",adapter:"dblp.search",integration:"official-search-api",scope:"computer-science-bibliography"},
+  inspirehep:{category:"literature-physics",access:"public",adapter:"inspirehep.search",integration:"official-rest",scope:"high-energy-physics"},
+  zbmath:{category:"literature-mathematics",access:"public",adapter:"catalog-only",integration:"official-rest+oai-pmh",scope:"mathematics-bibliography",terms:"api-terms-must-be-accepted"},
+  nasa_ads:{category:"literature-astronomy-physics",access:"key",secrets:["NASA_ADS_TOKEN"],adapter:"catalog-only",integration:"official-rest",scope:"astronomy-astrophysics-physics",registration_url:"https://ui.adsabs.harvard.edu/user/settings/token"},
+  gbif_literature:{category:"literature-biodiversity",access:"public",adapter:"gbif_literature.search",integration:"official-rest",scope:"biodiversity-literature"},
+  bhl:{category:"library-biodiversity-heritage",access:"key",secrets:["BHL_API_KEY"],adapter:"bhl.search",integration:"official-rest",scope:"biodiversity-books-serials-fulltext",registration_url:"https://www.biodiversitylibrary.org/getapikey.aspx"},
+  uniprot:{category:"knowledge-life-sciences",access:"public",adapter:"uniprot.search",integration:"official-rest",scope:"protein-sequence-function-knowledge"},
+  opencitations:{category:"scholarly-citation-graph",access:"optional-key",secrets:["OPENCITATIONS_ACCESS_TOKEN"],adapter:"opencitations.doi",integration:"official-rest",scope:"bibliographic-and-citation-metadata",registration_url:"https://opencitations.net/accesstoken"},
+  ror:{category:"research-organization-registry",access:"optional-key",secrets:["ROR_CLIENT_ID"],adapter:"ror.search",integration:"official-rest",scope:"research-organizations",registration_url:"https://ror.org/api-client-id",note:"client-id-registration-temporarily-paused-as-of-2026-08; anonymous-api-remains-free"},
+  orcid:{category:"researcher-identity-knowledge",access:"optional-key",secret_groups:[["ORCID_CLIENT_ID","ORCID_CLIENT_SECRET"]],adapter:"catalog-only",integration:"official-public-api",scope:"public-researcher-registry",registration_url:"https://orcid.org/developer-tools",terms:"public-api-free-for-non-commercial-use"},
+  osf:{category:"research-repository",access:"public",adapter:"catalog-only",integration:"official-rest",scope:"public-projects-registrations-preprints-files",endpoint:"https://api.osf.io/v2/"},
+
+  library_of_congress:{category:"library-national-us",access:"public",adapter:"library_of_congress.search",integration:"official-json-api",scope:"books-manuscripts-maps-photos-audio-archives"},
+  open_library:{category:"library-global-books",access:"public",adapter:"open_library.search",integration:"official-rest",scope:"book-bibliography"},
+  dpla:{category:"digital-library-us",access:"key",secrets:["DPLA_API_KEY"],adapter:"dpla.search",integration:"official-rest",scope:"aggregated-library-archive-museum-content",registration_url:"https://api.dp.la/v2/api_key/YOUR_EMAIL@example.com",registration_method:"POST"},
+  europeana:{category:"digital-library-europe",access:"key",secrets:["EUROPEANA_API_KEY"],adapter:"europeana.search",integration:"official-rest",scope:"aggregated-european-cultural-heritage",registration_url:"https://pro.europeana.eu/page/get-api"},
+  smithsonian:{category:"museum-library-archive-us",access:"key",secret_groups:[["SMITHSONIAN_API_KEY"],["DATA_GOV_API_KEY"]],adapter:"smithsonian.search",integration:"official-open-access-api",scope:"museum-library-archive-collections",registration_url:"https://api.data.gov/signup/"},
+  nara_catalog:{category:"archive-national-us",access:"key",secrets:["NARA_API_KEY"],adapter:"nara_catalog.search",integration:"official-rest",scope:"us-national-archives-catalog",registration_url:"https://www.archives.gov/research/catalog/lcdrg/api"},
+  digitalnz:{category:"digital-library-new-zealand",access:"optional-key",secrets:["DIGITALNZ_API_KEY"],adapter:"digitalnz.search",integration:"official-rest",scope:"aggregated-nz-digital-heritage"},
+  met_museum:{category:"museum-open-collection",access:"public",adapter:"met_museum.search",integration:"official-rest",scope:"metropolitan-museum-open-access"},
+  wikimedia_commons:{category:"global-media-knowledge",access:"public",adapter:"wikimedia_commons.search",integration:"official-mediawiki-api",scope:"open-media-and-metadata"},
+  wikisource:{category:"global-digital-text-library",access:"public",adapter:"wikisource.search",integration:"official-mediawiki-api",scope:"public-domain-and-free-texts-multilingual"},
+  internet_archive:{category:"global-digital-library-archive",access:"public",adapter:"catalog-only",integration:"official-metadata-and-advanced-search-apis",scope:"books-audio-video-software-web-collections"},
+  software_heritage:{category:"global-software-archive",access:"public",adapter:"catalog-only",integration:"official-rest",scope:"source-code-archive"}
 };
 function anyGroup(env,groups){return groups?.some(g=>g.every(k=>Boolean(env[k])))}
 export function statusFor(env,name){
