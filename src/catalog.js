@@ -1,5 +1,5 @@
 import {CATALOG as BASE_CATALOG,EXCLUDED_PROVIDERS as BASE_EXCLUDED} from "./catalog-base.js";
-export const CATALOG_VERSION="2026-08-15.17";
+export const CATALOG_VERSION="2026-08-15.18";
 export const EXCLUDED_PROVIDERS=BASE_EXCLUDED;
 export const CATALOG={
   ...BASE_CATALOG,
@@ -54,6 +54,12 @@ export const CATALOG={
   ror:{category:"research-organization-registry",access:"optional-key",secrets:["ROR_CLIENT_ID"],adapter:"ror.search",integration:"official-rest",scope:"research-organizations",registration_url:"https://ror.org/api-client-id",note:"client-id-registration-temporarily-paused-as-of-2026-08; anonymous-api-remains-free"},
   orcid:{category:"researcher-identity-knowledge",access:"optional-key",secret_groups:[["ORCID_CLIENT_ID","ORCID_CLIENT_SECRET"]],adapter:"catalog-only",integration:"official-public-api",scope:"public-researcher-registry",registration_url:"https://orcid.org/developer-tools",terms:"public-api-free-for-non-commercial-use"},
   osf:{category:"research-repository",access:"public",adapter:"catalog-only",integration:"official-rest",scope:"public-projects-registrations-preprints-files",endpoint:"https://api.osf.io/v2/"},
+  hal:{category:"research-repository-france",access:"public",adapter:"hal.search",integration:"official-rest+oai-pmh",scope:"french-open-science-repository",terms:"oai-harvest-non-commercial"},
+  oapen:{category:"open-access-books",access:"public",adapter:"oapen.search",integration:"official-rest+oai-pmh+feeds",scope:"open-access-scholarly-books"},
+  doab:{category:"open-access-books-directory",access:"public",adapter:"doab.search",integration:"official-rest+metadata-feeds",scope:"open-access-book-metadata"},
+  eric:{category:"literature-education",access:"public",adapter:"eric.search",integration:"official-eric-api",scope:"education-research"},
+  scielo_network:{category:"literature-latin-america-global-south",access:"public",adapter:"catalog-only",integration:"official-oai+search",scope:"open-access-journals-preprints-data",endpoint:"https://search.scielo.org/"},
+  scielo_books:{category:"open-access-books-latin-america",access:"public",adapter:"catalog-only",integration:"official-oai-pmh+opds",scope:"open-access-books-and-chapters",endpoint:"http://oai.books.scielo.org/oai-pmh"},
 
   library_of_congress:{category:"library-national-us",access:"public",adapter:"library_of_congress.search",integration:"official-json-api",scope:"books-manuscripts-maps-photos-audio-archives"},
   open_library:{category:"library-global-books",access:"public",adapter:"open_library.search",integration:"official-rest",scope:"book-bibliography"},
@@ -63,6 +69,12 @@ export const CATALOG={
   nara_catalog:{category:"archive-national-us",access:"key",secrets:["NARA_API_KEY"],adapter:"nara_catalog.search",integration:"official-rest",scope:"us-national-archives-catalog",registration_url:"https://www.archives.gov/research/catalog/lcdrg/api"},
   digitalnz:{category:"digital-library-new-zealand",access:"optional-key",secrets:["DIGITALNZ_API_KEY"],adapter:"digitalnz.search",integration:"official-rest",scope:"aggregated-nz-digital-heritage"},
   met_museum:{category:"museum-open-collection",access:"public",adapter:"met_museum.search",integration:"official-rest",scope:"metropolitan-museum-open-access"},
+  ndl_search:{category:"library-national-japan",access:"public",adapter:"ndl_search.search",integration:"official-sru+opensearch+oai-pmh",scope:"japan-national-library-and-linked-libraries",terms:"non-profit-use-no-application;commercial-or-continuous-use-may-require-application",registration_url:"https://ndlsearch.ndl.go.jp/en/help/api"},
+  gallica:{category:"library-national-france-digital",access:"public",adapter:"gallica.search",integration:"official-sru",scope:"bnf-gallica-digital-library"},
+  bnf_data:{category:"library-national-france-knowledge-graph",access:"public",adapter:"catalog-only",integration:"official-sparql",scope:"authors-works-topics-places-archives-manuscripts",endpoint:"https://data.bnf.fr/sparql"},
+  project_gutenberg:{category:"global-public-domain-ebooks",access:"public",adapter:"catalog-only",integration:"official-opds+machine-readable-catalog",scope:"public-domain-ebooks",endpoint:"https://www.gutenberg.org/ebooks/search.opds/",terms:"do-not-crawl-human-site-use-feeds-or-catalog"},
+  govinfo:{category:"government-publications-us",access:"key",secret_groups:[["DATA_GOV_API_KEY"],["GOVINFO_API_KEY"]],adapter:"govinfo.search",integration:"official-rest+mcp-preview+bulk-data",scope:"official-publications-all-three-us-federal-branches",registration_url:"https://www.govinfo.gov/api-signup"},
+  uk_national_archives:{category:"archive-national-uk",access:"external-source",adapter:"catalog-only",integration:"official-discovery-api",scope:"uk-national-and-aggregated-archive-descriptions",registration_url:"https://www.nationalarchives.gov.uk/terms-and-conditions/discovery-for-developers-about-the-application-programming-interface-api/",note:"free API access requires contacting webmaster@nationalarchives.gov.uk and providing source IP"},
   wikimedia_commons:{category:"global-media-knowledge",access:"public",adapter:"wikimedia_commons.search",integration:"official-mediawiki-api",scope:"open-media-and-metadata"},
   wikisource:{category:"global-digital-text-library",access:"public",adapter:"wikisource.search",integration:"official-mediawiki-api",scope:"public-domain-and-free-texts-multilingual"},
   internet_archive:{category:"global-digital-library-archive",access:"public",adapter:"catalog-only",integration:"official-metadata-and-advanced-search-apis",scope:"books-audio-video-software-web-collections"},
