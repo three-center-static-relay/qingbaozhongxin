@@ -4,7 +4,7 @@
   "main": "src/guard.js",
   "compatibility_date": "2026-08-15",
   "workers_dev": true,
-  "build": {"command": "node tests/akshare-aktools.mjs && node -e \"console.log('akshare-alone-done')\""},
+  "build": {"command": "node tests/akshare-aktools.mjs && node -e \"console.log('akshare-alone-done-2')\""},
   "triggers": {"crons": ["23 18 * * *"]},
   "durable_objects": {"bindings": [{"name": "CENTER_GATE", "class_name": "CenterGate"}]},
   "exports": {"CenterGate": {"type":"durable-object","storage":"sqlite"}},
