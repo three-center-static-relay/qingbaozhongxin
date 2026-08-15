@@ -1,5 +1,7 @@
 import base,{CenterGate as BaseCenterGate} from "./index.js";
+import {runDatasetRadar,latestRadar,radarMeta} from "./dataset-radar.js";
 const json=(x,s=200)=>Response.json(x,{status:s,headers:{"cache-control":"no-store"}});
+const MAX_RADAR_BYTES=110000;
 
 // Harden the Durable Object gate so even the same task_id cannot re-enter while active.
 // Durable Object requests are serialized, so this closes the last simultaneous duplicate-dispatch window.
@@ -7,6 +9,12 @@ export class CenterGate extends BaseCenterGate{
   constructor(state,env){super(state,env);this._state=state}
   async fetch(req){
     const u=new URL(req.url);
+    if(req.method==="GET"&&u.pathname==="/radar/latest")return json({ok:true,snapshot:await this._state.storage.get("radar:latest")||null});
+    if(req.method==="POST"&&u.pathname==="/radar/latest"){
+      const b=await req.json().catch(()=>null);if(!b||b.metadata_only!==true||b.raw_dataset_mirror!==false||b.raw_notebook_copy!==false||!Array.isArray(b.candidates))return json({ok:false,error:"INVALID_RADAR_SNAPSHOT"},400);
+      const raw=JSON.stringify(b),bytes=new TextEncoder().encode(raw).length;if(bytes>MAX_RADAR_BYTES)return json({ok:false,error:"RADAR_SNAPSHOT_TOO_LARGE",max_bytes:MAX_RADAR_BYTES,bytes},413);
+      await this._state.storage.put("radar:latest",b);return json({ok:true,bytes,candidate_count:b.candidates.length});
+    }
     if(req.method==="POST"&&u.pathname==="/acquire"){
       const a=await this._state.storage.get("active");
       if(a&&a.expires_at_ms<=Date.now())await this._state.storage.delete("active");
@@ -28,4 +36,8 @@ async function selftest(env,ctx){
   const ok=r.ok&&body?.ok===true&&nonempty&&hasDigest&&terminal&&released;
   return json({ok,business_e2e:true,cost_class:"public-zero-key",provider:"worldbank",operation:"indicator",task_id:taskId,http_status:r.status,nonempty,result_digest:hasDigest?body.result_digest:null,terminal_status:task?.task?.status||null,lock_released:released,elapsed_ms:Date.now()-started},ok?200:503);
 }
-export default{async fetch(req,env,ctx){try{const u=new URL(req.url);if(req.method==="POST"&&u.pathname==="/v1/cancel")return await cancel(req,env);if(req.method==="POST"&&u.pathname==="/v1/selftest"){if(u.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"selftest is service-binding internal only"},403);return await selftest(env,ctx)}return await base.fetch(req,env,ctx)}catch(e){return json({ok:false,error:e?.message||"INTERNAL_ERROR",message:"Request failed"},e?.status||500)}}};
+async function radarRoute(req,env){const u=new URL(req.url);if(req.method==="GET"&&u.pathname==="/v1/dataset-radar/meta")return json({ok:true,...radarMeta(env)});if(req.method==="GET"&&u.pathname==="/v1/dataset-radar/latest"){const r=await latestRadar(env);return json({ok:true,snapshot:r?.snapshot||null})}if(req.method==="POST"&&u.pathname==="/v1/dataset-radar/run"){if(u.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"dataset radar execution is service-binding internal only"},403);const out=await runDatasetRadar(env,{trigger:"internal-manual"});return json(out,out.ok?200:503)}return null}
+export default{
+  async fetch(req,env,ctx){try{const rr=await radarRoute(req,env);if(rr)return rr;const u=new URL(req.url);if(req.method==="POST"&&u.pathname==="/v1/cancel")return await cancel(req,env);if(req.method==="POST"&&u.pathname==="/v1/selftest"){if(u.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"selftest is service-binding internal only"},403);return await selftest(env,ctx)}return await base.fetch(req,env,ctx)}catch(e){return json({ok:false,error:e?.message||"INTERNAL_ERROR",message:"Request failed"},e?.status||500)}},
+  async scheduled(controller,env,ctx){ctx.waitUntil(runDatasetRadar(env,{trigger:"cloudflare-cron",scheduled_time:controller?.scheduledTime||Date.now()}).catch(()=>null))}
+};
