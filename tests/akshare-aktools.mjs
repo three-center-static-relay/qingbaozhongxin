@@ -1,0 +1,9 @@
+import assert from "node:assert/strict";
+import {CATALOG,statusFor} from "../src/catalog.js";
+import {OPERATIONS,runAdapter} from "../src/adapters.js";
+assert.equal(CATALOG.akshare.adapter,"akshare.aktools-http");assert.equal(CATALOG.aktools.adapter,"akshare.aktools-http");assert.equal(CATALOG.akshare.arbitrary_url,false);assert.equal(statusFor({},"akshare").configured,false);assert.equal(statusFor({AKTOOLS_BASE_URL:"https://aktools.example.test/"},"akshare").configured,true);
+for(const op of ["stock_zh_a_hist","stock_zh_a_spot_em","stock_hk_hist","stock_us_hist","index_zh_a_hist","fund_etf_hist_em"])assert.ok(OPERATIONS.akshare.includes(op),`missing ${op}`);
+await assert.rejects(()=>runAdapter("akshare","stock_zh_a_hist",{symbol:"600000"},{}),/UPSTREAM_AUTH_FAILED/);await assert.rejects(()=>runAdapter("akshare","stock_zh_a_hist",{symbol:"600000"},{AKTOOLS_BASE_URL:"http://aktools.example.test/"}),/AKTOOLS_BASE_URL_INVALID/);
+const oldFetch=globalThis.fetch,calls=[];globalThis.fetch=async(url,init={})=>{const u=new URL(String(url));calls.push(u.toString());assert.equal(u.origin,"https://aktools.example.test");assert.equal(u.pathname,"/api/public/stock_zh_a_hist");assert.equal(u.searchParams.get("symbol"),"600000");return new Response(JSON.stringify([{date:"2026-08-14",close:10.2}]),{status:200,headers:{"content-type":"application/json"}})};
+try{const out=await runAdapter("akshare","stock_zh_a_hist",{symbol:"600000",period:"daily"},{AKTOOLS_BASE_URL:"https://aktools.example.test/"});assert.equal(out.transport,"AKTools HTTP");assert.equal(out.items.length,1);assert.equal(calls.length,1);await assert.rejects(()=>runAdapter("akshare","not_allowed",{}, {AKTOOLS_BASE_URL:"https://aktools.example.test/"}),/ADAPTER_OPERATION_NOT_APPROVED/)}finally{globalThis.fetch=oldFetch}
+console.log(JSON.stringify({ok:true,provider:"akshare",transport:"aktools-http",allowlisted_operations:OPERATIONS.akshare.length,no_retry:true,arbitrary_url:false}));
