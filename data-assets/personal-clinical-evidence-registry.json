@@ -1,25 +1,27 @@
 {
-  "schema_version":"1.0",
-  "name":"personal-clinical-evidence-registry",
-  "policy":"Prefer current official guidelines, regulators and primary standards; retrieve dynamically; never treat community summaries as sole clinical ground truth.",
+  "schema_version":"1.1",
+  "name":"personal-clinical-care-evidence-registry",
+  "policy":"Support direct patient-facing clinical analysis and care recommendations with current authoritative evidence. Prefer official guidelines, regulators, specialty standards and primary literature; never use community summaries as sole clinical ground truth.",
   "sources":[
     {"id":"nhc-tertiary-2025","domain":"hospital-quality","authority":"China NHC","tier":"A","access":"public-web","state":"catalog","role":"China tertiary-hospital quality and safety baseline"},
-    {"id":"ahrq-diagnostic-safety","domain":"diagnostic-safety","authority":"AHRQ","tier":"A","access":"public-web","state":"catalog","role":"diagnostic calibration, cannot-miss differential, second-opinion workflow"},
-    {"id":"fda-cds-2026","domain":"clinical-decision-support","authority":"US FDA","tier":"A","access":"public-web","state":"catalog","role":"patient/clinician decision-support safety boundary"},
+    {"id":"ahrq-patient-centered-cds","domain":"clinical-decision-support","authority":"AHRQ","tier":"A","access":"public-web","state":"catalog","role":"patient-centered care decision support and safety"},
+    {"id":"fda-cds-2026","domain":"clinical-decision-support","authority":"US FDA","tier":"A","access":"public-web","state":"catalog","role":"patient and clinician decision-support safety boundary"},
     {"id":"acr-appropriateness","domain":"radiology","authority":"American College of Radiology","tier":"A","access":"public-web","state":"catalog","role":"imaging appropriateness and radiology evidence"},
     {"id":"uspstf","domain":"prevention-screening","authority":"USPSTF","tier":"A","access":"public-web","state":"catalog","role":"evidence-based preventive services"},
-    {"id":"pubmed","domain":"biomedical-literature","authority":"US NLM/NIH","tier":"A","access":"public-api","state":"existing-or-catalog","role":"primary biomedical literature and reviews"},
+    {"id":"pubmed","domain":"biomedical-literature","authority":"US NLM/NIH","tier":"A","access":"public-api","state":"existing-or-catalog","role":"primary biomedical literature and systematic reviews"},
     {"id":"clinicaltrials","domain":"clinical-trials","authority":"ClinicalTrials.gov/NIH","tier":"A","access":"public-api","state":"existing-or-catalog","role":"trial status and intervention evidence"},
-    {"id":"dailymed","domain":"medication-labeling","authority":"US NLM/FDA labeling","tier":"A","access":"public-api","state":"catalog","role":"current structured drug labels, warnings, contraindications"},
+    {"id":"dailymed","domain":"medication-labeling","authority":"US NLM/FDA labeling","tier":"A","access":"public-api","state":"catalog","role":"structured drug labels, warnings, contraindications and administration information"},
     {"id":"rxnorm","domain":"medication-normalization","authority":"US NLM","tier":"A","access":"public-api","state":"catalog","role":"normalize medication concepts and ingredients"},
+    {"id":"medlineplus","domain":"patient-care-information","authority":"US NLM/NIH","tier":"A","access":"public-web-data","state":"catalog","role":"patient-readable conditions, tests, treatments, medicines and self-care information"},
     {"id":"loinc","domain":"laboratory-coding","authority":"Regenstrief/LOINC","tier":"A","access":"free-with-terms","state":"catalog","role":"normalize laboratory and clinical observations"},
     {"id":"snomed-ct","domain":"clinical-terminology","authority":"SNOMED International","tier":"A","access":"licensed-by-jurisdiction","state":"catalog-only","role":"clinical concept normalization; respect licensing"},
     {"id":"hl7-fhir","domain":"health-data-interoperability","authority":"HL7","tier":"A","access":"public-standard","state":"catalog","role":"personal longitudinal health data schema"},
     {"id":"dicom","domain":"medical-imaging-standard","authority":"NEMA/MITA DICOM","tier":"A","access":"public-standard","state":"catalog","role":"medical imaging interoperability and metadata"},
-    {"id":"who-guidelines","domain":"global-guidelines","authority":"WHO","tier":"A","access":"public-web","state":"catalog","role":"global disease, public-health and treatment guidance"},
-    {"id":"nice-guidance","domain":"clinical-guidelines","authority":"NICE","tier":"A","access":"public-web","state":"catalog","role":"evidence-based clinical pathways and technology guidance"},
-    {"id":"cdc","domain":"infectious-disease-public-health","authority":"US CDC","tier":"A","access":"public-web-api","state":"existing-or-catalog","role":"infectious disease, vaccination and public-health guidance"}
+    {"id":"who-guidelines","domain":"global-guidelines","authority":"WHO","tier":"A","access":"public-web","state":"catalog","role":"global disease, treatment, nursing-support and public-health guidance"},
+    {"id":"who-rehabilitation","domain":"rehabilitation","authority":"WHO","tier":"A","access":"public-web","state":"catalog","role":"rehabilitation, functioning and recovery guidance"},
+    {"id":"nice-guidance","domain":"clinical-guidelines","authority":"NICE","tier":"A","access":"public-web","state":"catalog","role":"evidence-based treatment, care pathways, medicines and technology guidance"},
+    {"id":"cdc","domain":"infectious-disease-public-health","authority":"US CDC","tier":"A","access":"public-web-api","state":"existing-or-catalog","role":"infectious disease, vaccination, prevention and patient-care guidance"}
   ],
-  "evidence_order":["current-official-guideline-or-regulator","current-specialty-society-guideline","systematic-review-meta-analysis","high-quality-primary-study","other-primary-study","model-prior"],
+  "evidence_order":["current-official-guideline-or-regulator","current-specialty-society-guideline","systematic-review-meta-analysis","high-quality-primary-study","other-primary-study","patient-education-source","model-prior"],
   "gates":["publication-or-update-date-known","patient-population-fit","jurisdiction-fit","contraindications-checked","source-version-retained","conflict-between-guidelines-explicit","model-prior-never-sole-basis"]
 }
