@@ -4,7 +4,7 @@
   "main": "src/guard.js",
   "compatibility_date": "2026-08-15",
   "workers_dev": true,
-  "build": {"command": "node tests/build-bisect-delay.mjs && node tests/akshare-aktools.mjs"},
+  "build": {"command": "node tests/build-bisect-delay.mjs && node tests/live-policy-regulatory-primary.mjs && node tests/intelligence-branch-architecture.mjs"},
   "triggers": {"crons": ["23 18 * * *"]},
   "durable_objects": {"bindings": [{"name": "CENTER_GATE", "class_name": "CenterGate"}]},
   "exports": {"CenterGate": {"type":"durable-object","storage":"sqlite"}},
