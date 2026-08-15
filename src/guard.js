@@ -28,4 +28,11 @@ async function selftest(env,ctx){
   const ok=r.ok&&body?.ok===true&&nonempty&&hasDigest&&terminal&&released;
   return json({ok,business_e2e:true,cost_class:"public-zero-key",provider:"worldbank",operation:"indicator",task_id:taskId,http_status:r.status,nonempty,result_digest:hasDigest?body.result_digest:null,terminal_status:task?.task?.status||null,lock_released:released,elapsed_ms:Date.now()-started},ok?200:503);
 }
-export default{async fetch(req,env,ctx){try{const u=new URL(req.url);if(req.method==="POST"&&u.pathname==="/v1/cancel")return await cancel(req,env);if(req.method==="POST"&&u.pathname==="/v1/selftest"){if(u.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"selftest is service-binding internal only"},403);return await selftest(env,ctx)}return await base.fetch(req,env,ctx)}catch(e){return json({ok:false,error:e?.message||"INTERNAL_ERROR",message:"Request failed"},e?.status||500)}}};
+async function tencentBigdataProbe(env,ctx){
+  const taskId=`diag-tencent-bigdata-${crypto.randomUUID()}`;
+  const request=new Request("https://intelligence.internal/v1/run",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({task_id:taskId,provider:"tencent_location_bigdata",operation:"list_tools",timeout_seconds:45,args:{}})});
+  const r=await base.fetch(request,env,ctx),body=await r.json().catch(()=>null),data=body?.result?.data;
+  const tools=Array.isArray(data?.available_tools)?data.available_tools.map(x=>x?.name).filter(Boolean):[];
+  return json({ok:r.ok&&body?.ok===true,http_status:r.status,error:body?.error||null,message:body?.message||null,details:body?.details||null,available_count:Number.isFinite(data?.available_count)?data.available_count:null,tools},r.ok?200:503);
+}
+export default{async fetch(req,env,ctx){try{const u=new URL(req.url);if(req.method==="POST"&&u.pathname==="/v1/cancel")return await cancel(req,env);if(req.method==="POST"&&u.pathname==="/v1/selftest"){if(u.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"selftest is service-binding internal only"},403);return await selftest(env,ctx)}if(req.method==="GET"&&u.pathname==="/v1/diag/tencent-bigdata-20260815")return await tencentBigdataProbe(env,ctx);return await base.fetch(req,env,ctx)}catch(e){return json({ok:false,error:e?.message||"INTERNAL_ERROR",message:"Request failed"},e?.status||500)}}};
