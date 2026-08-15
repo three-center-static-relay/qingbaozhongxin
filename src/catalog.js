@@ -1,7 +1,7 @@
 import {CATALOG as EXISTING_CATALOG,EXCLUDED_PROVIDERS as EXISTING_EXCLUDED} from "./catalog-prelocation.js";
 import {GLOBAL_HIGH_VALUE_CATALOG} from "./catalog-global-highvalue.js";
 import {SPLUS_CATALOG} from "./catalog-splus.js";
-export const CATALOG_VERSION="2026-08-15.27";
+export const CATALOG_VERSION="2026-08-15.28";
 export const EXCLUDED_PROVIDERS=EXISTING_EXCLUDED;
 export const CATALOG={
   ...EXISTING_CATALOG,
