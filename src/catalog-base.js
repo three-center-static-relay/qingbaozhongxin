@@ -1,4 +1,4 @@
-export const CATALOG_VERSION="2026-08-15.7";
+export const CATALOG_VERSION="2026-08-15.8";
 export const EXCLUDED_PROVIDERS=["datacommons","faostat","agt_stock","baichuan","taobao"];
 
 export const CATALOG={
@@ -99,6 +99,10 @@ export const CATALOG={
   getty_vocabularies:{category:"cultural-heritage-authority-knowledge",access:"public",adapter:"catalog-only",integration:"official-linked-open-data+sparql+downloads",scope:"aat-tgn-ulan-art-architecture-people-places-terms",endpoint:"http://vocab.getty.edu/sparql",terms:"ODC-By-1.0"},
   getty_collection:{category:"museum-provenance-open-data",access:"public",adapter:"catalog-only",integration:"official-rest+sparql",scope:"getty-museum-collection-and-provenance-index",endpoint:"https://data.getty.edu/"},
   musicbrainz:{category:"music-metadata-knowledge",access:"external-source",adapter:"catalog-only",integration:"official-rest-v2",scope:"artists-recordings-releases-works-events-labels-places",endpoint:"https://musicbrainz.org/ws/2/",terms:"free-non-commercial;maximum-one-request-per-second;meaningful-user-agent-required"},
+  finna:{category:"national-library-archive-museum-aggregator-finland",access:"public",adapter:"finna.search",integration:"official-rest-openapi",scope:"finnish-libraries-archives-museums",endpoint:"https://api.finna.fi/v1/search",terms:"descriptive-metadata-free-of-charge"},
+  cleveland_museum:{category:"museum-open-collection",access:"public",adapter:"cleveland_museum.search",integration:"official-open-access-rest",scope:"artworks-creators-exhibitions-open-images",endpoint:"https://openaccess-api.clevelandart.org/api/artworks/",terms:"dataset-cc0"},
+  harvard_art_museums:{category:"museum-research-collection",access:"key",secrets:["HARVARD_ART_MUSEUMS_API_KEY"],adapter:"catalog-only",integration:"official-rest+iiif",scope:"objects-people-exhibitions-publications-images",endpoint:"https://api.harvardartmuseums.org/",registration_url:"https://www.harvardartmuseums.org/collections/api",terms:"non-commercial-only;2500-requests-per-day;attribution-linkback-required"},
+  trove:{category:"national-library-archive-museum-aggregator-australia",access:"key",secrets:["TROVE_API_KEY"],adapter:"catalog-only",integration:"official-rest-v3",scope:"books-newspapers-gazettes-images-music-people-metadata",endpoint:"https://api.trove.nla.gov.au/v3/",registration_url:"https://help.nla.gov.au/trove/building-with-trove/api",terms:"metadata-use-only-by-default;fulltext-content-reuse-may-require-explicit-nla-permission;current-terms-must-be-checked"},
   anthropic_mcp_examples:{category:"mcp-reference",access:"public",adapter:"catalog-only"}
 };
 
