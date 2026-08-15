@@ -17,7 +17,7 @@ const live={
   finna:"search",
   cleveland_museum:"search",
   libris:"search",
-  federal_register:"search",
+  federal_register:"documents",
   software_heritage:"search_origin",
   osf_public:"search_public",
   ensembl:"lookup_symbol",
