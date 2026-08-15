@@ -18,6 +18,12 @@ Only free/long-term-free or public-account credentials belong in the production 
 | Copernicus Marine | `COPERNICUS_MARINE_USERNAME`, `COPERNICUS_MARINE_PASSWORD` | https://data.marine.copernicus.eu/register | Free account for data/services. |
 | Destatis GENESIS | `DESTATIS_GENESIS_TOKEN` | https://www-genesis.destatis.de/genesis/online | Optional token/account depending on API method; public data remain free. |
 
+## Free-registration / trial or entitlement-controlled candidates
+
+| Provider | Secret | Registration / account URL | Notes |
+|---|---|---|---|
+| Wind AIFin Market | `WIND_API_KEY` | https://aifinmarket.wind.com.cn/#/user/overview | Official AIFin Market MCP/Skills account key. Wind currently advertises free registration/trial. Do not assume permanent free quota; use only current entitled capabilities and points. Official integration manifest: https://aifinmarket.wind.com.cn/skill.md |
+
 ## No-key production candidates
 
 `ons_uk`, `statcan`, `ecb_data`, `sec_edgar`, `clinicaltrials`, `abs_australia`, `istat_italy`, `cbs_netherlands`, `scb_sweden`, `ssb_norway`, `statfin_finland`, `statbank_denmark`, `gleif_lei`, `bank_canada_valet`, `us_treasury_fiscaldata`, `faa_aerodata`, `noaa_accessais`, `emodnet`, `argo_gdac`, `gebco`, `world_bank_pink_sheet`, `imf_commodity_prices`, `jodi_oil_gas`, `nih_reporter`, `cdc_open_data`, `cms_data`, `usaspending`, `ted_eu_procurement`, `usgs_earthquake`, `gdacs`, `reliefweb`, `nomad_materials`, `aflowlib`.
