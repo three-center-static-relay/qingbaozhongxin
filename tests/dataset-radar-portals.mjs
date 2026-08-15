@@ -13,8 +13,7 @@ assert.deepEqual(pmeta.always_daily_portals,["kaggle_datasets","kaggle_notebooks
 const day=portalsForDay(Date.UTC(2026,7,16));
 assert.equal(day.length,4);
 assert.equal(day[0].id,"kaggle_datasets");assert.equal(day[1].id,"kaggle_notebooks");
-assert.equal(day[2].region,"CN");assert.equal(day[3].region,"GLOBAL");
-assert.equal(day[3].always,true,false);
+assert.equal(day[2].region,"CN");assert.equal(day[3].region,"GLOBAL");assert.notEqual(day[3].always,true);
 
 const tianchi=PORTALS.find(x=>x.id==="tianchi_portal");
 const md=`
