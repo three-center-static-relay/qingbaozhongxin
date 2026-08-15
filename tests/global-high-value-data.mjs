@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {CATALOG} from "../src/catalog.js";
 import {OPERATIONS} from "../src/adapters.js";
 
+// Monotonic capability gate: providers already promoted to bounded live adapters must never be forced back to catalog-only.
 const live={
   ons_uk:["list_datasets","dataset_get"],
   statcan:["changed_series","vector_latest"],
