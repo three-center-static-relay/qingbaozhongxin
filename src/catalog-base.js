@@ -1,4 +1,4 @@
-export const CATALOG_VERSION="2026-08-15.9";
+export const CATALOG_VERSION="2026-08-15.10";
 export const EXCLUDED_PROVIDERS=["datacommons","faostat","agt_stock","baichuan","taobao"];
 
 export const CATALOG={
@@ -112,6 +112,10 @@ export const CATALOG={
   federal_register:{category:"government-regulatory-publications-us",access:"public",adapter:"federal_register.search",integration:"official-rest-v1",scope:"rules-proposed-rules-notices-presidential-documents",endpoint:"https://www.federalregister.gov/api/v1/",note:"api-key-not-required;federalregister.gov-is-informational-and-links-to-official-govinfo-editions"},
   software_heritage:{category:"global-software-archive",access:"public",adapter:"software_heritage.search_origin",integration:"official-rest-v1",scope:"public-source-code-origins-and-archive-graph",endpoint:"https://archive.softwareheritage.org/api/1/",terms:"anonymous-read-supported;no-massive-data-extraction;respect-quotas-and-personal-data-rules"},
   viaf:{category:"global-library-authority-file",access:"public",adapter:"catalog-only",integration:"official-web-and-machine-readable-authority-service",scope:"merged-name-authority-identifiers-from-national-libraries-and-wikidata",endpoint:"https://viaf.org/"},
+  osf_public:{category:"research-repository",access:"public",adapter:"osf.search_public",integration:"official-rest-v2",scope:"public-projects-registrations-preprints-files",endpoint:"https://api.osf.io/v2/",note:"anonymous-public-api-currently-rate-limited;use-bounded-low-frequency-queries"},
+  ensembl:{category:"genomics-knowledge",access:"public",adapter:"ensembl.lookup_symbol",integration:"official-rest",scope:"genes-transcripts-proteins-genome-annotations",endpoint:"https://rest.ensembl.org/"},
+  reactome:{category:"biological-pathway-knowledge",access:"public",adapter:"reactome.query_id",integration:"official-content-service",scope:"curated-peer-reviewed-pathways-reactions-proteins-small-molecules-literature",endpoint:"https://reactome.org/ContentService/"},
+  uspto_odp:{category:"patent-trademark-official-us",access:"key",secrets:["USPTO_ODP_API_KEY"],adapter:"catalog-only",integration:"official-open-data-portal-rest",scope:"patent-file-wrapper-ptab-office-actions-bulk-products-and-related-public-data",endpoint:"https://api.uspto.gov/api/v1/",registration_url:"https://data.uspto.gov/",note:"USPTO.gov account required for Open Data Portal access; documented ODP API endpoints require an API key managed after sign-in"},
   anthropic_mcp_examples:{category:"mcp-reference",access:"public",adapter:"catalog-only"}
 };
 
