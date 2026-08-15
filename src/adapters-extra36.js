@@ -35,14 +35,9 @@ async function cftc(operation,args,env){const id=CFTC_DATASETS[operation];if(!id
 const TED="https://api.ted.europa.eu/v3/notices/search";
 const TED_DEFAULT_FIELDS=["publication-number","notice-title","buyer-name","notice-type"];
 function tedQuery(v){const s=req(v,"query",500);if(/[\u0000-\u001f\u007f]/.test(s))err("INVALID_TED_QUERY");return s}
-function tedFields(v){const a=(v?arr(v,20):TED_DEFAULT_FIELDS);if(!a.length||a.some(x=>!^[A-Za-z0-9_.()\-]+$/.test(x)))err("INVALID_TED_FIELD");return a}
+function tedFields(v){const a=(v?arr(v,20):TED_DEFAULT_FIELDS);if(!a.length||a.some(x=>!/^[A-Za-z0-9_.()\-]+$/.test(x)))err("INVALID_TED_FIELD");return a}
 async function ted(operation,args){if(operation!=="search")err("ADAPTER_OPERATION_NOT_APPROVED",403);const payload={query:tedQuery(args?.query),fields:tedFields(args?.fields),page:clamp(args?.page,1,300,1),limit:clamp(args?.limit,1,50,20),checkQuerySyntax:true,paginationMode:"PAGE_NUMBER"};const body=await request(TED,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});return{provider:"ted_eu_procurement",operation,total:body?.totalNoticeCount??body?.total??null,items:Array.isArray(body?.notices)?body.notices:Array.isArray(body?.results)?body.results:[],pagination:{page:payload.page,limit:payload.limit,mode:"PAGE_NUMBER"}}}
 
-const CATALOG=[
- {provider:"companies_house_uk",role:"UK-company-register-live-profile-and-search",auth:"COMPANIES_HOUSE_API_KEY"},
- {provider:"opendart_korea",role:"Korea-disclosures-company-profile-and-periodic-financial-accounts",auth:"OPENDART_API_KEY"},
- {provider:"cftc_cot",role:"US-regulatory-trader-positioning-and-product-hierarchy",auth:"public; CFTC_APP_TOKEN optional"},
- {provider:"ted_eu_procurement",role:"EU-published-public-procurement-notices",auth:"public"}
-];
+const CATALOG=[{provider:"companies_house_uk",role:"UK-company-register-live-profile-and-search",auth:"COMPANIES_HOUSE_API_KEY"},{provider:"opendart_korea",role:"Korea-disclosures-company-profile-and-periodic-financial-accounts",auth:"OPENDART_API_KEY"},{provider:"cftc_cot",role:"US-regulatory-trader-positioning-and-product-hierarchy",auth:"public; CFTC_APP_TOKEN optional"},{provider:"ted_eu_procurement",role:"EU-published-public-procurement-notices",auth:"public"}];
 export const OPERATIONS={companies_house_uk:["search_companies","company_profile"],opendart_korea:["disclosures","company","major_accounts"],cftc_cot:["tff_combined","disaggregated_combined","product_hierarchy"],ted_eu_procurement:["search"],splus_corporate_markets_procurement:["catalog"]};
 export async function runAdapter(provider,operation,args={},env={}){if(!OPERATIONS[provider]?.includes(operation))err("ADAPTER_OPERATION_NOT_APPROVED",403,{provider,operation,allowed:OPERATIONS[provider]||[]});if(provider==="companies_house_uk")return companiesHouse(operation,args,env);if(provider==="opendart_korea")return opendart(operation,args,env);if(provider==="cftc_cot")return cftc(operation,args,env);if(provider==="ted_eu_procurement")return ted(operation,args);if(provider==="splus_corporate_markets_procurement")return{provider,operation,items:CATALOG};err("ADAPTER_NOT_IMPLEMENTED",501)}
