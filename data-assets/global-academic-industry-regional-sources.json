@@ -1,0 +1,56 @@
+{
+  "schema_version": "2026-08-15.1",
+  "purpose": "Priority registry for university research-data repositories, university-managed flagship datasets, and high-value industry/regional research databases. It complements the global public dataset platform registry and does not mirror raw repositories.",
+  "coverage_strategy": {
+    "institution_resolution": ["ROR", "re3data", "OpenDOAR", "DataCite", "OpenAIRE", "Dataverse installations", "Google Dataset Search"],
+    "rule": "For any named university, research institute, region or industry, resolve the institution first, enumerate its public repositories and flagship data projects, then prefer official institutional/subject repositories over community copies.",
+    "ingestion": "Search and metadata discovery stay in intelligence center. Only task-relevant, licensed, validated, bounded data are frozen into immutable compute packs.",
+    "restricted_data": "Restricted, credentialed, licensed, confidential or personal microdata are metadata-only until access rights are explicitly available; never bypass repository controls.",
+    "dedupe": "Use DOI/DataCite ID, repository persistent ID, ROR affiliation, dataset checksum and source lineage to avoid duplicate copies."
+  },
+  "university_anchor_repositories": [
+    {"id":"harvard_dataverse","institution":"Harvard University","region":"US","type":"multidisciplinary-research-data","access":"public-metadata-many-open-files","machine_access":"Dataverse API","priority":"A","url":"https://dataverse.harvard.edu/"},
+    {"id":"stanford_digital_repository","institution":"Stanford University","region":"US","type":"institutional-research-data-publications-software","access":"public-items-with-record-specific-rights","machine_access":"repository-search+DataCite-discovery","priority":"A","url":"https://purl.stanford.edu/"},
+    {"id":"stanford_social_science_data","institution":"Stanford University","region":"US","type":"social-science-curated-data","access":"dataset-specific","machine_access":"public-catalog","priority":"A","url":"https://data.stanford.edu/"},
+    {"id":"princeton_data_commons","institution":"Princeton University","region":"US","type":"multidisciplinary-research-data-code","access":"public-records-and-files-subject-to-record-rights","machine_access":"repository-search+DataCite-discovery","priority":"A","url":"https://datacommons.princeton.edu/discovery/"},
+    {"id":"mit_dspace","institution":"Massachusetts Institute of Technology","region":"US","type":"institutional-research-output-data","access":"public-items-with-access-controls-possible","machine_access":"DSpace/repository-discovery","priority":"A","url":"https://dspace.mit.edu/"},
+    {"id":"mit_data_gateway","institution":"Massachusetts Institute of Technology","region":"US","type":"data-discovery-analysis-learning","access":"public-discovery","machine_access":"site-discovery","priority":"B","url":"https://data.mit.edu/"},
+    {"id":"yale_dataverse","institution":"Yale University","region":"US","type":"multidisciplinary-research-data","access":"public-metadata-many-open-files","machine_access":"Dataverse API","priority":"A","url":"https://dataverse.yale.edu/"},
+    {"id":"cornell_ecommons","institution":"Cornell University","region":"US","type":"institutional-data-code-scholarship","access":"open-access-general-repository","machine_access":"repository-search+OAI/DataCite-discovery","priority":"A","url":"https://ecommons.cornell.edu/"},
+    {"id":"columbia_academic_commons","institution":"Columbia University","region":"US","type":"institutional-research-and-scholarship","access":"public-records-many-open-files","machine_access":"official-REST-search","priority":"A","url":"https://academiccommons.columbia.edu/"},
+    {"id":"ucsd_data_nexus","institution":"University of California San Diego","region":"US","type":"research-data-discovery-hub","access":"public-discovery-dataset-specific","machine_access":"linked-repositories-and-APIs","priority":"A","url":"https://datanexus.ucsd.edu/"},
+    {"id":"oxford_ora","institution":"University of Oxford","region":"UK","type":"institutional-research-data-and-outputs","access":"open-access-where-rights-allow","machine_access":"repository-search+metadata-harvest","priority":"A","url":"https://ora.ox.ac.uk/"},
+    {"id":"cambridge_apollo","institution":"University of Cambridge","region":"UK","type":"institutional-research-data-software-outputs","access":"open-access-where-rights-allow","machine_access":"repository-search+metadata-harvest","priority":"A","url":"https://www.repository.cam.ac.uk/"},
+    {"id":"eth_research_collection","institution":"ETH Zurich","region":"Switzerland","type":"research-data-publications","access":"public-metadata-and-open-data-by-record","machine_access":"official-Research-Collection-API-v2","priority":"A","url":"https://www.research-collection.ethz.ch/"},
+    {"id":"imperial_helix","institution":"Imperial College London","region":"UK","type":"institutional-research-data","access":"public-data-by-record","machine_access":"repository-discovery","priority":"A","url":"https://helix.imperial.ac.uk/"},
+    {"id":"edinburgh_datashare","institution":"University of Edinburgh","region":"UK","type":"multidisciplinary-research-data","access":"freely-discoverable-open-data-by-record","machine_access":"DSpace/OAI-style-repository-discovery","priority":"A","url":"https://datashare.ed.ac.uk/"},
+    {"id":"pku_open_research_data","institution":"Peking University","region":"China","type":"multidisciplinary-research-data","access":"public-metadata-open-and-request-access-files","machine_access":"Dataverse-compatible-discovery","priority":"A+","url":"https://opendata.pku.edu.cn/"},
+    {"id":"tsinghua_research_data_service","institution":"Tsinghua University","region":"China","type":"research-data-support-and-discovery","access":"public-guidance-linked-data-resources","machine_access":"discovery-only-until-specific-repository-resolved","priority":"A","url":"https://lib.tsinghua.edu.cn/en/Research_support/Research_Data.htm"},
+    {"id":"utoronto_borealis","institution":"University of Toronto","region":"Canada","type":"institutional-research-data","access":"public-metadata-open-and-restricted-records","machine_access":"Borealis/Dataverse-API","priority":"A","url":"https://borealisdata.ca/dataverse/utoronto"},
+    {"id":"utokyo_repository","institution":"The University of Tokyo","region":"Japan","type":"institutional-research-outputs-and-data","access":"public-items-by-record","machine_access":"institutional-repository-discovery","priority":"A","url":"https://repository.dl.itc.u-tokyo.ac.jp/"}
+  ],
+  "university_flagship_data_projects": [
+    {"id":"icpsr","institution":"University of Michigan","domain":"social-behavioral-health-policy-crime-education","coverage":"global+US","access":"mixed-public-and-restricted","priority":"A+","url":"https://www.icpsr.umich.edu/","note":"large curated social-science archive; honor membership/restricted-study controls"},
+    {"id":"ipums","institution":"University of Minnesota","domain":"population-census-surveys-demography-GIS","coverage":"165+ countries","access":"free-registration-for-many-microdata-products","priority":"A+","url":"https://www.ipums.org/","note":"harmonized microdata and geography; preserve extract/version metadata"},
+    {"id":"harvard_atlas_economic_complexity","institution":"Harvard University Growth Lab","domain":"trade-industry-products-economic-complexity-cities","coverage":"global","access":"public-downloads-and-GraphQL-API-subject-to-current-limits","priority":"A+","url":"https://atlas.hks.harvard.edu/","note":"high-value industry and regional economic structure layer"},
+    {"id":"groningen_pwt_ggdc","institution":"University of Groningen","domain":"income-productivity-sector-growth-capital-labor","coverage":"global","access":"public-downloads-and-Dataverse","priority":"A+","url":"https://www.rug.nl/ggdc/","note":"includes Penn World Table and sector/productivity databases"},
+    {"id":"uk_data_service","institution":"University of Essex-led UK Data Service","domain":"social-economic-population-survey-census-business","coverage":"UK+international","access":"public-catalog; many datasets require free-registration; controlled data remain restricted","priority":"A+","url":"https://ukdataservice.ac.uk/"},
+    {"id":"pku_china_survey_data","institution":"Peking University","domain":"China-household-health-aging-social-behavior","coverage":"China","access":"mixed-open-and-request-access","priority":"A+","url":"https://opendata.pku.edu.cn/","collections":["CFPS","CHARLS","China Survey Data Archive","CLHLS-HF"]},
+    {"id":"ucsd_caida","institution":"University of California San Diego / CAIDA","domain":"internet-traffic-topology-routing-security","coverage":"global-internet","access":"mixed-public-and-acceptable-use-controlled","priority":"A","url":"https://www.caida.org/"}
+  ],
+  "regional_industry_discovery_routes": {
+    "economics_trade_industry": ["harvard_atlas_economic_complexity","groningen_pwt_ggdc","World Bank","IMF","OECD","UN Comtrade","WTO","Eurostat","national statistics offices"],
+    "population_household_social": ["ipums","icpsr","uk_data_service","pku_china_survey_data","national census/statistics","World Bank Microdata"],
+    "health_medicine": ["university institutional repositories","ClinicalTrials.gov","NCBI","PubMed","Europe PMC","WHO","NIH repositories","DataCite/re3data subject repositories"],
+    "engineering_industry_materials": ["university institutional repositories","NOMAD","Materials Project","AFLOW","Zenodo","Figshare","Dataverse","DataCite subject search"],
+    "geospatial_environment": ["university GIS repositories","NASA Earthdata","Copernicus","USGS","NOAA","PANGAEA","WorldPop","GHSL","GBIF","re3data geoscience repositories"],
+    "computer_networks_ai": ["ucsd_caida","Hugging Face Datasets","OpenML","UCI","university lab repositories","Zenodo","DataCite"],
+    "regional_local_studies": ["named-university repository","regional university libraries","national data portal","subnational open-data portal","Google Dataset Search","re3data","OpenDOAR","DataCite"]
+  },
+  "routing_policy": {
+    "named_university_query": "Resolve ROR identity, inspect explicit anchor, then re3data/OpenDOAR/DataCite/OpenAIRE/Dataverse for institution-affiliated repositories and datasets.",
+    "named_region_query": "Use national official statistics first, then local government/open data, then universities/research institutes located in or studying the region, then global cross-check sources.",
+    "named_industry_query": "Use official regulator/statistics/industry datasets first, then university flagship research databases and reproducibility datasets, then community hubs.",
+    "quality_rule": "University affiliation alone does not make a dataset ground truth; score methodology, provenance, sample design, revisions, representativeness, license and reproducibility."
+  }
+}
