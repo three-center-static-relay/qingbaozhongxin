@@ -1,4 +1,4 @@
-export const CATALOG_VERSION="2026-08-15.4";
+export const CATALOG_VERSION="2026-08-15.5";
 export const EXCLUDED_PROVIDERS=["datacommons","faostat","agt_stock","baichuan","taobao"];
 
 export const CATALOG={
@@ -73,6 +73,11 @@ export const CATALOG={
   huawei_registry:{category:"cn-cloud-registry",access:"public",adapter:"catalog-only"},
   dify_registry:{category:"agent-registry",access:"public",adapter:"catalog-only"},
   nacos_registry:{category:"mcp-registry",access:"public",adapter:"catalog-only"},
+  courtlistener:{category:"legal-open-data-us",access:"key",secrets:["COURTLISTENER_API_TOKEN"],adapter:"courtlistener.search",integration:"official-rest-v4",scope:"case-law-pacer-judges-oral-arguments",registration_url:"https://www.courtlistener.com/sign-up/",token_url:"https://www.courtlistener.com/profile/api-token/"},
+  repec:{category:"literature-economics",access:"external-source",adapter:"catalog-only",integration:"official-redif+oai-pmh+api",scope:"economics-bibliographic-metadata",endpoint:"https://oai.repec.org/",terms:"non-commercial-by-default-contact-repec-for-commercial-use"},
+  agris:{category:"literature-agriculture-global",access:"external-source",adapter:"catalog-only",integration:"official-search+open-metadata-network",scope:"food-agriculture-forestry-fisheries-environment-literature",endpoint:"https://www.fao.org/agris/",terms:"free-search-metadata-license-varies-by-provider"},
+  epo_ops:{category:"patent-global",access:"key",secret_groups:[["EPO_OPS_CONSUMER_KEY","EPO_OPS_CONSUMER_SECRET"]],adapter:"catalog-only",integration:"official-rest-oauth",scope:"worldwide-patent-bibliographic-legal-event-fulltext-image-data",registration_url:"https://developers.epo.org/user/register",free_tier:"non-paying-up-to-4GB-per-week"},
+  epo_linked_data:{category:"patent-linked-open-data",access:"public",adapter:"catalog-only",integration:"official-linked-data-api",scope:"ep-patent-publications-applications-citations-classifications",endpoint:"https://data.epo.org/linked-data/"},
   anthropic_mcp_examples:{category:"mcp-reference",access:"public",adapter:"catalog-only"}
 };
 
