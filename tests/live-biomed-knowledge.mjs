@@ -38,7 +38,7 @@ await assert.rejects(()=>runAdapter("ensembl","lookup_id",{ensembl_id:"https://e
 const rv=await runAdapter("reactome","version",{},{});assert.equal(rv.version,"95");
 const rq=await runAdapter("reactome","query",{reactome_id:"R-HSA-69563"},{});assert.equal(rq.data.stId,"R-HSA-69563");
 await assert.rejects(()=>runAdapter("reactome","query",{reactome_id:"../../evil"},{}),/INVALID_REACTOME_ID/);
-const pdb=await runAdapter("rcsb_pdb","entry",{pdb_id:"4HHB"},{});assert.equal(pdb.data.rcsb_id,"4HHB");const lig=await runAdapter("rcsb_pdb","chem_comp",{pdb_id:"4HHB",comp_id:"ATP"},{});assert.equal(lig.data.chem_comp.id,"ATP");
+const pdb=await runAdapter("rcsb_pdb","entry",{pdb_id:"4HHB"},{});assert.equal(pdb.data.rcsb_id,"4HHB");const lig=await runAdapter("rcsb_pdb","chem_comp",{comp_id:"ATP"},{});assert.equal(lig.data.chem_comp.id,"ATP");
 const uni=await runAdapter("uniprot","gene_search",{gene:"TP53",organism_id:"9606",reviewed:true,limit:10},{});assert.equal(uni.items[0].primaryAccession,"P04637");assert.ok(calls.at(-1).u.includes("gene_exact%3ATP53"));
 await assert.rejects(()=>runAdapter("uniprot","gene_search",{gene:"TP53) OR (*)"},{}),/INVALID_GENE/);
 const umbrella=await runAdapter("splus_biomed_knowledge","catalog",{},{});assert.equal(umbrella.items.length,6);
