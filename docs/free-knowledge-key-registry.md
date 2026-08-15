@@ -31,6 +31,7 @@ This registry covers free/public knowledge sources that need or benefit from cre
 | Deutsche Digitale Bibliothek | `DDB_API_KEY` | Free key after creating a DDB user account; generate it under Meine DDB | https://www.deutsche-digitale-bibliothek.de/content/hilfe?lang=en |
 | Harvard Art Museums | `HARVARD_ART_MUSEUMS_API_KEY` | Free key; API is non-commercial and rate-limited | https://www.harvardartmuseums.org/collections/api |
 | Trove | `TROVE_API_KEY` | Free key for eligible use; current Trove terms must be checked before harvesting content | https://help.nla.gov.au/trove/building-with-trove/api |
+| Archives Portal Europe | `ARCHIVES_PORTAL_EUROPE_API_KEY` | Free key after creating a free portal account | https://www.archivesportaleurope.net/ |
 
 ## Shared key rule
 
