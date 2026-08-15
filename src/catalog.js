@@ -1,5 +1,5 @@
 import {CATALOG as BASE_CATALOG,EXCLUDED_PROVIDERS as BASE_EXCLUDED} from "./catalog-base.js";
-export const CATALOG_VERSION="2026-08-15.21";
+export const CATALOG_VERSION="2026-08-15.22";
 export const EXCLUDED_PROVIDERS=BASE_EXCLUDED;
 export const CATALOG={
   ...BASE_CATALOG,
@@ -79,7 +79,7 @@ export const CATALOG={
   wikimedia_commons:{category:"global-media-knowledge",access:"public",adapter:"wikimedia_commons.search",integration:"official-mediawiki-api",scope:"open-media-and-metadata"},
   wikisource:{category:"global-digital-text-library",access:"public",adapter:"wikisource.search",integration:"official-mediawiki-api",scope:"public-domain-and-free-texts-multilingual"},
   internet_archive:{category:"global-digital-library-archive",access:"public",adapter:"catalog-only",integration:"official-metadata-and-advanced-search-apis",scope:"books-audio-video-software-web-collections"},
-  software_heritage:{category:"global-software-archive",access:"public",adapter:"catalog-only",integration:"official-rest",scope:"source-code-archive"}
+  software_heritage:{...BASE_CATALOG.software_heritage,adapter:"software_heritage.search_origin",integration:"official-rest-v1",scope:"public-source-code-origins-and-archive-graph",endpoint:"https://archive.softwareheritage.org/api/1/",terms:"anonymous-read-supported;no-massive-data-extraction;respect-quotas-and-personal-data-rules"}
 };
 function anyGroup(env,groups){return groups?.some(g=>g.every(k=>Boolean(env[k])))}
 export function statusFor(env,name){
