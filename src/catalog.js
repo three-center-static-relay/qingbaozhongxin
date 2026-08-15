@@ -2,7 +2,7 @@ import {CATALOG as EXISTING_CATALOG,EXCLUDED_PROVIDERS as EXISTING_EXCLUDED} fro
 import {GLOBAL_HIGH_VALUE_CATALOG} from "./catalog-global-highvalue.js";
 import {SPLUS_CATALOG} from "./catalog-splus.js";
 import {AIFIN_CATALOG} from "./catalog-aifin.js";
-export const CATALOG_VERSION="2026-08-15.34";
+export const CATALOG_VERSION="2026-08-16.35";
 export const EXCLUDED_PROVIDERS=EXISTING_EXCLUDED;
 export const CATALOG={
   ...EXISTING_CATALOG,
