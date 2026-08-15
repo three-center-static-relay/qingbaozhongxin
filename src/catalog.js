@@ -2,7 +2,7 @@ import {CATALOG as EXISTING_CATALOG,EXCLUDED_PROVIDERS as EXISTING_EXCLUDED} fro
 import {GLOBAL_HIGH_VALUE_CATALOG} from "./catalog-global-highvalue.js";
 import {SPLUS_CATALOG} from "./catalog-splus.js";
 import {AIFIN_CATALOG} from "./catalog-aifin.js";
-export const CATALOG_VERSION="2026-08-15.30";
+export const CATALOG_VERSION="2026-08-15.31";
 export const EXCLUDED_PROVIDERS=EXISTING_EXCLUDED;
 export const CATALOG={
   ...EXISTING_CATALOG,
@@ -15,6 +15,13 @@ export const CATALOG={
   fred:{...EXISTING_CATALOG.fred,adapter:"fred.series+search+observations+vintages",integration:"official-fred-api",scope:"series-metadata-search-observations-vintage-dates",arbitrary_url:false},
   eia:{...EXISTING_CATALOG.eia,adapter:"eia.v2-route+data+seriesid",integration:"official-api-v2",scope:"bounded-route-discovery-and-data-with-secret-redaction",endpoint:"https://api.eia.gov/v2",arbitrary_url:false},
   us_treasury_fiscaldata:{...GLOBAL_HIGH_VALUE_CATALOG.us_treasury_fiscaldata,access:"public",adapter:"us_treasury_fiscaldata.live",integration:"official-fiscaldata-rest",scope:"debt-to-penny-average-interest-rates-treasury-auctions",endpoint:"https://api.fiscaldata.treasury.gov/services/api/fiscal_service",arbitrary_url:false},
+  us_census_api:{...GLOBAL_HIGH_VALUE_CATALOG.us_census_api,access:"key",secrets:["CENSUS_API_KEY"],adapter:"us_census_api.live",integration:"official-rest-current-key-required",scope:"bounded-dataset-variable-geography-queries",endpoint:"https://api.census.gov/data",arbitrary_url:false},
+  us_bls_api:{...GLOBAL_HIGH_VALUE_CATALOG.us_bls_api,access:"key",secrets:["BLS_API_KEY"],adapter:"us_bls_api.v2-timeseries",integration:"official-public-data-api-v2",scope:"bounded-multi-series-employment-wages-prices-productivity",endpoint:"https://api.bls.gov/publicAPI/v2",arbitrary_url:false},
+  us_bea_api:{...GLOBAL_HIGH_VALUE_CATALOG.us_bea_api,access:"key",secrets:["BEA_API_KEY"],adapter:"us_bea_api.live",integration:"official-rest-json",scope:"datasets-parameters-bounded-economic-data",endpoint:"https://apps.bea.gov/api/data/",arbitrary_url:false},
+  usda_nass_quickstats:{...GLOBAL_HIGH_VALUE_CATALOG.usda_nass_quickstats,access:"key",secrets:["USDA_NASS_API_KEY"],adapter:"usda_nass_quickstats.live",integration:"official-quickstats-api",scope:"bounded-agriculture-production-crops-livestock-prices-yield",endpoint:"https://quickstats.nass.usda.gov/api/api_GET/",arbitrary_url:false},
+  nih_reporter:{...GLOBAL_HIGH_VALUE_CATALOG.nih_reporter,access:"public",adapter:"nih_reporter.v2",integration:"official-rest-v2",scope:"bounded-project-and-publication-search-funding-organizations-investigators",endpoint:"https://api.reporter.nih.gov/v2",arbitrary_url:false},
+  cms_data:{...GLOBAL_HIGH_VALUE_CATALOG.cms_data,access:"public",adapter:"cms_data.dataset",integration:"official-public-data-api",scope:"bounded-dataset-id-filter-pagination",endpoint:"https://data.cms.gov/data-api/v1",arbitrary_url:false},
+  usaspending:{...GLOBAL_HIGH_VALUE_CATALOG.usaspending,access:"public",adapter:"usaspending.v2",integration:"official-rest-v2",scope:"award-count-awarding-agencies-contracts-grants-loans",endpoint:"https://api.usaspending.gov/api/v2",arbitrary_url:false},
   worldpop:{...EXISTING_CATALOG.worldpop,category:"population-open-global",access:"public",optional_secrets:["WORLDPOP_API_KEY"],adapter:"open_location.worldpop-v2",integration:"official-rest-v2",scope:"polygon-population-density-age-sex-2015-2030",endpoint:"https://api.worldpop.org/v2",free_tier:"1000-requests-per-day-anonymous;10000-with-free-approved-key",arbitrary_url:false},
   overture_maps:{...EXISTING_CATALOG.overture_maps,category:"open-global-poi-buildings-transport",access:"external-runtime",adapter:"open_location.source-info",integration:"official-cloud-geoparquet",scope:"places-buildings-transportation-divisions-base-gers",endpoint:"https://docs.overturemaps.org/getting-data/cloud-sources/",billing:"free-public-AWS-Azure-data",arbitrary_url:false},
   night_lights:{...EXISTING_CATALOG.night_lights,category:"open-global-activity-proxy",access:"external-runtime",adapter:"open_location.source-info",integration:"nasa-black-marble-vnp46a2",scope:"daily-global-500m-nighttime-activity-proxy",earth_engine_collection:"NASA/VIIRS/002/VNP46A2",billing:"NASA-data-free",arbitrary_url:false},
