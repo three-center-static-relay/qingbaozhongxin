@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import {OPERATIONS,runAdapter} from "../src/adapters.js";
 import {CATALOG,CATALOG_VERSION,statusFor} from "../src/catalog.js";
+import {assertCatalogAtLeast} from "./catalog-version-utils.mjs";
 
-assert.match(CATALOG_VERSION,/^2026-08-15\.\d+$/);
-assert.ok(Number(CATALOG_VERSION.split(".").at(-1))>=31,`US live sources require catalog revision >=31, got ${CATALOG_VERSION}`);
+assertCatalogAtLeast(CATALOG_VERSION,"2026-08-15.31","US live sources");
 for(const p of ["us_census_api","us_bls_api","us_bea_api","usda_nass_quickstats","nih_reporter","cms_data","usaspending","splus_us_official"]){
   assert.ok(CATALOG[p],`missing catalog ${p}`);
   assert.equal(statusFor({},p)?.live_adapter,true,`${p} must be live`);
