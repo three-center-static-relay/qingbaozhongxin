@@ -2,7 +2,7 @@ import {CATALOG as EXISTING_CATALOG,EXCLUDED_PROVIDERS as EXISTING_EXCLUDED} fro
 import {GLOBAL_HIGH_VALUE_CATALOG} from "./catalog-global-highvalue.js";
 import {SPLUS_CATALOG} from "./catalog-splus.js";
 import {AIFIN_CATALOG} from "./catalog-aifin.js";
-export const CATALOG_VERSION="2026-08-15.31";
+export const CATALOG_VERSION="2026-08-15.32";
 export const EXCLUDED_PROVIDERS=EXISTING_EXCLUDED;
 export const CATALOG={
   ...EXISTING_CATALOG,
@@ -22,6 +22,10 @@ export const CATALOG={
   nih_reporter:{...GLOBAL_HIGH_VALUE_CATALOG.nih_reporter,access:"public",adapter:"nih_reporter.v2",integration:"official-rest-v2",scope:"bounded-project-and-publication-search-funding-organizations-investigators",endpoint:"https://api.reporter.nih.gov/v2",arbitrary_url:false},
   cms_data:{...GLOBAL_HIGH_VALUE_CATALOG.cms_data,access:"public",adapter:"cms_data.dataset",integration:"official-public-data-api",scope:"bounded-dataset-id-filter-pagination",endpoint:"https://data.cms.gov/data-api/v1",arbitrary_url:false},
   usaspending:{...GLOBAL_HIGH_VALUE_CATALOG.usaspending,access:"public",adapter:"usaspending.v2",integration:"official-rest-v2",scope:"award-count-awarding-agencies-contracts-grants-loans",endpoint:"https://api.usaspending.gov/api/v2",arbitrary_url:false},
+  un_comtrade:{...(GLOBAL_HIGH_VALUE_CATALOG.un_comtrade||EXISTING_CATALOG.un_comtrade||{}),category:"global-official-trade",access:"optional-key",secrets:["UN_COMTRADE_API_KEY"],adapter:"un_comtrade.preview+data",integration:"official-comtrade-api-current",scope:"bounded-final-trade-preview-and-subscription-key-data",endpoint:"https://comtradeapi.un.org",free_tier:"preview-without-key-up-to-500-records-per-call; subscription tiers vary",arbitrary_url:false},
+  reliefweb:{...(GLOBAL_HIGH_VALUE_CATALOG.reliefweb||EXISTING_CATALOG.reliefweb||{}),category:"global-humanitarian-reports-disasters",access:"key",secrets:["RELIEFWEB_APPNAME"],adapter:"reliefweb.v2",integration:"UN-OCHA-official-api-v2",scope:"bounded-reports-and-disasters",endpoint:"https://api.reliefweb.int/v2",free_tier:"1000-calls-per-day;1000-max-upstream-records;worker-caps-100",arbitrary_url:false},
+  gdacs:{...(GLOBAL_HIGH_VALUE_CATALOG.gdacs||EXISTING_CATALOG.gdacs||{}),category:"global-disaster-alerts",access:"public",adapter:"gdacs.latest",integration:"UN-EU-official-gdacs",scope:"latest-bounded-disaster-alert-feed+source-info",endpoint:"https://www.gdacs.org",arbitrary_url:false},
+  cdc_open_data:{...(GLOBAL_HIGH_VALUE_CATALOG.cdc_open_data||EXISTING_CATALOG.cdc_open_data||{}),category:"us-public-health-open-data",access:"public",optional_secrets:["CDC_APP_TOKEN"],adapter:"cdc.socrata-bounded",integration:"official-CDC-Socrata",scope:"dataset-metadata-and-bounded-row-query-without-raw-SoQL",endpoint:"https://data.cdc.gov",arbitrary_url:false},
   worldpop:{...EXISTING_CATALOG.worldpop,category:"population-open-global",access:"public",optional_secrets:["WORLDPOP_API_KEY"],adapter:"open_location.worldpop-v2",integration:"official-rest-v2",scope:"polygon-population-density-age-sex-2015-2030",endpoint:"https://api.worldpop.org/v2",free_tier:"1000-requests-per-day-anonymous;10000-with-free-approved-key",arbitrary_url:false},
   overture_maps:{...EXISTING_CATALOG.overture_maps,category:"open-global-poi-buildings-transport",access:"external-runtime",adapter:"open_location.source-info",integration:"official-cloud-geoparquet",scope:"places-buildings-transportation-divisions-base-gers",endpoint:"https://docs.overturemaps.org/getting-data/cloud-sources/",billing:"free-public-AWS-Azure-data",arbitrary_url:false},
   night_lights:{...EXISTING_CATALOG.night_lights,category:"open-global-activity-proxy",access:"external-runtime",adapter:"open_location.source-info",integration:"nasa-black-marble-vnp46a2",scope:"daily-global-500m-nighttime-activity-proxy",earth_engine_collection:"NASA/VIIRS/002/VNP46A2",billing:"NASA-data-free",arbitrary_url:false},
