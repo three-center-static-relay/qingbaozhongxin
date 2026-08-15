@@ -38,9 +38,9 @@ function species(v){return tok(v,"species",/^[A-Za-z][A-Za-z0-9_]{1,79}$/,80).to
 function ensemblId(v){return tok(v,"ensembl_id",/^ENS[A-Z0-9]*\d+(?:\.\d+)?$/i,60).toUpperCase()}
 async function ensembl(operation,args){let u="";
  if(operation==="species")u=`${ENSEMBL}/info/species?content-type=application/json`;
- else if(operation==="lookup_id"){u=`${ENSEMBL}/lookup/id/${encodeURIComponent(ensemblId(args?.ensembl_id))}?expand=${args?.expand===true?1:0};content-type=application/json`}
+ else if(operation==="lookup_id")u=`${ENSEMBL}/lookup/id/${encodeURIComponent(ensemblId(args?.ensembl_id))}?expand=${args?.expand===true?1:0};content-type=application/json`;
  else if(operation==="symbol_xrefs"){const sp=species(args?.species),symbol=tok(args?.symbol,"symbol",/^[A-Za-z0-9_.-]+$/,80);u=`${ENSEMBL}/xrefs/symbol/${encodeURIComponent(sp)}/${encodeURIComponent(symbol)}?content-type=application/json`}
- else if(operation==="id_xrefs"){u=`${ENSEMBL}/xrefs/id/${encodeURIComponent(ensemblId(args?.ensembl_id))}?all_levels=${args?.all_levels===true?1:0};content-type=application/json`}
+ else if(operation==="id_xrefs")u=`${ENSEMBL}/xrefs/id/${encodeURIComponent(ensemblId(args?.ensembl_id))}?all_levels=${args?.all_levels===true?1:0};content-type=application/json`;
  else err("ADAPTER_OPERATION_NOT_APPROVED",403);
  const body=await request(u);return{provider:"ensembl",operation,items:Array.isArray(body)?body:undefined,data:Array.isArray(body)?undefined:body}}
 
@@ -50,19 +50,15 @@ async function reactome(operation,args){if(operation==="version"){const body=awa
 
 const RCSB="https://data.rcsb.org/rest/v1/core";
 function pdbId(v){return tok(v,"pdb_id",/^[0-9][A-Za-z0-9]{3}$/,4).toUpperCase()}
-async function rcsb(operation,args){const p=pdbId(args?.pdb_id);let u="";
- if(operation==="entry")u=`${RCSB}/entry/${p}`;
- else if(operation==="pubmed")u=`${RCSB}/pubmed/${p}`;
- else if(operation==="polymer_entity"){const e=tok(args?.entity_id,"entity_id",/^\d{1,4}$/,4);u=`${RCSB}/polymer_entity/${p}/${e}`}
- else if(operation==="chem_comp"){const c=tok(args?.comp_id,"comp_id",/^[A-Za-z0-9]{1,5}$/,5).toUpperCase();u=`${RCSB}/chemcomp/${c}`}
- else err("ADAPTER_OPERATION_NOT_APPROVED",403);return{provider:"rcsb_pdb",operation,data:await request(u)}}
+async function rcsb(operation,args){let u="";
+ if(operation==="chem_comp"){const c=tok(args?.comp_id,"comp_id",/^[A-Za-z0-9]{1,5}$/,5).toUpperCase();u=`${RCSB}/chemcomp/${c}`}
+ else {const p=pdbId(args?.pdb_id);if(operation==="entry")u=`${RCSB}/entry/${p}`;else if(operation==="pubmed")u=`${RCSB}/pubmed/${p}`;else if(operation==="polymer_entity"){const e=tok(args?.entity_id,"entity_id",/^\d{1,4}$/,4);u=`${RCSB}/polymer_entity/${p}/${e}`}else err("ADAPTER_OPERATION_NOT_APPROVED",403)}
+ return{provider:"rcsb_pdb",operation,data:await request(u)}}
 
 const UNIPROT="https://rest.uniprot.org";
 function accession(v){return tok(v,"accession",/^[A-Z0-9]{6,10}$/i,10).toUpperCase()}
 async function uniprot(operation,args){if(operation==="entry"){const a=accession(args?.accession),u=new URL(`${UNIPROT}/uniprotkb/${a}`);u.searchParams.set("format","json");return{provider:"uniprot",operation,data:await request(u)}}if(operation==="gene_search"){const gene=tok(args?.gene,"gene",/^[A-Za-z0-9_.-]+$/,80),org=tok(args?.organism_id||"9606","organism_id",/^\d{1,10}$/,10),reviewed=args?.reviewed===false?"false":"true",u=new URL(`${UNIPROT}/uniprotkb/search`);u.searchParams.set("query",`(gene_exact:${gene}) AND (organism_id:${org}) AND (reviewed:${reviewed})`);u.searchParams.set("format","json");u.searchParams.set("size",String(clamp(args?.limit,1,50,20)));u.searchParams.set("fields","accession,id,protein_name,gene_names,organism_name,length,xref_pdb");const body=await request(u);return{provider:"uniprot",operation,items:Array.isArray(body?.results)?body.results:[]}}err("ADAPTER_OPERATION_NOT_APPROVED",403)}
 
-const CATALOG=[
- {provider:"pubchem",role:"chemical-compounds-properties-synonyms-gene-links"},{provider:"chembl",role:"drug-discovery-molecules-targets-bioactivities-mechanisms"},{provider:"ensembl",role:"genes-transcripts-genome-identifiers-cross-references"},{provider:"reactome",role:"curated-biological-pathways-events-participants"},{provider:"rcsb_pdb",role:"experimental-macromolecular-structures-and-annotations"},{provider:"uniprot",role:"protein-sequence-function-gene-and-PDB-cross-references"}
-];
+const CATALOG=[{provider:"pubchem",role:"chemical-compounds-properties-synonyms-gene-links"},{provider:"chembl",role:"drug-discovery-molecules-targets-bioactivities-mechanisms"},{provider:"ensembl",role:"genes-transcripts-genome-identifiers-cross-references"},{provider:"reactome",role:"curated-biological-pathways-events-participants"},{provider:"rcsb_pdb",role:"experimental-macromolecular-structures-and-annotations"},{provider:"uniprot",role:"protein-sequence-function-gene-and-PDB-cross-references"}];
 export const OPERATIONS={pubchem:["compound_properties_cid","compound_properties_name","compound_synonyms","gene_summary"],chembl:["molecule","molecule_search","target","target_search","activities","mechanisms","status"],ensembl:["species","lookup_id","symbol_xrefs","id_xrefs"],reactome:["version","query","participants"],rcsb_pdb:["entry","pubmed","polymer_entity","chem_comp"],uniprot:["entry","gene_search"],splus_biomed_knowledge:["catalog"]};
 export async function runAdapter(provider,operation,args={},env={}){if(!OPERATIONS[provider]?.includes(operation))err("ADAPTER_OPERATION_NOT_APPROVED",403,{provider,operation,allowed:OPERATIONS[provider]||[]});if(provider==="pubchem")return pubchem(operation,args);if(provider==="chembl")return chembl(operation,args);if(provider==="ensembl")return ensembl(operation,args);if(provider==="reactome")return reactome(operation,args);if(provider==="rcsb_pdb")return rcsb(operation,args);if(provider==="uniprot")return uniprot(operation,args);if(provider==="splus_biomed_knowledge")return{provider,operation,items:CATALOG};err("ADAPTER_NOT_IMPLEMENTED",501)}
