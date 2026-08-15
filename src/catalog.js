@@ -1,10 +1,12 @@
 import {CATALOG as EXISTING_CATALOG,EXCLUDED_PROVIDERS as EXISTING_EXCLUDED} from "./catalog-prelocation.js";
 import {GLOBAL_HIGH_VALUE_CATALOG} from "./catalog-global-highvalue.js";
-export const CATALOG_VERSION="2026-08-15.26";
+import {SPLUS_CATALOG} from "./catalog-splus.js";
+export const CATALOG_VERSION="2026-08-15.27";
 export const EXCLUDED_PROVIDERS=EXISTING_EXCLUDED;
 export const CATALOG={
   ...EXISTING_CATALOG,
   ...GLOBAL_HIGH_VALUE_CATALOG,
+  ...SPLUS_CATALOG,
   worldpop:{...EXISTING_CATALOG.worldpop,category:"population-open-global",access:"public",optional_secrets:["WORLDPOP_API_KEY"],adapter:"open_location.worldpop-v2",integration:"official-rest-v2",scope:"polygon-population-density-age-sex-2015-2030",endpoint:"https://api.worldpop.org/v2",free_tier:"1000-requests-per-day-anonymous;10000-with-free-approved-key",arbitrary_url:false},
   overture_maps:{...EXISTING_CATALOG.overture_maps,category:"open-global-poi-buildings-transport",access:"external-runtime",adapter:"open_location.source-info",integration:"official-cloud-geoparquet",scope:"places-buildings-transportation-divisions-base-gers",endpoint:"https://docs.overturemaps.org/getting-data/cloud-sources/",billing:"free-public-AWS-Azure-data",arbitrary_url:false},
   night_lights:{...EXISTING_CATALOG.night_lights,category:"open-global-activity-proxy",access:"external-runtime",adapter:"open_location.source-info",integration:"nasa-black-marble-vnp46a2",scope:"daily-global-500m-nighttime-activity-proxy",earth_engine_collection:"NASA/VIIRS/002/VNP46A2",billing:"NASA-data-free",arbitrary_url:false},
