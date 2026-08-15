@@ -2,9 +2,9 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "intelligence-worker",
   "main": "src/guard.js",
-  "compatibility_date": "2026-08-14",
+  "compatibility_date": "2026-08-15",
   "workers_dev": true,
-  "build": {"command": "node tests/stress.mjs && node tests/qichacha.mjs && node tests/free-knowledge-sources.mjs && node tests/runtime-repairs.mjs && node tests/free-location-intelligence.mjs"},
+  "build": {"command": "node tests/stress.mjs && node tests/qichacha.mjs && node tests/free-knowledge-sources.mjs && node tests/runtime-repairs.mjs && node tests/free-location-intelligence.mjs && node tests/nasa-high-value.mjs"},
   "durable_objects": {
     "bindings": [
       {"name": "CENTER_GATE", "class_name": "CenterGate"}
