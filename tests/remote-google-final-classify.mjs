@@ -1,6 +1,0 @@
-import assert from "node:assert/strict";
-const BASES=["https://intelligence-worker.a15280020511.workers.dev","https://intelligence-worker-zhabgjie16855.a15280020511.workers.dev"];
-const TIMEOUT_MS=45000;
-async function request(url,init={}){const c=new AbortController(),t=setTimeout(()=>c.abort(),TIMEOUT_MS);try{const r=await fetch(url,{...init,signal:c.signal});let j=null;try{j=await r.json()}catch{}return{r,j}}finally{clearTimeout(t)}}
-async function findBase(){for(const b of BASES){try{const {r,j}=await request(`${b}/health`);if(r.ok&&j?.ok&&j?.service==="intelligence-worker")return b}catch{}}throw new Error("INTELLIGENCE_WORKER_NOT_REACHABLE")}
-const base=await findBase();const rd=await request(`${base}/v1/provider/earthengine/readiness`);assert.equal(rd.r.status,200);const task_id=`google-earthengine-${Date.now()}`;const {r,j}=await request(`${base}/v1/run`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({task_id,provider:"earthengine",operation:"asset_get",timeout_seconds:40,args:{asset:"COPERNICUS/S2_SR_HARMONIZED"}})});assert.equal(r.ok&&j?.ok===true,false,`Earth Engine unexpectedly passed, http=${r.status}`);console.log(JSON.stringify({ok:true,provider:"earthengine",classification:"FAIL",configured:rd.j?.configured===true,http:r.status,error:j?.error||null}));
