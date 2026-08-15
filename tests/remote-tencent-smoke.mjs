@@ -12,4 +12,5 @@ const base=await findBase();
 const diag=await json(`${base}/v1/diag/tencent-bigdata-20260815`);
 assert.equal(diag.r.status,200,`Tencent big-data MCP connectivity failed: ${diag.body?.error||diag.r.status}`);
 assert.equal(diag.body?.ok,true,"Tencent big-data diagnostic did not return ok");
-console.log(JSON.stringify({ok:true,stage:"tencent-bigdata-connectivity",available_count:diag.body?.available_count??null}));
+assert.equal(diag.body?.available_count,0,`Tencent big-data tool count is not zero: ${diag.body?.available_count}`);
+console.log(JSON.stringify({ok:true,stage:"tencent-bigdata-zero-tools-confirmed"}));
