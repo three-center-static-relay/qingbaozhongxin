@@ -1,7 +1,10 @@
 {
   "name": "intelligence-worker",
   "private": true,
-  "scripts": {"stress": "node tests/stress.mjs"},
+  "scripts": {
+    "stress": "node tests/stress.mjs",
+    "test:copernicus": "node tests/copernicus-cds.mjs"
+  },
   "devDependencies": {
     "wrangler": "^4.0.0",
     "msw": "^2.0.0"
