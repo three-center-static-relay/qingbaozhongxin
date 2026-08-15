@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import {OPERATIONS,runAdapter} from "../src/adapters.js";
 import {CATALOG,CATALOG_VERSION,statusFor} from "../src/catalog.js";
+import {assertCatalogAtLeast} from "./catalog-version-utils.mjs";
 
-assert.match(CATALOG_VERSION,/^2026-08-15\.\d+$/);
-assert.ok(Number(CATALOG_VERSION.split(".").at(-1))>=29,`macro fusion requires catalog revision >=29, got ${CATALOG_VERSION}`);
+assertCatalogAtLeast(CATALOG_VERSION,"2026-08-15.29","macro fusion");
 for(const p of ["worldbank","imf","bis","fred","eia","us_treasury_fiscaldata","splus_macro_fusion"])assert.ok(CATALOG[p],`missing catalog ${p}`);
 for(const p of ["imf","bis","us_treasury_fiscaldata","splus_macro_fusion"])assert.equal(statusFor({},p)?.live_adapter,true,`${p} must be live`);
 assert.ok(OPERATIONS.worldbank.includes("indicator"),"legacy World Bank indicator operation lost");
