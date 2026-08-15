@@ -1,3 +1,4 @@
+// one-shot production diagnostic; retriggered after PR creation
 import assert from "node:assert/strict";
 const BASES=["https://intelligence-worker.a15280020511.workers.dev","https://intelligence-worker-zhabgjie16855.a15280020511.workers.dev"];
 const TIMEOUT_MS=90000;
