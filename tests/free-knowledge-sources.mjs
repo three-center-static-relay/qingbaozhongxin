@@ -18,7 +18,10 @@ const live={
   cleveland_museum:"search",
   libris:"search",
   federal_register:"search",
-  software_heritage:"search_origin"
+  software_heritage:"search_origin",
+  osf_public:"search_public",
+  ensembl:"lookup_symbol",
+  reactome:"query_id"
 };
 for(const [provider,operation] of Object.entries(live)){
   assert.ok(CATALOG[provider],`missing catalog provider: ${provider}`);
@@ -30,7 +33,7 @@ const catalogOnly=[
   "rijksmuseum_library_sru","pangaea","deutsche_digitale_bibliothek",
   "getty_vocabularies","getty_collection","musicbrainz",
   "harvard_art_museums","trove","bne_lod","archives_portal_europe",
-  "openml","eurlex_cellar","uk_legislation","viaf"
+  "openml","eurlex_cellar","uk_legislation","viaf","uspto_odp"
 ];
 for(const provider of catalogOnly){
   assert.ok(CATALOG[provider],`missing catalog provider: ${provider}`);
@@ -42,4 +45,6 @@ assert.equal(CATALOG.deutsche_digitale_bibliothek.secrets?.[0],"DDB_API_KEY");
 assert.equal(CATALOG.harvard_art_museums.secrets?.[0],"HARVARD_ART_MUSEUMS_API_KEY");
 assert.equal(CATALOG.trove.secrets?.[0],"TROVE_API_KEY");
 assert.equal(CATALOG.archives_portal_europe.secrets?.[0],"ARCHIVES_PORTAL_EUROPE_API_KEY");
+assert.equal(CATALOG.uspto_odp.secrets?.[0],"USPTO_ODP_API_KEY");
+assert.equal(CATALOG.uspto_odp.registration_url,"https://data.uspto.gov/");
 console.log(JSON.stringify({ok:true,live:Object.keys(live).length,catalog_only:catalogOnly.length,total_checked:Object.keys(live).length+catalogOnly.length}));
