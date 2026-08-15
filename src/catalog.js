@@ -1,5 +1,5 @@
 import {CATALOG as BASE_CATALOG,EXCLUDED_PROVIDERS as BASE_EXCLUDED} from "./catalog-base.js";
-export const CATALOG_VERSION="2026-08-15.14";
+export const CATALOG_VERSION="2026-08-15.15";
 export const EXCLUDED_PROVIDERS=BASE_EXCLUDED;
 export const CATALOG={
   ...BASE_CATALOG,
@@ -24,7 +24,8 @@ export const CATALOG={
   aifin_market:{category:"finance-cn-mcp",access:"key",secrets:["WIND_API_KEY"],adapter:"catalog-only",integration:"official-skill-mcp"},
   pkulaw:{category:"legal-cn",access:"key",secret_groups:[["BROWSERFABRIC_API_KEY","PKULAW_BROWSERFABRIC_CONTEXT_ID"]],adapter:"browserfabric.authenticated-read",integration:"browserfabric-persistent-context",scope:"pkulaw-fixed-domains-read-only"},
   yuandian:{category:"legal-cn",access:"key",secret_groups:[["YD_API_KEY"],["YUANDIAN_API_KEY"]],adapter:"yuandian.official-api",integration:"official-rest+mcp",scope:"law-case-enterprise-read-only"},
-  wikidata:{category:"global-knowledge-graph",access:"public",adapter:"wikidata.public-read",integration:"official-sparql+entitydata",scope:"anonymous-read-only"}
+  wikidata:{category:"global-knowledge-graph",access:"public",adapter:"wikidata.public-read",integration:"official-sparql+entitydata",scope:"anonymous-read-only"},
+  copernicus_cds:{category:"climate-global-official",access:"key",secret_groups:[["COPERNICUS_CDS_API_KEY"],["CDS_API_KEY"]],adapter:"copernicus_cds.catalog+retrieve",integration:"official-rest",scope:"catalog-read+bounded-retrieval-job-control-no-binary-proxy",terms:"dataset-terms-must-be-accepted-manually-before-download"}
 };
 function anyGroup(env,groups){return groups?.some(g=>g.every(k=>Boolean(env[k])))}
 export function statusFor(env,name){
