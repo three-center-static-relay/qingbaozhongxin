@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {OPERATIONS,runAdapter} from "../src/adapters.js";
 import {CATALOG,CATALOG_VERSION,statusFor} from "../src/catalog.js";
 
-assert.equal(CATALOG_VERSION,"2026-08-15.30");
+assert.equal(CATALOG_VERSION,"2026-08-15.31");
 for(const p of ["us_census_api","us_bls_api","us_bea_api","usda_nass_quickstats","nih_reporter","cms_data","usaspending","splus_us_official"]){
   assert.ok(CATALOG[p],`missing catalog ${p}`);
   assert.equal(statusFor({},p)?.live_adapter,true,`${p} must be live`);
