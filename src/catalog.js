@@ -2,7 +2,7 @@ import {CATALOG as EXISTING_CATALOG,EXCLUDED_PROVIDERS as EXISTING_EXCLUDED} fro
 import {GLOBAL_HIGH_VALUE_CATALOG} from "./catalog-global-highvalue.js";
 import {SPLUS_CATALOG} from "./catalog-splus.js";
 import {AIFIN_CATALOG} from "./catalog-aifin.js";
-export const CATALOG_VERSION="2026-08-15.33";
+export const CATALOG_VERSION="2026-08-15.34";
 export const EXCLUDED_PROVIDERS=EXISTING_EXCLUDED;
 export const CATALOG={
   ...EXISTING_CATALOG,
@@ -22,6 +22,10 @@ export const CATALOG={
   nih_reporter:{...GLOBAL_HIGH_VALUE_CATALOG.nih_reporter,access:"public",adapter:"nih_reporter.v2",integration:"official-rest-v2",scope:"bounded-project-and-publication-search-funding-organizations-investigators",endpoint:"https://api.reporter.nih.gov/v2",arbitrary_url:false},
   cms_data:{...GLOBAL_HIGH_VALUE_CATALOG.cms_data,access:"public",adapter:"cms_data.dataset",integration:"official-public-data-api",scope:"bounded-dataset-id-filter-pagination",endpoint:"https://data.cms.gov/data-api/v1",arbitrary_url:false},
   usaspending:{...GLOBAL_HIGH_VALUE_CATALOG.usaspending,access:"public",adapter:"usaspending.v2",integration:"official-rest-v2",scope:"award-count-awarding-agencies-contracts-grants-loans",endpoint:"https://api.usaspending.gov/api/v2",arbitrary_url:false},
+  companies_house_uk:{...GLOBAL_HIGH_VALUE_CATALOG.companies_house_uk,access:"key",secrets:["COMPANIES_HOUSE_API_KEY"],adapter:"companies_house.public-data-live",integration:"official-rest-basic-key",scope:"company-search-and-company-profile",endpoint:"https://api.company-information.service.gov.uk",free_tier:"public-register-read-api; default-600-requests-per-5-minutes",arbitrary_url:false},
+  opendart_korea:{...GLOBAL_HIGH_VALUE_CATALOG.opendart_korea,access:"key",secrets:["OPENDART_API_KEY"],adapter:"opendart.live",integration:"official-English-OpenDART-rest",scope:"disclosures-company-profile-major-periodic-financial-accounts",endpoint:"https://engopendart.fss.or.kr/engapi",arbitrary_url:false},
+  cftc_cot:{...GLOBAL_HIGH_VALUE_CATALOG.cftc_cot,access:"public",optional_secrets:["CFTC_APP_TOKEN"],adapter:"cftc.socrata-fixed-datasets",integration:"official-public-reporting-socrata",scope:"traders-in-financial-futures-disaggregated-cot-product-hierarchy",endpoint:"https://publicreporting.cftc.gov/resource",arbitrary_url:false},
+  ted_eu_procurement:{...GLOBAL_HIGH_VALUE_CATALOG.ted_eu_procurement,access:"public",adapter:"ted.search-api-v3",integration:"official-TED-search-api-v3",scope:"published-procurement-notice-expert-search-bounded-page-mode",endpoint:"https://api.ted.europa.eu/v3/notices/search",free_tier:"published-notice-search-no-authentication",arbitrary_url:false},
   un_comtrade:{...(GLOBAL_HIGH_VALUE_CATALOG.un_comtrade||EXISTING_CATALOG.un_comtrade||{}),category:"global-official-trade",access:"optional-key",secrets:["UN_COMTRADE_API_KEY"],adapter:"un_comtrade.preview+data",integration:"official-comtrade-api-current",scope:"bounded-final-trade-preview-and-subscription-key-data",endpoint:"https://comtradeapi.un.org",free_tier:"preview-without-key-up-to-500-records-per-call; subscription tiers vary",arbitrary_url:false},
   reliefweb:{...(GLOBAL_HIGH_VALUE_CATALOG.reliefweb||EXISTING_CATALOG.reliefweb||{}),category:"global-humanitarian-reports-disasters",access:"key",secrets:["RELIEFWEB_APPNAME"],adapter:"reliefweb.v2",integration:"UN-OCHA-official-api-v2",scope:"bounded-reports-and-disasters",endpoint:"https://api.reliefweb.int/v2",free_tier:"1000-calls-per-day;1000-max-upstream-records;worker-caps-100",arbitrary_url:false},
   gdacs:{...(GLOBAL_HIGH_VALUE_CATALOG.gdacs||EXISTING_CATALOG.gdacs||{}),category:"global-disaster-alerts",access:"public",adapter:"gdacs.latest",integration:"UN-EU-official-gdacs",scope:"latest-bounded-disaster-alert-feed+source-info",endpoint:"https://www.gdacs.org",arbitrary_url:false},
