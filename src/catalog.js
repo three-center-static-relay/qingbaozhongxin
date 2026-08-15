@@ -1,5 +1,5 @@
 import {CATALOG as BASE_CATALOG,EXCLUDED_PROVIDERS as BASE_EXCLUDED} from "./catalog-base.js";
-export const CATALOG_VERSION="2026-08-15.18";
+export const CATALOG_VERSION="2026-08-15.19";
 export const EXCLUDED_PROVIDERS=BASE_EXCLUDED;
 export const CATALOG={
   ...BASE_CATALOG,
@@ -26,6 +26,7 @@ export const CATALOG={
   yuandian:{category:"legal-cn",access:"key",secret_groups:[["YD_API_KEY"],["YUANDIAN_API_KEY"]],adapter:"yuandian.official-api",integration:"official-rest+mcp",scope:"law-case-enterprise-read-only"},
   wikidata:{category:"global-knowledge-graph",access:"public",adapter:"wikidata.public-read",integration:"official-sparql+entitydata",scope:"anonymous-read-only"},
   copernicus_cds:{category:"climate-global-official",access:"key",secret_groups:[["COPERNICUS_CDS_API_KEY"],["CDS_API_KEY"]],adapter:"copernicus_cds.catalog+retrieve",integration:"official-rest",scope:"catalog-read+bounded-retrieval-job-control-no-binary-proxy",terms:"dataset-terms-must-be-accepted-manually-before-download"},
+  qichacha:{category:"company-intelligence-cn",access:"key",secrets:["QICHACHA_APP_KEY","QICHACHA_SECRET_KEY"],adapter:"qichacha.company-search",integration:"official-openapi",scope:"read-only-bounded-company-search",endpoint:"https://api.qichacha.com/FuzzySearch/GetList",api_code:"886",pricing_note:"currently-listed-CNY-0.10-per-request-with-20-trial-requests",permission:"enterprise-real-name-and-application-scenario-review-required"},
 
   crossref:{...BASE_CATALOG.crossref,integration:"official-rest",scope:"global-scholarly-metadata"},
   openalex:{...BASE_CATALOG.openalex,integration:"official-rest",registration_url:"https://openalex.org/settings/api",free_tier:"1-usd-daily-api-credit"},
