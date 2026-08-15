@@ -1,5 +1,6 @@
 import base,{CenterGate as BaseCenterGate} from "./index.js";
 import {runDatasetRadar,latestRadar,radarMeta} from "./dataset-radar.js";
+import {runPortalRadar,portalRadarMeta} from "./dataset-radar-portals.js";
 const json=(x,s=200)=>Response.json(x,{status:s,headers:{"cache-control":"no-store"}});
 const MAX_RADAR_BYTES=110000;
 
@@ -36,8 +37,25 @@ async function selftest(env,ctx){
   const ok=r.ok&&body?.ok===true&&nonempty&&hasDigest&&terminal&&released;
   return json({ok,business_e2e:true,cost_class:"public-zero-key",provider:"worldbank",operation:"indicator",task_id:taskId,http_status:r.status,nonempty,result_digest:hasDigest?body.result_digest:null,terminal_status:task?.task?.status||null,lock_released:released,elapsed_ms:Date.now()-started},ok?200:503);
 }
-async function radarRoute(req,env){const u=new URL(req.url);if(req.method==="GET"&&u.pathname==="/v1/dataset-radar/meta")return json({ok:true,...radarMeta(env)});if(req.method==="GET"&&u.pathname==="/v1/dataset-radar/latest"){const r=await latestRadar(env);return json({ok:true,snapshot:r?.snapshot||null})}if(req.method==="POST"&&u.pathname==="/v1/dataset-radar/run"){if(u.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"dataset radar execution is service-binding internal only"},403);const out=await runDatasetRadar(env,{trigger:"internal-manual"});return json(out,out.ok?200:503)}return null}
+async function radarRoute(req,env){
+  const u=new URL(req.url);
+  if(req.method==="GET"&&u.pathname==="/v1/dataset-radar/meta")return json({ok:true,...radarMeta(env),portal_radar:portalRadarMeta()});
+  if(req.method==="GET"&&u.pathname==="/v1/dataset-radar/latest"){const r=await latestRadar(env);return json({ok:true,snapshot:r?.snapshot||null})}
+  if(req.method==="POST"&&u.pathname==="/v1/dataset-radar/run"){
+    if(u.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"dataset radar execution is service-binding internal only"},403);
+    const core=await runDatasetRadar(env,{trigger:"internal-manual"}).catch(e=>({ok:false,error:e?.message||"CORE_RADAR_FAILED"}));
+    const portal=await runPortalRadar(env,{trigger:"internal-manual"}).catch(e=>({ok:false,error:e?.message||"PORTAL_RADAR_FAILED"}));
+    const ok=core?.ok===true&&portal?.ok===true;return json({ok,core,portal},ok?200:503)
+  }
+  return null
+}
 export default{
   async fetch(req,env,ctx){try{const rr=await radarRoute(req,env);if(rr)return rr;const u=new URL(req.url);if(req.method==="POST"&&u.pathname==="/v1/cancel")return await cancel(req,env);if(req.method==="POST"&&u.pathname==="/v1/selftest"){if(u.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"selftest is service-binding internal only"},403);return await selftest(env,ctx)}return await base.fetch(req,env,ctx)}catch(e){return json({ok:false,error:e?.message||"INTERNAL_ERROR",message:"Request failed"},e?.status||500)}},
-  async scheduled(controller,env,ctx){ctx.waitUntil(runDatasetRadar(env,{trigger:"cloudflare-cron",scheduled_time:controller?.scheduledTime||Date.now()}).catch(()=>null))}
+  async scheduled(controller,env,ctx){
+    const scheduledTime=controller?.scheduledTime||Date.now();
+    ctx.waitUntil((async()=>{
+      await runDatasetRadar(env,{trigger:"cloudflare-cron",scheduled_time:scheduledTime}).catch(()=>null);
+      await runPortalRadar(env,{trigger:"cloudflare-cron",scheduled_time:scheduledTime}).catch(()=>null);
+    })())
+  }
 };
