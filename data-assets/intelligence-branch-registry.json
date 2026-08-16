@@ -1,12 +1,12 @@
 {
-  "schema_version":"1.3",
+  "schema_version":"1.4",
   "center":"intelligence-center",
   "root_identity":"general-purpose evidence, data, information and public-intelligence acquisition center",
   "architecture_rule":"All domain branches are additive subdomains. No branch may rename, replace, narrow or become the Intelligence Center root service.",
   "root_service":"intelligence-worker",
   "branches":[
     {"id":"nasa-earth-space","type":"intelligence-subdomain","scope":"NASA Earth observation, space science, remote sensing and public mission data","replaces_center":false},
-    {"id":"top-hospital-medical","label_zh":"医学诊断分析循证治疗与护理","type":"intelligence-subdomain","scope":"broad medical decision-support capability for clinical diagnosis, differential diagnosis, laboratory and report interpretation, CT/MRI/PET/X-ray/ultrasound/DICOM and pathology support, ECG/waveforms, evidence-based medicine, medication safety, pharmacogenomics, treatment-option and care-plan design, clinical calculators, nursing, rehabilitation, rare disease, genetics and precision oncology using free authoritative sources and open medical tooling","replaces_center":false},
+    {"id":"top-hospital-medical","label_zh":"顶级综合医院全科医学能力","type":"intelligence-subdomain","scope":"full-specialty top-tier comprehensive-hospital-style medical decision-support capability across all major clinical specialties and subspecialties, diagnosis, differential diagnosis, laboratories, pathology, CT/MRI/PET/X-ray/ultrasound/DICOM, ECG and physiologic signals, evidence-based medicine, medication and pharmacogenomics, diagnostic-test selection, treatment and procedure option design, nursing, rehabilitation, genetics, rare disease, precision oncology, longitudinal multimorbidity analysis and second-opinion support; medical branch evolution is capability-only","replaces_center":false},
     {"id":"finance-markets","type":"intelligence-subdomain","scope":"financial markets, securities, macro, company filings and investment research","replaces_center":false},
     {"id":"law-policy","type":"intelligence-subdomain","scope":"law, regulation, policy and public administration","replaces_center":false},
     {"id":"geospatial-location","type":"intelligence-subdomain","scope":"maps, population, mobility proxies, remote sensing and location intelligence","replaces_center":false},
@@ -17,6 +17,7 @@
   "invariants":[
     "src/index.js remains the generic intelligence-worker entry point",
     "provider catalog remains cross-domain",
-    "domain registries add domain capabilities and source metadata without redefining center identity"
+    "domain registries add domain capabilities and source metadata without redefining center identity",
+    "top-hospital-medical remains capability-only and may expand specialty breadth, tools and authoritative sources without adding a medical workflow or orchestration runtime"
   ]
 }
