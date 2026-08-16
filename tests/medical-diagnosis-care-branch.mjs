@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import {CATALOG} from "../src/catalog.js";
 
 const branch=JSON.parse(fs.readFileSync(new URL("../data-assets/top-hospital-medical-branch.json",import.meta.url),"utf8"));
 const registry=JSON.parse(fs.readFileSync(new URL("../data-assets/intelligence-branch-registry.json",import.meta.url),"utf8"));
@@ -32,6 +33,12 @@ for(const id of ["pydicom","highdicom","simpleitk","nibabel","monai_core","opens
   assert.ok(stack.medical_file_and_imaging_tools.some(x=>x.id===id),`missing tool ${id}`);
 }
 
+for(const provider of ["who_icd11","umls_uts","loinc_terminology","ucum_standard","medlineplus_connect","openfda_drug_label","rxclass","pubtator3","monarch_api","ebi_ols","nci_evs","ncbi_gtr","cpic_pgx","clinpgx","civic_precision_oncology","open_targets","biomcp","who_smart_guidelines","hl7_fhir_standard","hl7_cql","dicomweb_standard","lactmed","livertox"]){
+  assert.ok(CATALOG[provider],`medical provider ${provider} missing from aggregate catalog`);
+  assert.equal(CATALOG[provider].arbitrary_url,false);
+  assert.equal(CATALOG[provider].write,false);
+}
+
 assert.equal(evidence.name,"medical-diagnosis-evidence-treatment-care-sources");
 assert.ok(evidence.sources.length>=30);
 assert.equal(Object.prototype.hasOwnProperty.call(evidence,"policy"),false);
@@ -45,4 +52,4 @@ assert.match(med.scope,/evidence-based medicine/i);
 assert.match(med.scope,/treatment-option/i);
 assert.match(med.scope,/nursing/i);
 
-console.log(JSON.stringify({ok:true,suite:"medical-top-tier-capability-stack",capability_only:true,free_access_only:true,multimodal:true,ct_mri_dicom:true,evidence_medicine:true,medication:true,treatment_design:true,nursing:true,precision_medicine:true}));
+console.log(JSON.stringify({ok:true,suite:"medical-top-tier-capability-stack",capability_only:true,free_access_only:true,multimodal:true,ct_mri_dicom:true,evidence_medicine:true,medication:true,treatment_design:true,nursing:true,precision_medicine:true,aggregate_catalog:true}));
