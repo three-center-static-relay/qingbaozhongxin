@@ -1,108 +1,72 @@
 {
-  "schema_version":"1.0",
+  "schema_version":"2.0",
   "branch_id":"top-hospital-medical",
+  "label_zh":"医学诊断分析与护理",
   "parent":"intelligence-center",
   "type":"intelligence-subdomain",
   "replaces_center":false,
-  "purpose":"Discover, retrieve, validate and route high-value clinical, biomedical, hospital-research, medication, imaging, pathology, genomics and healthcare evidence. This branch is one additive branch of the Intelligence Center.",
-  "routing_policy":{
-    "evidence_and_public_data":"intelligence-center",
-    "heavy_numeric_or_image_compute":"generic-compute-center",
-    "optional_synthesis":"generic-expert-center",
-    "rule":"Refer to downstream generic capabilities; never rename or convert another center into a hospital center."
+  "purpose":"Direct patient-facing medical support focused only on diagnostic analysis, interpretation of supplied clinical evidence and practical nursing/self-care guidance. Keep the branch simple: no downstream orchestration, no expert-center routing, no hospital workflow engine and no research-tool deployment layer.",
+  "capabilities":{
+    "diagnostic_analysis":{
+      "enabled":true,
+      "scope":["symptoms and history","physical-exam findings supplied by the user","laboratory and test reports","medication context","medical photographs and report images","differential diagnosis","red-flag and urgency assessment"],
+      "rule":"Return a ranked differential with supporting and opposing evidence, uncertainty and what additional findings would materially change the assessment; never turn an uncertain image or illegible note into a definite fact."
+    },
+    "clinical_evidence_interpretation":{
+      "enabled":true,
+      "scope":["laboratory results","imaging reports","pathology reports","ECG and other report text","medication labels and interactions","guideline comparison"],
+      "rule":"Interpret only the evidence actually supplied or retrieved from authoritative sources; distinguish observed findings from inference."
+    },
+    "nursing_and_self_care":{
+      "enabled":true,
+      "scope":["symptom monitoring","hygiene and protection","activity and diet advice when relevant","medication-adherence and administration safety","follow-up observations","when to seek urgent or emergency care"],
+      "rule":"Give practical low-risk care advice and escalation criteria; do not invent prescriptions, doses or procedures from unreadable records."
+    }
   },
-  "live_or_existing_intelligence_sources":[
-    {"id":"clinicaltrials","state":"live-existing","role":"clinical trial search and study metadata"},
-    {"id":"ncbi_entrez","state":"live-existing","role":"PubMed, PMC, Gene, Protein, ClinVar and other NCBI databases"},
-    {"id":"who_gho","state":"live-existing","role":"WHO global health indicators"},
-    {"id":"pubchem","state":"live-existing","role":"compound properties, identifiers and synonyms"},
-    {"id":"chembl","state":"live-existing","role":"molecules, targets, bioactivities and mechanisms"},
-    {"id":"ensembl","state":"live-existing","role":"genes, transcripts, identifiers and cross-references"},
-    {"id":"reactome","state":"live-existing","role":"curated biological pathways"},
-    {"id":"rcsb_pdb","state":"live-existing","role":"macromolecular structures"},
-    {"id":"uniprot","state":"live-existing","role":"protein sequence and function knowledge"},
-    {"id":"openfda","state":"catalog-existing","role":"FDA drugs, devices, food and regulatory open data"},
-    {"id":"biomcp","state":"external-mcp-existing","role":"multi-source biomedical evidence MCP; local/external MCP runtime required"}
+  "authoritative_free_evidence_sources":[
+    {"id":"china_nhc","role":"China national clinical and health guidance","access":"public"},
+    {"id":"nmpa","role":"China medicine and device regulatory information","access":"public"},
+    {"id":"who_guidelines","role":"global clinical and care guidance","access":"public"},
+    {"id":"nice_guidance","role":"evidence-based diagnosis, treatment and care guidance","access":"public"},
+    {"id":"cdc","role":"infectious disease, vaccination and public-health clinical guidance","access":"public"},
+    {"id":"fda","role":"drug and device safety, labels and regulatory evidence","access":"public"},
+    {"id":"pubmed_ncbi","role":"primary literature, reviews and biomedical evidence","access":"public-api"},
+    {"id":"pubmed_central","role":"open full-text biomedical literature where available","access":"public"},
+    {"id":"europe_pmc","role":"biomedical literature and open full text where licensed","access":"public"},
+    {"id":"dailymed","role":"structured medication labels and warnings","access":"public-api"},
+    {"id":"rxnorm","role":"medication normalization","access":"public-api"},
+    {"id":"medlineplus","role":"patient-readable disease, test, treatment and care information","access":"public"},
+    {"id":"clinicaltrials","role":"trial status and intervention evidence when clinically relevant","access":"public-api"}
   ],
-  "clinical_evidence_and_medication_sources":[
-    "China NHC","NMPA","FDA","EMA","AHRQ","ACR Appropriateness Criteria","USPSTF","NICE","WHO Guidelines","CDC","PubMed","PubMed Central","Europe PMC","ClinicalTrials.gov","DailyMed","RxNorm","MedlinePlus","Cochrane discovery/reference","Guidelines and specialty-society publications"
+  "direct_output_contract":[
+    "case_summary",
+    "key_observed_findings",
+    "ranked_differential_diagnosis",
+    "evidence_for_and_against_each_major_diagnosis",
+    "red_flags_and_urgency",
+    "recommended_next_evaluation",
+    "nursing_and_self_care",
+    "medication_and_safety_notes_if_relevant",
+    "uncertainty_and_information_gaps"
   ],
-  "hospital_and_research_dataset_sources":[
-    {"id":"physionet","access":"public-plus-credentialed-datasets","role":"clinical signals, ICU and hospital research datasets"},
-    {"id":"mimic-iv","institution":"Beth Israel Deaconess Medical Center / MIT ecosystem","access":"credentialed-research","role":"de-identified EHR and critical-care research"},
-    {"id":"mimic-cxr","institution":"Beth Israel Deaconess Medical Center / PhysioNet","access":"credentialed-research","role":"chest radiographs and reports"},
-    {"id":"eicu","access":"credentialed-research","role":"multi-center ICU research database"},
-    {"id":"chexpert","institution":"Stanford Medicine","access":"research-terms","role":"chest X-ray dataset and labels"},
-    {"id":"tcia","institution":"US NCI","access":"public-and-collection-specific","role":"de-identified cancer radiology and pathology imaging"},
-    {"id":"nih-chestxray14","institution":"NIH Clinical Center","access":"research-public","role":"chest radiograph research dataset"},
-    {"id":"gdc-tcga","institution":"US NCI","access":"open-plus-controlled","role":"cancer genomics and clinical research data"},
-    {"id":"adni","access":"registration-data-use-terms","role":"Alzheimer imaging and biomarker research"},
-    {"id":"uk-biobank","access":"restricted-application","role":"large-scale biomedical cohort; reference/discovery only unless authorized"}
+  "excluded_scope":[
+    "expert-center routing",
+    "compute-center routing",
+    "multi-agent or committee workflow",
+    "candidate promotion workflow",
+    "hospital operations workflow",
+    "PACS or DICOM server deployment",
+    "research-model discovery as a patient-care step",
+    "research-dataset discovery as a patient-care step",
+    "image-model training or segmentation pipelines",
+    "genomics or molecular-tool chains unless directly needed for the presented case",
+    "automatic diagnosis from a single photo without clinical context"
   ],
-  "medical_tool_registry":{
-    "biomedical_evidence_mcp_and_api":[
-      {"tool":"BioMCP","state":"catalog-external-runtime","role":"unified biomedical evidence queries across trusted sources"},
-      {"tool":"NCBI E-utilities","state":"live-existing","role":"PubMed/PMC/ClinVar/Gene and other NCBI retrieval"},
-      {"tool":"ClinicalTrials.gov API","state":"live-existing","role":"clinical trials"},
-      {"tool":"openFDA API","state":"catalog-existing","role":"drug/device/regulatory data"},
-      {"tool":"PubChem PUG REST","state":"live-existing","role":"chemical and drug-compound data"},
-      {"tool":"ChEMBL API","state":"live-existing","role":"drug discovery and bioactivity"},
-      {"tool":"Ensembl REST","state":"live-existing","role":"genomics"},
-      {"tool":"Reactome ContentService","state":"live-existing","role":"pathways"},
-      {"tool":"RCSB PDB APIs","state":"live-existing","role":"structural biology"},
-      {"tool":"UniProt REST","state":"live-existing","role":"protein knowledge"}
-    ],
-    "medical_imaging_ai_and_processing":[
-      {"tool":"MONAI Core","state":"downstream-compute-registered","role":"medical-imaging AI training and inference"},
-      {"tool":"MONAI Label","state":"catalog-downstream","role":"AI-assisted image annotation"},
-      {"tool":"MONAI Deploy","state":"catalog-downstream","role":"medical-imaging inference application packaging/deployment"},
-      {"tool":"pydicom","state":"downstream-compute-registered","role":"DICOM parsing and metadata/pixel access"},
-      {"tool":"NiBabel","state":"downstream-compute-registered","role":"NIfTI and neuroimaging formats"},
-      {"tool":"SimpleITK","state":"downstream-compute-registered-optional","role":"medical image registration, resampling and processing"},
-      {"tool":"OpenSlide","state":"catalog-downstream","role":"whole-slide pathology image access"},
-      {"tool":"TorchIO","state":"catalog-downstream","role":"3D medical image preprocessing and augmentation"},
-      {"tool":"nnU-Net","state":"catalog-downstream","role":"self-configuring biomedical image segmentation"},
-      {"tool":"TotalSegmentator","state":"catalog-downstream","role":"CT/MR anatomical segmentation; task/license restrictions respected"},
-      {"tool":"MedSAM / MedSAM2","state":"catalog-downstream","role":"promptable medical-image segmentation"},
-      {"tool":"TorchXRayVision","state":"catalog-downstream","role":"chest X-ray datasets and pretrained research models"},
-      {"tool":"3D Slicer","state":"catalog-downstream","role":"medical image visualization, registration, segmentation and analysis"},
-      {"tool":"ITK","state":"catalog-downstream","role":"medical image processing foundation"},
-      {"tool":"VTK","state":"catalog-downstream","role":"3D visualization and scientific imaging"}
-    ],
-    "pacs_dicom_and_web_viewing":[
-      {"tool":"OHIF Viewer","state":"catalog-downstream","role":"web DICOM/DICOMweb viewer and imaging application framework"},
-      {"tool":"Cornerstone3D","state":"catalog-downstream","role":"browser medical image rendering and annotation"},
-      {"tool":"Orthanc","state":"catalog-downstream","role":"lightweight DICOM/PACS server with REST API"},
-      {"tool":"dcm4chee","state":"catalog-downstream","role":"enterprise DICOM archive/PACS"},
-      {"tool":"DCMTK","state":"catalog-downstream","role":"DICOM toolkit and networking utilities"}
-    ],
-    "digital_pathology":[
-      {"tool":"QuPath","state":"catalog-downstream","role":"digital pathology and whole-slide bioimage analysis"},
-      {"tool":"OpenSlide","state":"catalog-downstream","role":"whole-slide image reading"}
-    ],
-    "clinical_data_and_interoperability":[
-      {"tool":"HL7 FHIR","state":"standard","role":"clinical data interchange"},
-      {"tool":"DICOM / DICOMweb","state":"standard","role":"medical imaging interchange"},
-      {"tool":"LOINC","state":"standard-free-with-terms","role":"laboratory and observation terminology"},
-      {"tool":"SNOMED CT","state":"standard-license-by-jurisdiction","role":"clinical terminology"},
-      {"tool":"OHDSI OMOP CDM","state":"catalog-downstream","role":"observational health data common model and analytics"},
-      {"tool":"HAPI FHIR","state":"catalog-downstream","role":"FHIR server/client implementation"},
-      {"tool":"OpenMRS","state":"catalog-downstream","role":"open medical record platform"}
-    ]
-  },
-  "top_hospital_open_research_anchors":[
-    {"anchor":"Massachusetts General Hospital / OHIF ecosystem","value":"open imaging platform and clinical imaging research"},
-    {"anchor":"Brigham and Women's / 3D Slicer ecosystem","value":"open medical image computing"},
-    {"anchor":"Beth Israel Deaconess / MIMIC ecosystem","value":"de-identified hospital and ICU data research"},
-    {"anchor":"Stanford Medicine / CheXpert and imaging AI research","value":"public research datasets and methods"},
-    {"anchor":"Mayo Clinic, MSKCC, Stanford, NIH and other MONAI contributors","value":"clinical/research participation in medical-imaging AI ecosystem"}
-  ],
-  "safety_and_access_rules":[
-    "Public or properly authorized data only; never bypass hospital, dataset, IRB, credential, data-use or patient-consent restrictions.",
-    "Patient-identifiable records and images never enter GitHub.",
-    "Cataloged research software is not automatically a cleared medical device and is not automatically production-ready for patient care.",
-    "A tool marked catalog-downstream is discovered and registered but not claimed installed or live.",
-    "A downstream compute tool must pass runtime import/model-weight/license validation before execution.",
-    "The medical branch remains one Intelligence Center subdomain and does not redefine the center root identity."
+  "safety_rules":[
+    "Urgent red flags remain part of diagnostic and nursing capability and are not optional workflow overhead.",
+    "Patient-identifiable records and images are analyzed transiently and are never written into GitHub.",
+    "A photograph or handwritten note may support analysis but cannot by itself establish a definitive diagnosis when key findings are uncertain or illegible.",
+    "Medication advice must respect contraindications, allergies, pregnancy status, age, renal/hepatic function and current medicines when relevant; missing data must be stated.",
+    "For conditions where delay may threaten life, vision, neurologic function or other organ function, recommend timely in-person assessment rather than false reassurance."
   ]
 }
