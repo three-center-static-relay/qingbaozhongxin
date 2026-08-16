@@ -6,7 +6,8 @@ export const PROVIDER_CANARIES=Object.freeze([
   {id:"bigquery-metadata",provider:"bigquery",operation:"table_get",args:{public_project:"bigquery-public-data",dataset:"google_trends",table:"international_top_terms"},cost_class:"google-metadata-no-query-scan"},
   {id:"earthengine-public-asset",provider:"earthengine",operation:"asset_get",args:{asset:"GOOGLE/DYNAMICWORLD/V1"},cost_class:"public-read"},
   {id:"google-patents-public",provider:"google_patents_public",operation:"search",args:{query:"battery",limit:1},cost_class:"public-read-zero-bigquery"},
-  {id:"pkulaw-health",provider:"pkulaw",operation:"health_check",args:{},cost_class:"provider-account-read"}
+  {id:"pkulaw-health",provider:"pkulaw",operation:"health_check",args:{},cost_class:"provider-account-read"},
+  {id:"wind-aifin-mcp",provider:"aifin_market",operation:"list_tools",args:{server_type:"stock_data"},cost_class:"provider-account-read"}
 ]);
 
 function gate(env){return env.CENTER_GATE.get(env.CENTER_GATE.idFromName("global"))}
@@ -31,6 +32,12 @@ function validateResult(spec,result){
   if(spec.id==="pkulaw-health"){
     const healthy=result?.auth_ok===true&&result?.transport_ok===true&&result?.law_data_ok===true&&result?.case_data_ok===true&&result?.status==="healthy";
     return{business_ok:healthy,observed:{status:result?.status||null,auth_ok:result?.auth_ok===true,transport_ok:result?.transport_ok===true,law_data_ok:result?.law_data_ok===true,case_data_ok:result?.case_data_ok===true,checks:result?.checks||null}};
+  }
+  if(spec.id==="wind-aifin-mcp"){
+    const tools=Array.isArray(result?.result?.tools)?result.result.tools:[];
+    const names=tools.map(x=>String(x?.name||""));
+    const ready=result?.source==="Wind AIFin Market"&&result?.server_type==="stock_data"&&names.includes("get_stock_price_indicators");
+    return{business_ok:ready,observed:{source:result?.source||null,server_type:result?.server_type||null,tool_count:tools.length,stock_price_tool:names.includes("get_stock_price_indicators"),mcp_transport_ok:ready}};
   }
   return{business_ok:false,observed:{error:"UNKNOWN_CANARY"}};
 }
