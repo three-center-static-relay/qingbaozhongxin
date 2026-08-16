@@ -1,9 +1,9 @@
 import app,{CenterGate} from "./production-guard.js";
 export {CenterGate};
 
-// Deployment attestation trigger: required runtime secrets are validated by Wrangler; no runtime behavior change.
 const ORIGIN="https://intelligence.internal";
 const SERVICE="intelligence-worker";
+const DEPLOYMENT_ATTESTATION="required-secrets-zenodo-kaggle-v1";
 const json=(body,status=200)=>Response.json(body,{status,headers:{"cache-control":"no-store"}});
 
 async function readApp(path,env,ctx){
@@ -31,6 +31,7 @@ async function adminContext(env,ctx){
     ok,
     service:SERVICE,
     admin_read_only:true,
+    deployment_attestation:DEPLOYMENT_ATTESTATION,
     observed_at:new Date().toISOString(),
     runtime_version:{id:version.id||null,tag:version.tag||null,timestamp:version.timestamp||null},
     health:health.body,
