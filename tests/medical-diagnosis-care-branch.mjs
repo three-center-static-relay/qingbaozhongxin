@@ -6,10 +6,12 @@ const branch=JSON.parse(fs.readFileSync(new URL("../data-assets/top-hospital-med
 const registry=JSON.parse(fs.readFileSync(new URL("../data-assets/intelligence-branch-registry.json",import.meta.url),"utf8"));
 const evidence=JSON.parse(fs.readFileSync(new URL("../data-assets/personal-clinical-evidence-registry.json",import.meta.url),"utf8"));
 const stack=JSON.parse(fs.readFileSync(new URL("../data-assets/medical-top-tier-capability-stack.json",import.meta.url),"utf8"));
+const specialty=JSON.parse(fs.readFileSync(new URL("../data-assets/medical-top-tier-specialty-sources.json",import.meta.url),"utf8"));
 
 assert.equal(branch.branch_id,"top-hospital-medical");
 assert.equal(branch.label_zh,"医学诊断分析循证治疗与护理");
 assert.equal(branch.capability_registry,"data-assets/medical-top-tier-capability-stack.json");
+assert.equal(branch.specialty_source_registry,"data-assets/medical-top-tier-specialty-sources.json");
 
 for(const key of [
   "clinical_diagnosis","differential_diagnosis","laboratory_interpretation","ct_mri_pet_xray_ultrasound_image_support",
@@ -33,7 +35,12 @@ for(const id of ["pydicom","highdicom","simpleitk","nibabel","monai_core","opens
   assert.ok(stack.medical_file_and_imaging_tools.some(x=>x.id===id),`missing tool ${id}`);
 }
 
-for(const provider of ["who_icd11","umls_uts","loinc_terminology","ucum_standard","medlineplus_connect","openfda_drug_label","rxclass","pubtator3","monarch_api","ebi_ols","nci_evs","ncbi_gtr","cpic_pgx","clinpgx","civic_precision_oncology","open_targets","biomcp","who_smart_guidelines","hl7_fhir_standard","hl7_cql","dicomweb_standard","lactmed","livertox"]){
+assert.ok(specialty.sources.length>=14);
+for(const id of ["ncbi_clinvar","orphadata_api","nci_pdq","ema_medicines_data","kdigo_guidelines","idsa_guidelines","aha_acc_guidelines","esc_guidelines","aasld_guidelines","surviving_sepsis_campaign","rnao_best_practice_guidelines","who_rehabilitation_package","nei_eye_health","aao_preferred_practice_patterns"]){
+  assert.ok(specialty.sources.some(x=>x.id===id),`missing specialty source ${id}`);
+}
+
+for(const provider of ["who_icd11","umls_uts","loinc_terminology","ucum_standard","medlineplus_connect","openfda_drug_label","rxclass","pubtator3","ncbi_clinvar","monarch_api","orphadata_api","ebi_ols","nci_evs","ncbi_gtr","cpic_pgx","clinpgx","civic_precision_oncology","open_targets","ema_medicines_data","nci_pdq","kdigo_guidelines","idsa_guidelines","aha_acc_guidelines","esc_guidelines","aasld_guidelines","surviving_sepsis","rnao_bpg","who_rehabilitation","nei_eye_health","aao_ppp","biomcp","who_smart_guidelines","hl7_fhir_standard","hl7_cql","dicomweb_standard","lactmed","livertox","medical_top_tier_search"]){
   assert.ok(CATALOG[provider],`medical provider ${provider} missing from aggregate catalog`);
   assert.equal(CATALOG[provider].arbitrary_url,false);
   assert.equal(CATALOG[provider].write,false);
@@ -52,4 +59,4 @@ assert.match(med.scope,/evidence-based medicine/i);
 assert.match(med.scope,/treatment-option/i);
 assert.match(med.scope,/nursing/i);
 
-console.log(JSON.stringify({ok:true,suite:"medical-top-tier-capability-stack",capability_only:true,free_access_only:true,multimodal:true,ct_mri_dicom:true,evidence_medicine:true,medication:true,treatment_design:true,nursing:true,precision_medicine:true,aggregate_catalog:true}));
+console.log(JSON.stringify({ok:true,suite:"medical-top-tier-capability-stack",capability_only:true,free_access_only:true,multimodal:true,ct_mri_dicom:true,evidence_medicine:true,medication:true,treatment_design:true,nursing:true,precision_medicine:true,specialty_sources:true,aggregate_catalog:true}));
