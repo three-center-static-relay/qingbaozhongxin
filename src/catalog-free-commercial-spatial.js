@@ -1,6 +1,6 @@
 export const FREE_COMMERCIAL_SPATIAL_CATALOG={
   geospatial_commercial:{
-    stack_version:"free-commercial-spatial-v5-20260816",
+    stack_version:"free-commercial-spatial-v6-20260816",
     category:"domain-branch-geospatial-commercial",
     access:"public",
     adapter:"geospatial_commercial.domain",
@@ -10,7 +10,7 @@ export const FREE_COMMERCIAL_SPATIAL_CATALOG={
     arbitrary_url:false
   },
   commercial_web_research:{
-    stack_version:"free-commercial-spatial-v5-20260816",
+    stack_version:"free-commercial-spatial-v6-20260816",
     category:"china-commercial-geospatial-web-evidence-fusion",
     access:"key",
     secret_groups:[["EXA_API_KEY"],["TAVILY_API_KEY"],["FIRECRAWL_API_KEY"]],
@@ -22,8 +22,22 @@ export const FREE_COMMERCIAL_SPATIAL_CATALOG={
     arbitrary_url:false,
     write:false
   },
+  cmab_china:{
+    stack_version:"free-commercial-spatial-v6-20260816",
+    category:"china-national-multi-attribute-buildings",
+    access:"public",
+    adapter:"bulk-bounded-staging-required",
+    integration:"Figshare-standard-GIS-province-and-natural-city-packages",
+    scope:"3667-spatial-cities-31m-buildings-rooftop-height-structure-function-age-style-quality",
+    endpoint:"https://doi.org/10.6084/m9.figshare.27992417",
+    license:"CC-BY-4.0",
+    billing:"open-data-no-key",
+    evidence_policy:"AI-and-multi-source-derived-building-attributes; modelled-evidence-not-cadastral-or-live-occupancy-ground-truth",
+    staging_policy:"select province/natural-city package then bounded AOI features; never transfer the full national archive through a Worker",
+    arbitrary_url:false
+  },
   cbra_china:{
-    stack_version:"free-commercial-spatial-v5-20260816",
+    stack_version:"free-commercial-spatial-v6-20260816",
     category:"china-building-rooftop-area-2_5m-multiannual",
     access:"public",
     adapter:"bulk-bounded-staging-required",
@@ -37,7 +51,7 @@ export const FREE_COMMERCIAL_SPATIAL_CATALOG={
     arbitrary_url:false
   },
   microsoft_building_density_height:{
-    stack_version:"free-commercial-spatial-v5-20260816",
+    stack_version:"free-commercial-spatial-v6-20260816",
     category:"global-building-density-height-temporal-open-data",
     access:"public",
     adapter:"bulk-bounded-cog-staging-required",
