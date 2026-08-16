@@ -7,7 +7,9 @@ export const PROVIDER_CANARIES=Object.freeze([
   {id:"earthengine-public-asset",provider:"earthengine",operation:"asset_get",args:{asset:"GOOGLE/DYNAMICWORLD/V1"},cost_class:"public-read"},
   {id:"google-patents-public",provider:"google_patents_public",operation:"search",args:{query:"battery",limit:1},cost_class:"public-read-zero-bigquery"},
   {id:"pkulaw-health",provider:"pkulaw",operation:"health_check",args:{},cost_class:"provider-account-read"},
-  {id:"wind-aifin-stock",provider:"aifin_market",operation:"get_stock_price_indicators",args:{windcode:"600519.SH"},cost_class:"provider-account-read"}
+  {id:"wind-aifin-stock",provider:"aifin_market",operation:"get_stock_price_indicators",args:{windcode:"600519.SH"},cost_class:"provider-account-read"},
+  {id:"geonames-fuzhou",provider:"geonames",operation:"search",args:{q:"Fuzhou",country:"CN",limit:3,lang:"en"},cost_class:"free-tier-read"},
+  {id:"mobilitydatabase-metadata",provider:"mobilitydatabase",operation:"metadata",args:{limit:1},cost_class:"free-account-read"}
 ]);
 
 function gate(env){return env.CENTER_GATE.get(env.CENTER_GATE.idFromName("global"))}
@@ -36,6 +38,14 @@ function validateResult(spec,result){
   if(spec.id==="wind-aifin-stock"){
     const source=result?.source||null,serverType=result?.server_type||null,hasData=result?.result!==undefined&&result?.result!==null;
     return{business_ok:source==="Wind AIFin Market"&&serverType==="stock_data"&&hasData,observed:{source,server_type:serverType,has_data:hasData,tool:spec.operation}};
+  }
+  if(spec.id==="geonames-fuzhou"){
+    const items=Array.isArray(result?.data?.geonames)?result.data.geonames:[],first=items[0]||{};
+    return{business_ok:result?.free_tier_only===true&&items.length>0,observed:{item_count:items.length,first_name:first.name||null,first_country:first.countryCode||null,free_tier_only:result?.free_tier_only===true}};
+  }
+  if(spec.id==="mobilitydatabase-metadata"){
+    const hasData=result?.data!==undefined&&result?.data!==null;
+    return{business_ok:result?.free_account_only===true&&hasData,observed:{free_account_only:result?.free_account_only===true,has_data:hasData,refresh_token_supported:true}};
   }
   return{business_ok:false,observed:{error:"UNKNOWN_CANARY"}};
 }

@@ -25,14 +25,13 @@ try{
     seen.push({provider,operation,args});
     if(provider==="esa_worldcover")return{provider,operation,data:{tile:"N24E117",year:2021}};
     if(provider==="baidu_maps")return{provider,operation,free_tier_only:true,data:{status:0,description:"轻微拥堵"}};
-    if(provider==="openaq")return{provider,operation,free_tier_only:true,data:{results:[{id:1}]}};
     if(provider==="geonames")return{provider,operation,free_tier_only:true,data:{geonames:[{name:"Fuzhou"}]}};
     if(provider==="mobilitydatabase")return{provider,operation,free_account_only:true,data:{feeds:[{id:"gtfs-fz"}]}};
     throw new Error(`UNEXPECTED_DISPATCH:${provider}:${operation}`);
   };
 
-  const env={BAIDU_MAP_AK:"b",OPENAQ_API_KEY:"o",GEONAMES_USERNAME:"g",MOBILITYDATABASE_ACCESS_TOKEN:"m"};
-  const out=await buildPointContext({location:"26.0647,119.2868",country_code:"CN",municipality:"Fuzhou",h3_resolution:9,traffic_radius_m:900,air_radius_m:99999},env,dispatch);
+  const env={BAIDU_MAP_AK:"b",GEONAMES_USERNAME:"g",MOBILITYDATABASE_ACCESS_TOKEN:"m"};
+  const out=await buildPointContext({location:"26.0647,119.2868",country_code:"CN",municipality:"Fuzhou",h3_resolution:9,traffic_radius_m:900},env,dispatch);
   assert.equal(out.provider,"geospatial_commercial");
   assert.equal(out.operation,"point_context");
   assert.equal(out.free_only,true);
@@ -40,13 +39,14 @@ try{
   assert.equal(out.real_footfall,false);
   assert.equal(out.paid_fallback,false);
   assert.equal(out.arbitrary_url,false);
-  assert.equal(out.layer_count,7);
-  assert.equal(out.successful_layers,7);
-  assert.equal(out.source_receipts.length,7);
+  assert.equal(out.layer_count,6);
+  assert.equal(out.successful_layers,6);
+  assert.equal(out.source_receipts.length,6);
   for(const r of out.source_receipts)assert.match(r.digest_sha256,/^[a-f0-9]{64}$/);
   assert.equal(out.layers.find(x=>x.name==="nasa_power_climatology").data.annual.T2M,19.16);
   assert.equal(out.layers.find(x=>x.name==="nasa_power_climatology").data.annual.PRECTOTCORR,4.17);
   assert.equal(out.layers.find(x=>x.name==="h3").data.cell,"8941b530807ffff");
+  assert.equal(out.layers.some(x=>x.name==="openaq"),false);
   assert.equal(out.deferred_bulk_layers.includes("overture_maps"),true);
   assert.equal(out.deferred_bulk_layers.includes("ghsl"),true);
   assert.equal(out.deferred_bulk_layers.includes("night_lights"),true);
@@ -54,16 +54,15 @@ try{
   assert.equal(out.normalization_required_for_compute,true);
   assert.equal(seen.find(x=>x.provider==="baidu_maps").args.radius,900);
   assert.equal(seen.find(x=>x.provider==="baidu_maps").args.coord_type_input,"wgs84");
-  assert.equal(seen.find(x=>x.provider==="openaq").args.radius_m,25000);
   assert.equal(seen.find(x=>x.provider==="mobilitydatabase").args.country_code,"CN");
 
   seen.length=0;
   const minimal=await buildPointContext({location:"26.0647,119.2868"},{},dispatch);
   assert.equal(minimal.successful_layers,3);
-  assert.deepEqual(minimal.layers.filter(x=>x.skipped).map(x=>x.name).sort(),["baidu_traffic","geonames","mobilitydatabase","openaq"]);
+  assert.deepEqual(minimal.layers.filter(x=>x.skipped).map(x=>x.name).sort(),["baidu_traffic","geonames","mobilitydatabase"]);
   assert.equal(minimal.source_receipts.length,3);
-  assert.equal(seen.length,1); // only the always-public WorldCover tile_info dispatcher; NASA+H3 are local/fixed direct layers
+  assert.equal(seen.length,1);
   assert.equal(seen[0].provider,"esa_worldcover");
 } finally {globalThis.fetch=originalFetch;}
 
-console.log(JSON.stringify({ok:true,suite:"geospatial-commercial-point-context",free_only:true,mandatory_public_layers:["h3","esa_worldcover","nasa_power_climatology"],optional_free_layers:["baidu_traffic","openaq","geonames","mobilitydatabase"],observed_mobile_lbs:false,paid_fallback:false}));
+console.log(JSON.stringify({ok:true,suite:"geospatial-commercial-point-context",free_only:true,mandatory_public_layers:["h3","esa_worldcover","nasa_power_climatology"],optional_free_layers:["baidu_traffic","geonames","mobilitydatabase"],air_quality_in_bundle:false,observed_mobile_lbs:false,paid_fallback:false}));
