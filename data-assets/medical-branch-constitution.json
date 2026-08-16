@@ -1,0 +1,48 @@
+{
+  "schema_version":"1.0",
+  "constitution_id":"medical-branch-capability-only",
+  "label_zh":"医学分支宪法：全科顶级能力、只加能力",
+  "applies_to":"top-hospital-medical",
+  "mission":"Build and maintain a full-specialty, top-tier comprehensive-hospital-style medical decision-support capability stack across diagnosis, testing, imaging, pathology, evidence-based medicine, medication, treatment design, procedures, nursing, rehabilitation, genetics and longitudinal care.",
+  "coverage":"all major medical specialties and subspecialties; cross-specialty and multidisciplinary clinical problems are included as capabilities, not as workflow engines",
+  "target":"top-tier comprehensive hospital breadth and depth of medical decision-support capability; this is a capability target and not a claim of equivalence to in-person examination, hospital equipment or licensed clinical care",
+  "future_change_contract":{
+    "allowed_additions":[
+      "clinical capability",
+      "specialty capability",
+      "diagnostic capability",
+      "medical imaging or signal capability",
+      "laboratory or pathology capability",
+      "evidence-based medicine capability",
+      "medication or pharmacology capability",
+      "treatment or procedure design capability",
+      "nursing or rehabilitation capability",
+      "genetics or precision-medicine capability",
+      "medical file-format or interoperability capability",
+      "authoritative medical data source",
+      "read-only medical API or MCP",
+      "medical analysis tool"
+    ],
+    "prohibited_additions":[
+      "workflow",
+      "process pipeline",
+      "routing policy",
+      "expert-center routing",
+      "compute-center routing",
+      "multi-agent workflow",
+      "committee or expert-panel mechanism",
+      "approval chain",
+      "candidate-promotion flow",
+      "stage gate",
+      "task-state machine",
+      "queue orchestration",
+      "model-selection workflow",
+      "output contract framework",
+      "hospital operations workflow"
+    ],
+    "rule":"Future medical-branch evolution must add or improve capability records, tools or authoritative sources only. It must not add a new process, route, committee, orchestration layer or workflow framework."
+  },
+  "specialty_registry":"data-assets/medical-all-specialties-capability-registry.json",
+  "capability_stack":"data-assets/medical-top-tier-capability-stack.json",
+  "specialty_sources":"data-assets/medical-top-tier-specialty-sources.json"
+}
