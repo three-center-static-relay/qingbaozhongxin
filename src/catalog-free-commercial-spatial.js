@@ -69,7 +69,7 @@ export const FREE_COMMERCIAL_SPATIAL_CATALOG={
     scope:"place-search-nearby-admin-postal-elevation-timezone-country-info",
     endpoint:"https://secure.geonames.org",
     registration_url:"https://www.geonames.org/login",
-    free_tier:"10000-credits-per-day-per-application;1000-credits-per-hour;commercial-use-allowed-with-attribution",
+    free_tier:"30000-credits-per-day-per-application;2000-credits-per-hour;commercial-use-allowed-with-attribution-as-of-2026-08",
     billing_policy:"free-server-only; no premium automatic fallback",
     license:"CC-BY",
     arbitrary_url:false
