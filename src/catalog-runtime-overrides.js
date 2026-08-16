@@ -1,7 +1,13 @@
 export const RUNTIME_CATALOG_OVERRIDES={
-  google_patents_public:{category:"google-public-patents",access:"public",adapter:"google_patents.bounded-public-search",integration:"official-google-patents-public-search",scope:"bounded-public-search-no-bigquery-scan",endpoint:"https://patents.google.com/xhr/query",billing:"bigquery-bytes-billed-zero",arbitrary_url:false,write:false},
-  amap:{category:"maps-cn-mcp",access:"key",secrets:["AMAP_API_KEY"],adapter:"amap.mcp-streamable-http",integration:"official-streamable-http-mcp",scope:"geocode-reverse-place-route-distance-weather-read-only",endpoint:"https://mcp.amap.com/mcp",auth:"query-key",arbitrary_url:false,rest_fallback:false},
-  baidu_maps:{category:"maps-cn-mcp",access:"key",secret_groups:[["BAIDU_MAP_AK"],["BAIDU_MAP_API_KEY"]],adapter:"baidu_maps.mcp-streamable-http",integration:"official-streamable-http-mcp",scope:"geocode-reverse-read-only",endpoint:"https://mcp.map.baidu.com/mcp",auth:"query-ak",arbitrary_url:false,rest_fallback:false},
-  tencent_maps:{category:"maps-cn-mcp",access:"key",secret_groups:[["TENCENT_LBS_API_KEY"],["TENCENT_MAP_API_KEY"]],adapter:"tencent_maps.mcp-sse",integration:"official-mcp-sse",scope:"geocode-reverse-nearby-read-only",endpoint:"https://mcp.map.qq.com/sse",auth:"query-key",arbitrary_url:false,rest_fallback:false,transport_note:"Tencent official hosted MCP currently documents SSE; migrate to Streamable HTTP when Tencent publishes a stable endpoint."},
-  tianditu:{category:"maps-cn-official",access:"key",secret_groups:[["TIANDITU_TK"],["TIANDITU_API_KEY"]],adapter:"tianditu.search",integration:"official-https-api",scope:"bounded-read-only-place-search",endpoint:"https://api.tianditu.gov.cn/v2/search",arbitrary_url:false,mcp_status:"no-public-official-mcp-verified-2026-08-16",compliance_policy:{internal_analysis_only:true,public_map_service:false,persistent_raw_map_mirror:false,personal_trajectory:false,proxy_rotation:false,quota_evasion:false,bulk_mirroring:false,attribution_required_if_republishing:true,separate_review_if_public_map_service:true}}
+  google_patents_public:{
+    category:"google-public-patents",
+    access:"public",
+    adapter:"google_patents.bounded-public-search",
+    integration:"official-google-patents-public-search",
+    scope:"bounded-public-search-no-bigquery-scan",
+    endpoint:"https://patents.google.com/xhr/query",
+    billing:"bigquery-bytes-billed-zero",
+    arbitrary_url:false,
+    write:false
+  }
 };
