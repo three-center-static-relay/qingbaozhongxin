@@ -3,6 +3,7 @@ import {OPERATIONS as SPATIAL_OPERATIONS,runAdapter as runSpatial} from "./adapt
 import {OPERATIONS as MEDICAL_LIVE_OPERATIONS,runAdapter as runMedicalLive} from "./adapters-extra45.js";
 import {OPERATIONS as MEDICAL_LIVE2_OPERATIONS,runAdapter as runMedicalLive2} from "./adapters-extra46.js";
 import {OPERATIONS as MEDICAL_LIVE3_OPERATIONS,runAdapter as runMedicalLive3} from "./adapters-extra47.js";
+import {OPERATIONS as MEDICAL_LIVE4_OPERATIONS,runAdapter as runMedicalLive4} from "./adapters-extra48.js";
 
 const text=(v,n=1200)=>String(v??"").trim().slice(0,n);
 const clamp=(v,min,max,d)=>{const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,Math.trunc(n))):d};
@@ -51,8 +52,9 @@ async function searchMedical(args,env){
   };
 }
 
-export const OPERATIONS={medical_top_tier_search:["search"],...MEDICAL_LIVE_OPERATIONS,...MEDICAL_LIVE2_OPERATIONS,...MEDICAL_LIVE3_OPERATIONS,...SPATIAL_OPERATIONS};
+export const OPERATIONS={medical_top_tier_search:["search"],...MEDICAL_LIVE_OPERATIONS,...MEDICAL_LIVE2_OPERATIONS,...MEDICAL_LIVE3_OPERATIONS,...MEDICAL_LIVE4_OPERATIONS,...SPATIAL_OPERATIONS};
 export async function runAdapter(provider,operation,args={},env={}){
+  if(MEDICAL_LIVE4_OPERATIONS[provider]?.includes(operation))return runMedicalLive4(provider,operation,args,env);
   if(MEDICAL_LIVE3_OPERATIONS[provider]?.includes(operation))return runMedicalLive3(provider,operation,args,env);
   if(MEDICAL_LIVE2_OPERATIONS[provider]?.includes(operation))return runMedicalLive2(provider,operation,args,env);
   if(MEDICAL_LIVE_OPERATIONS[provider]?.includes(operation))return runMedicalLive(provider,operation,args,env);
