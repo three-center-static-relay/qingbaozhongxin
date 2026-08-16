@@ -1,6 +1,7 @@
 import {runAdapter as runWebSearch} from "./adapters-extra39.js";
 import {OPERATIONS as SPATIAL_OPERATIONS,runAdapter as runSpatial} from "./adapters-extra44.js";
 import {OPERATIONS as MEDICAL_LIVE_OPERATIONS,runAdapter as runMedicalLive} from "./adapters-extra45.js";
+import {OPERATIONS as MEDICAL_LIVE2_OPERATIONS,runAdapter as runMedicalLive2} from "./adapters-extra46.js";
 
 const text=(v,n=1200)=>String(v??"").trim().slice(0,n);
 const clamp=(v,min,max,d)=>{const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,Math.trunc(n))):d};
@@ -49,8 +50,9 @@ async function searchMedical(args,env){
   };
 }
 
-export const OPERATIONS={medical_top_tier_search:["search"],...MEDICAL_LIVE_OPERATIONS,...SPATIAL_OPERATIONS};
+export const OPERATIONS={medical_top_tier_search:["search"],...MEDICAL_LIVE_OPERATIONS,...MEDICAL_LIVE2_OPERATIONS,...SPATIAL_OPERATIONS};
 export async function runAdapter(provider,operation,args={},env={}){
+  if(MEDICAL_LIVE2_OPERATIONS[provider]?.includes(operation))return runMedicalLive2(provider,operation,args,env);
   if(MEDICAL_LIVE_OPERATIONS[provider]?.includes(operation))return runMedicalLive(provider,operation,args,env);
   if(SPATIAL_OPERATIONS[provider]?.includes(operation))return runSpatial(provider,operation,args,env);
   if(provider!=="medical_top_tier_search"||operation!=="search")err("ADAPTER_OPERATION_NOT_APPROVED",403,{provider,operation});
