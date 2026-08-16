@@ -1,5 +1,5 @@
 import {CATALOG as BASE_CATALOG,EXCLUDED_PROVIDERS as BASE_EXCLUDED} from "./catalog-base.js";
-export const CATALOG_VERSION="2026-08-15.23";
+export const CATALOG_VERSION="2026-08-16.01";
 export const EXCLUDED_PROVIDERS=BASE_EXCLUDED;
 export const CATALOG={
   ...BASE_CATALOG,
@@ -20,7 +20,6 @@ export const CATALOG={
   amap:{category:"maps-cn",access:"key",secrets:["AMAP_API_KEY"],adapter:"amap.multi"},
   baidu_maps:{category:"maps-cn",access:"key",secret_groups:[["BAIDU_MAP_AK"],["BAIDU_MAP_API_KEY"]],adapter:"baidu_maps.geocode+reverse"},
   tencent_maps:{category:"maps-cn-mcp",access:"key",secret_groups:[["TENCENT_LBS_API_KEY"],["TENCENT_MAP_API_KEY"]],adapter:"tencent_maps.multi",integration:"official-mcp+webservice"},
-  tianditu:{category:"maps-cn-official",access:"key",secret_groups:[["TIANDITU_TK"],["TIANDITU_API_KEY"]],adapter:"tianditu.search"},
   aifin_market:{category:"finance-cn-mcp",access:"key",secrets:["WIND_API_KEY"],adapter:"catalog-only",integration:"official-skill-mcp"},
   pkulaw:{category:"legal-cn",access:"key",secret_groups:[["PKULAW_MCP_TOKEN"],["PKULAW_API_TOKEN"],["BROWSERFABRIC_API_KEY"]],adapter:"pkulaw.official-cli-direct-jsonrpc",integration:"official-cli-direct-jsonrpc",scope:"10-fixed-official-mcp-services-tools-list-and-tool-call",endpoint:"https://apim-gateway.pkulaw.com/",auth_note:"preferred secret PKULAW_MCP_TOKEN; PKULAW_API_TOKEN supported; BROWSERFABRIC_API_KEY retained temporarily only as a legacy secret-name alias"},
   yuandian:{category:"legal-cn",access:"key",secret_groups:[["YD_API_KEY"],["YUANDIAN_API_KEY"]],adapter:"yuandian.official-api",integration:"official-rest+mcp",scope:"law-case-enterprise-read-only"},
