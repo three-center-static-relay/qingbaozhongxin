@@ -2,13 +2,15 @@ import {CATALOG as EXISTING_CATALOG,EXCLUDED_PROVIDERS as EXISTING_EXCLUDED} fro
 import {GLOBAL_HIGH_VALUE_CATALOG} from "./catalog-global-highvalue.js";
 import {SPLUS_CATALOG} from "./catalog-splus.js";
 import {AIFIN_CATALOG} from "./catalog-aifin.js";
-export const CATALOG_VERSION="2026-08-16.35";
+import {FREE_COMMERCIAL_SPATIAL_CATALOG} from "./catalog-free-commercial-spatial.js";
+export const CATALOG_VERSION="2026-08-16.36";
 export const EXCLUDED_PROVIDERS=EXISTING_EXCLUDED;
 export const CATALOG={
   ...EXISTING_CATALOG,
   ...GLOBAL_HIGH_VALUE_CATALOG,
   ...SPLUS_CATALOG,
   ...AIFIN_CATALOG,
+  ...FREE_COMMERCIAL_SPATIAL_CATALOG,
   worldbank:{...EXISTING_CATALOG.worldbank,adapter:"worldbank.indicator+metadata+topic+multi-indicator",integration:"official-indicators-api-v2",scope:"countries-indicators-topics-single-and-bounded-multi-indicator",arbitrary_url:false},
   imf:{...EXISTING_CATALOG.imf,adapter:"imf.datamapper-v2",integration:"official-datamapper-v2",scope:"indicators-countries-regions-groups-bounded-timeseries",endpoint:"https://www.imf.org/external/datamapper/api/v2",arbitrary_url:false},
   bis:{...EXISTING_CATALOG.bis,adapter:"bis.sdmx-v2",integration:"official-sdmx-rest-v2",scope:"structures-and-bounded-data-queries",endpoint:"https://stats.bis.org/api/v2",arbitrary_url:false},
