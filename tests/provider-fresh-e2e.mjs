@@ -22,6 +22,17 @@ const network=setupServer(
       if(svc==="mcp-case-search-service")return j({jsonrpc:"2.0",id:b.id,result:{content:[{type:"text",text:'[{"title":"劳动合同纠纷案"}]'}],isError:false}});
     }
     return j({error:"unexpected"},{status:500});
+  }),
+  http.post("https://mcp.wind.com.cn/vserver_stock_data/mcp/",async({request})=>{
+    assert.equal(request.headers.get("authorization"),"Bearer unit-wind-key");
+    const b=await request.json();
+    if(b.method==="initialize")return j({jsonrpc:"2.0",id:b.id,result:{protocolVersion:"2025-03-26",capabilities:{}}});
+    if(b.method==="tools/call"){
+      assert.equal(b.params?.name,"get_stock_price_indicators");
+      assert.equal(b.params?.arguments?.windcode,"600519.SH");
+      return j({jsonrpc:"2.0",id:b.id,result:{content:[{type:"text",text:JSON.stringify({data:{code:0,message:"OK",rows:[{windcode:"600519.SH",price:1}]}})}],isError:false}});
+    }
+    return j({jsonrpc:"2.0",id:b.id,error:{code:-32601,message:"unexpected method"}},{status:400});
   })
 );
 network.listen({onUnhandledRequest:"error"});
@@ -29,7 +40,7 @@ const server=createTestHarness({workers:[{configPath:"./wrangler.provider-selfte
 try{
   await server.listen();
   const r=await server.fetch("https://intelligence.internal/v1/selftest/providers",{method:"POST"}),b=await r.json();
-  assert.equal(r.status,200);assert.equal(b.ok,true);assert.equal(b.selftest,"provider-fresh-e2e");assert.equal(b.ai_called,false);assert.equal(b.providers_checked,4);assert.equal(b.bigquery_query_scan,false);assert.equal(b.bigquery_bytes_billed,0);assert.equal(b.checks.length,4);assert.ok(b.checks.every(x=>x.ok===true&&x.terminal_status==="pass"&&x.lock_released===true));assert.equal(b.checks.find(x=>x.id==="pkulaw-health")?.status,"healthy");assert.equal(b.checks.find(x=>x.id==="google-patents-public")?.bigquery_bytes_billed,0);assert.match(b.receipt_digest,/^[a-f0-9]{64}$/);
+  assert.equal(r.status,200);assert.equal(b.ok,true);assert.equal(b.selftest,"provider-fresh-e2e");assert.equal(b.ai_called,false);assert.equal(b.providers_checked,5);assert.equal(b.bigquery_query_scan,false);assert.equal(b.bigquery_bytes_billed,0);assert.equal(b.checks.length,5);assert.ok(b.checks.every(x=>x.ok===true&&x.terminal_status==="pass"&&x.lock_released===true));assert.equal(b.checks.find(x=>x.id==="pkulaw-health")?.status,"healthy");assert.equal(b.checks.find(x=>x.id==="google-patents-public")?.bigquery_bytes_billed,0);const wind=b.checks.find(x=>x.id==="wind-aifin-stock");assert.equal(wind?.source,"Wind AIFin Market");assert.equal(wind?.server_type,"stock_data");assert.equal(wind?.has_data,true);assert.equal(wind?.tool,"get_stock_price_indicators");assert.match(b.receipt_digest,/^[a-f0-9]{64}$/);
   const denied=await server.fetch("https://public.example/v1/selftest/providers",{method:"POST"});assert.equal(denied.status,403);
-  console.log(JSON.stringify({ok:true,suite:"provider-fresh-e2e",checks:4,internal_only:true,bigquery_zero_scan:true}));
+  console.log(JSON.stringify({ok:true,suite:"provider-fresh-e2e",checks:5,internal_only:true,bigquery_zero_scan:true,pkulaw_health:true,wind_aifin:true}));
 }finally{await server.close().catch(()=>{});network.close()}
