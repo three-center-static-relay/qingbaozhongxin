@@ -19,10 +19,11 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
     spatial_index:["h3"],
     population_demography:["worldpop"],
     buildings_urban_form:["ghsl","overture_maps","dlr_wsf"],
-    land_cover_change:["copernicus_lcfm"],
+    land_cover_change:["esa_worldcover","copernicus_lcfm"],
     activity_proxies:["night_lights"],
     synthetic_mobility:["worldmove"],
     transit_discovery:["mobilitydatabase"],
+    air_quality_environment:["openaq"],
     climate_environment:["nasa_power","gdacs"],
     earth_observation_discovery:["nasa_cmr","nasa_stac","nasa_gibs"],
     knowledge_crosscheck:["wikidata"]
@@ -30,9 +31,9 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
   feature_layers:[
     "place_identity","administrative_hierarchy","population_total","age_sex_structure","population_density",
     "poi_density","poi_mix","brand_competition","building_surface","building_volume","nonresidential_built_form",
-    "settlement_extent","land_cover","urban_change","night_activity_proxy","road_accessibility","walking_accessibility",
+    "settlement_extent","land_cover_10m","land_cover","urban_change","night_activity_proxy","road_accessibility","walking_accessibility",
     "driving_accessibility","real_time_traffic","public_transit_feed_availability","synthetic_mobility_prior",
-    "weather_climate_context","hazard_context","earth_observation_change","spatial_quality_provenance"
+    "air_quality_exposure","weather_climate_context","hazard_context","earth_observation_change","spatial_quality_provenance"
   ],
   analysis_families:[
     "site_selection","trade_area","market_potential","retail_gap","white_space","competition","cannibalization",
@@ -40,7 +41,7 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
     "risk_exposure","healthcare_location","infrastructure_location","scenario_analysis"
   ],
   reusable_compute_primitives:[
-    "commercial_spatial_fusion","facility_location","vrp","resource_allocation","change_point","effect_estimation",
+    "commercial_spatial_fusion","spatial_feature_fusion","site_ranking","white_space","facility_location","vrp","resource_allocation","change_point","effect_estimation",
     "multinomial_logit","sobol","network_analysis","optimization","causal","simulation","geospatial"
   ],
   limitations:[
