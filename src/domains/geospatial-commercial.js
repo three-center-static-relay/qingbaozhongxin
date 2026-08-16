@@ -1,4 +1,4 @@
-export const GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION="geospatial-commercial-v2-20260816";
+export const GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION="geospatial-commercial-v3-20260816";
 
 export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
   id:"geospatial-commercial",
@@ -30,7 +30,7 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
     commercial_poi_crosscheck:["overture_maps","foursquare_os_places"],
     spatial_index:["h3"],
     population_demography:["worldpop","ghsl"],
-    buildings_urban_form:["ghsl","dlr_wsf","overture_maps"],
+    buildings_urban_form:["cbra_china","microsoft_building_density_height","ghsl","dlr_wsf","overture_maps"],
     land_cover_change:["esa_worldcover","copernicus_lcfm"],
     activity_proxies:["night_lights"],
     synthetic_mobility:["worldmove"],
@@ -42,11 +42,11 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
   feature_layers:[
     "place_identity","administrative_hierarchy","population_total","age_sex_structure","population_density",
     "poi_density","poi_mix","brand_presence","brand_competition","commercial_supply","competitor_density",
-    "building_surface","building_height","building_volume","nonresidential_built_form","settlement_extent",
-    "land_cover_10m","urban_change","night_activity_proxy","road_accessibility","walking_accessibility",
+    "building_rooftop_2_5m","building_density","building_surface","building_height","building_volume","nonresidential_built_form","settlement_extent",
+    "building_change","land_cover_10m","urban_change","night_activity_proxy","road_accessibility","walking_accessibility",
     "driving_accessibility","public_transit_accessibility","real_time_traffic","public_transit_feed_availability",
     "synthetic_mobility_prior","project_pipeline_web_signal","commercial_open_close_web_signal",
-    "planning_policy_web_signal","retail_rent_web_signal","investment招商_web_signal","spatial_quality_provenance"
+    "planning_policy_web_signal","retail_rent_web_signal","investment_activity_web_signal","spatial_quality_provenance"
   ],
   analysis_families:[
     "site_selection","trade_area","market_potential","retail_gap","white_space","competition","cannibalization_proxy",
