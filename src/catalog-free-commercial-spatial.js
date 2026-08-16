@@ -1,4 +1,14 @@
 export const FREE_COMMERCIAL_SPATIAL_CATALOG={
+  geospatial_commercial:{
+    stack_version:"free-commercial-spatial-v3-20260816",
+    category:"domain-branch-geospatial-commercial",
+    access:"public",
+    adapter:"geospatial_commercial.domain",
+    integration:"shared-evidence-multi-provider-domain-manifest",
+    scope:"free-only-commercial-geospatial-capability-manifest-and-feature-plan",
+    billing:"local-manifest-no-api-fee",
+    arbitrary_url:false
+  },
   baidu_maps:{
     stack_version:"free-commercial-spatial-v2-20260816",
     category:"maps-cn-free-tier",
@@ -47,6 +57,36 @@ export const FREE_COMMERCIAL_SPATIAL_CATALOG={
     billing:"open-access",
     upstream_policy:"Cloudflare reads only the fixed Figshare public API archive; blocked/timeout Tsinghua web download path is not used",
     evidence_policy:"synthetic-mobility-prior-only; never label as observed phone footfall",
+    arbitrary_url:false
+  },
+  geonames:{
+    stack_version:"free-commercial-spatial-v3-20260816",
+    category:"global-place-admin-elevation-free-tier",
+    access:"key",
+    secrets:["GEONAMES_USERNAME"],
+    adapter:"geonames.free-rest",
+    integration:"official-rest-json",
+    scope:"place-search-nearby-admin-postal-elevation-timezone-country-info",
+    endpoint:"https://secure.geonames.org",
+    registration_url:"https://www.geonames.org/login",
+    free_tier:"10000-credits-per-day-per-application;1000-credits-per-hour;commercial-use-allowed-with-attribution",
+    billing_policy:"free-server-only; no premium automatic fallback",
+    license:"CC-BY",
+    arbitrary_url:false
+  },
+  mobilitydatabase:{
+    stack_version:"free-commercial-spatial-v3-20260816",
+    category:"global-transit-mobility-feed-catalog",
+    access:"key",
+    secret_groups:[["MOBILITYDATABASE_ACCESS_TOKEN"],["MOBILITYDATABASE_REFRESH_TOKEN"]],
+    adapter:"mobilitydatabase.free-api",
+    integration:"MobilityData-official-catalog-api",
+    scope:"metadata-gtfs-gtfs-rt-gbfs-feed-discovery-only",
+    endpoint:"https://api.mobilitydatabase.org",
+    registration_url:"https://mobilitydatabase.org/sign-up",
+    free_tier:"free-account-required-for-api;catalog-access-free",
+    billing_policy:"free-account-only; no paid fallback",
+    evidence_policy:"feed-catalog-metadata-only; individual-feed-license-and-authentication-must-be-respected",
     arbitrary_url:false
   }
 };
