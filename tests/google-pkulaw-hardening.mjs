@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {runAdapter} from "../src/adapters-extra33.js";
+import {CATALOG,statusFor} from "../src/catalog.js";
 
 const realFetch=globalThis.fetch;
 const j=(x,status=200,headers={"content-type":"application/json"})=>new Response(JSON.stringify(x),{status,headers});
@@ -66,6 +67,14 @@ globalThis.fetch=async(url,init={})=>{
 };
 
 try{
+  const patCatalog=CATALOG.google_patents_public;
+  assert.equal(patCatalog.access,"public");
+  assert.equal(patCatalog.adapter,"google_patents.bounded-public-search");
+  assert.equal(patCatalog.integration,"official-google-patents-public-search");
+  assert.equal(patCatalog.scope,"bounded-public-search-no-bigquery-scan");
+  assert.equal(patCatalog.billing,"bigquery-bytes-billed-zero");
+  assert.equal(statusFor({},"google_patents_public").configured,true);
+
   const genv={GOOGLE_CLOUD_ACCESS_TOKEN:"unit-google-token",GOOGLE_CLOUD_PROJECT:"unit-project"};
   const tr=await runAdapter("google_trends_public","top_terms",{country_code:"US",limit:1},genv);
   assert.equal(tr.latest_refresh_date,"2026-08-13");
@@ -96,5 +105,5 @@ try{
   assert.equal(lawSearchCalls,1);
   assert.equal(caseSearchCalls,1);
 
-  console.log(JSON.stringify({ok:true,suite:"google-pkulaw-hardening",trends_latest_partition:true,trends_bounded_bytes:true,patents_zero_bigquery_scan:true,pkulaw_schema_aware_health:true,pkulaw_service_fallback:true}));
+  console.log(JSON.stringify({ok:true,suite:"google-pkulaw-hardening",trends_latest_partition:true,trends_bounded_bytes:true,patents_zero_bigquery_scan:true,patents_catalog_runtime_aligned:true,pkulaw_schema_aware_health:true,pkulaw_service_fallback:true}));
 }finally{globalThis.fetch=realFetch}
