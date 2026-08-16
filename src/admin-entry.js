@@ -21,14 +21,18 @@ async function readGate(env){
   return {http_status:response.status,...body};
 }
 
-async function zenodoRuntimeSelftest(env){
-  const secretPresent=Boolean(String(env.ZENODO_TOKEN||"").trim());
+async function providerRuntimeSelftest(provider,env){
+  const isZenodo=provider==="zenodo";
+  const secretName=isZenodo?"ZENODO_TOKEN":"KAGGLE_API_TOKEN";
+  const operation=isZenodo?"search":"datasets_search";
+  const args=isZenodo?{query:"climate",limit:1,page:1,sort:"bestmatch"}:{query:"population",page:1,sort:"hottest"};
+  const secretPresent=Boolean(String(env[secretName]||"").trim());
   try{
-    const result=await runAdapter("zenodo","search",{query:"climate",limit:1,page:1,sort:"bestmatch"},env);
+    const result=await runAdapter(provider,operation,args,env);
     const itemCount=Array.isArray(result?.items)?result.items.length:0;
-    return json({ok:itemCount>0,selftest:"zenodo-runtime",secret_present:secretPresent,upstream_http_status:200,item_count:itemCount,total:result?.total??null,error:null,secrets_redacted:true});
+    return json({ok:itemCount>0,selftest:`${provider}-runtime`,secret_present:secretPresent,upstream_http_status:200,item_count:itemCount,total:result?.total??null,error:null,secrets_redacted:true});
   }catch(error){
-    return json({ok:false,selftest:"zenodo-runtime",secret_present:secretPresent,upstream_http_status:Number(error?.details?.http_status)||null,error:String(error?.message||"ZENODO_SELFTEST_FAILED"),adapter_status:Number(error?.status)||500,secrets_redacted:true});
+    return json({ok:false,selftest:`${provider}-runtime`,secret_present:secretPresent,upstream_http_status:Number(error?.details?.http_status)||null,error:String(error?.message||`${provider.toUpperCase()}_SELFTEST_FAILED`),adapter_status:Number(error?.status)||500,secrets_redacted:true});
   }
 }
 
@@ -58,7 +62,8 @@ async function adminContext(env,ctx){
 export default{
   async fetch(req,env,ctx){
     const url=new URL(req.url);
-    if(req.method==="GET"&&url.pathname==="/v1/selftest/zenodo-runtime")return zenodoRuntimeSelftest(env);
+    if(req.method==="GET"&&url.pathname==="/v1/selftest/zenodo-runtime")return providerRuntimeSelftest("zenodo",env);
+    if(req.method==="GET"&&url.pathname==="/v1/selftest/kaggle-runtime")return providerRuntimeSelftest("kaggle",env);
     if(req.method==="GET"&&url.pathname==="/v1/admin/context"){
       if(url.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"admin context is service-binding internal only"},403);
       return adminContext(env,ctx);
