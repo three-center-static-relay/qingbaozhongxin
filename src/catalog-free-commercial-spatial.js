@@ -88,5 +88,34 @@ export const FREE_COMMERCIAL_SPATIAL_CATALOG={
     billing_policy:"free-account-only; no paid fallback",
     evidence_policy:"feed-catalog-metadata-only; individual-feed-license-and-authentication-must-be-respected",
     arbitrary_url:false
+  },
+  openaq:{
+    stack_version:"free-commercial-spatial-v3-20260816",
+    category:"global-air-quality-environmental-exposure",
+    access:"key",
+    secrets:["OPENAQ_API_KEY"],
+    adapter:"openaq.v3-bounded",
+    integration:"official-rest-v3",
+    scope:"nearby-monitor-discovery-and-location-latest-measurements",
+    endpoint:"https://api.openaq.org/v3",
+    registration_url:"https://explore.openaq.org/register",
+    free_tier:"general-use-60-requests-per-minute-2000-per-hour-as-of-2026-08",
+    billing_policy:"general-use-free-tier-only; no custom-paid-rate fallback",
+    evidence_policy:"public-environmental-measurements-with-OpenAQ-and-underlying-source-attribution; not a complete census of all monitors",
+    arbitrary_url:false
+  },
+  esa_worldcover:{
+    stack_version:"free-commercial-spatial-v3-20260816",
+    category:"global-land-cover-10m-open-data",
+    access:"public",
+    adapter:"esa_worldcover.public-cog-index",
+    integration:"ESA-WorldCover-official-public-AWS-COG",
+    scope:"2020-v100-and-2021-v200-fixed-tile-url-and-bounded-range-probe",
+    endpoint:"https://esa-worldcover.s3.eu-central-1.amazonaws.com",
+    free_tier:"public-AWS-open-data-no-account-required",
+    billing_policy:"open-data-only; no Earth-Engine-commercial-runtime dependency",
+    license:"CC-BY-4.0",
+    evidence_policy:"10m-land-cover-baseline; do-not-treat-2020-v100-vs-2021-v200-difference-as-pure-change-because-algorithms-differ",
+    arbitrary_url:false
   }
 };
