@@ -5,9 +5,15 @@ function point(v){const s=text(v,48);if(!/^-?\d{1,2}(?:\.\d{1,8})?,-?\d{1,3}(?:\
 function tileLower(v,axis){let x=Number(v);if(!Number.isFinite(x))fail("INVALID_COORDINATE");const max=axis==="lat"?90:180,min=-max;if(x<min||x>max)fail("INVALID_COORDINATE");if(x===max)x-=1e-9;return Math.floor(x/3)*3}
 function tileIdFromPoint(p){const lat=tileLower(p.lat,"lat"),lng=tileLower(p.lng,"lng"),la=`${lat>=0?"N":"S"}${String(Math.abs(lat)).padStart(2,"0")}`,lo=`${lng>=0?"E":"W"}${String(Math.abs(lng)).padStart(3,"0")}`;return`${la}${lo}`}
 function clamp(v,min,max,d){const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,Math.trunc(n))):d}
-function bbox(v){const a=Array.isArray(v)?v.map(Number):String(v||"").split(",").map(Number);if(a.length!==4||a.some(x=>!Number.isFinite(x)))fail("INVALID_BBOX");const[minLon,minLat,maxLon,maxLat]=a;if(minLon<-180||maxLon>180||minLat<-90||maxLat>90||minLon>=maxLon||minLat>=maxLat)fail("INVALID_BBOX");return a.join(",")}
+function bboxArray(v){const a=Array.isArray(v)?v.map(Number):String(v||"").split(",").map(Number);if(a.length!==4||a.some(x=>!Number.isFinite(x)))fail("INVALID_BBOX");const[minLon,minLat,maxLon,maxLat]=a;if(minLon<-180||maxLon>180||minLat<-90||maxLat>90||minLon>=maxLon||minLat>=maxLat)fail("INVALID_BBOX");return a}
+function bbox(v){return bboxArray(v).join(",")}
+function iso3(v){const s=String(v||"CHN").trim().toUpperCase();if(!/^[A-Z]{3}$/.test(s))fail("INVALID_ISO3");return s}
+function adm(v){const s=String(v||"ADM2").trim().toUpperCase();if(!/^ADM[0-5]$/.test(s))fail("INVALID_ADM_LEVEL");return s}
+function stacDatetime(v){if(v===undefined||v===null||v==="")return undefined;const s=text(v,100);if(!/^[0-9TtZz:+.\-/]+$/.test(s))fail("INVALID_DATETIME");return s}
+function collections(v){if(v===undefined||v===null||v==="")return undefined;const xs=(Array.isArray(v)?v:String(v).split(",")).map(x=>String(x).trim()).filter(Boolean);if(!xs.length||xs.length>5||xs.some(x=>!/[A-Za-z0-9._:-]/.test(x)||x.length>100))fail("INVALID_COLLECTIONS");return xs}
 async function readJson(r){const raw=await r.text();if(new TextEncoder().encode(raw).length>MAX_JSON_BYTES)fail("UPSTREAM_RESPONSE_TOO_LARGE",502);let body;try{body=raw?JSON.parse(raw):null}catch{fail("UPSTREAM_BAD_JSON",502,{http_status:r.status})}if(!r.ok)fail(r.status===401||r.status===403?"UPSTREAM_AUTH_FAILED":"UPSTREAM_HTTP_ERROR",r.status===401||r.status===403?503:502,{http_status:r.status,message:text(body?.message||body?.detail||body?.error,300)});return body}
-async function getJson(url,headers={}){const c=new AbortController(),t=setTimeout(()=>c.abort(),TIMEOUT_MS);try{return await readJson(await fetch(url,{headers:{accept:"application/json",...headers},signal:c.signal}))}catch(e){if(e?.name==="AbortError")fail("UPSTREAM_TIMEOUT",504);throw e}finally{clearTimeout(t)}}
+async function requestJson(url,init={}){const c=new AbortController(),t=setTimeout(()=>c.abort(),TIMEOUT_MS);try{return await readJson(await fetch(url,{...init,headers:{accept:"application/json",...(init.headers||{})},signal:c.signal}))}catch(e){if(e?.name==="AbortError")fail("UPSTREAM_TIMEOUT",504);throw e}finally{clearTimeout(t)}}
+const getJson=(url,headers={})=>requestJson(url,{headers});
 async function rangeProbe(url){const c=new AbortController(),t=setTimeout(()=>c.abort(),TIMEOUT_MS);try{const r=await fetch(url,{headers:{range:"bytes=0-31"},signal:c.signal}),ok=r.status===200||r.status===206;try{await r.body?.cancel()}catch{}return{reachable:ok,http_status:r.status,content_type:r.headers.get("content-type"),content_range:r.headers.get("content-range"),etag:r.headers.get("etag"),last_modified:r.headers.get("last-modified"),range_probe:true,bytes_requested:32}}catch(e){if(e?.name==="AbortError")fail("UPSTREAM_TIMEOUT",504);throw e}finally{clearTimeout(t)}}
 function worldcoverInfo(args){const p=point(args.location),year=Number(args.year)===2020?2020:2021,version=year===2020?"v100":"v200",tile=tileIdFromPoint(p),file=`ESA_WorldCover_10m_${year}_${version}_${tile}_Map.tif`,url=`https://esa-worldcover.s3.eu-central-1.amazonaws.com/${version}/${year}/map/${file}`;return{location:p.s,year,version,tile,file,url,resolution_m:10,classes:11,crs:"EPSG:4326",license:"CC-BY-4.0",observed_mobile_lbs:false,change_warning:"2020-v100 and 2021-v200 use different algorithm versions; differences are not pure land-cover change"}}
 async function worldcoverProbe(args){const info=worldcoverInfo(args);return{...info,...await rangeProbe(info.url)}}
@@ -19,6 +25,9 @@ const SOURCE_INFO=Object.freeze({
   geolink_uv_china:{provider:"geolink_uv_china",coverage:"342 Chinese cities",year:"circa-2023",role:"urban-village-and-renewal-opportunity-screening",endpoint:"https://zenodo.org/api/records/18688062",evidence_kind:"modelled",license_policy:"read and persist release license metadata before binary ingest; fail closed if incompatible/unknown"},
   planetary_computer:{provider:"planetary_computer",coverage:"global",role:"public-STAC-earth-observation-backup",endpoint:"https://planetarycomputer.microsoft.com/api/stac/v1",access:"anonymous public STAC; most downloads anonymous but throttled",bounded_runtime:"collection/bbox/time-bounded discovery only"},
   copernicus_dataspace_stac:{provider:"copernicus_dataspace_stac",coverage:"global",role:"official-Sentinel-STAC",endpoint:"https://stac.dataspace.copernicus.eu/v1/",license:"Copernicus Sentinel free/full/open with attribution",access:"free core service with fair-use quotas",bounded_runtime:"collection/bbox/time-bounded discovery only"},
+  earth_search_stac:{provider:"earth_search_stac",coverage:"global",role:"free-public-STAC-backup-for-Sentinel-Landsat-Copernicus-DEM",endpoint:"https://earth-search.aws.element84.com/v1",access:"free-to-use public STAC; no guaranteed service level",license_policy:"preserve each collection/asset upstream license",bounded_runtime:"bbox/time/collection-bounded search only; backup/corroboration rather than sole production dependency"},
+  geoboundaries_gbopen:{provider:"geoboundaries_gbopen",coverage:"global including China",role:"administrative-boundary-crosscheck",endpoint:"https://www.geoboundaries.org/api/current/gbOpen",license:"CC-BY-4.0",access:"public API; attribution required",bounded_runtime:"single-country single-ADM metadata lookup only; gbAuthoritative is prohibited because it is non-commercial"},
+  opentripplanner_local:{provider:"opentripplanner_local",coverage:"depends on admitted OSM+GTFS/GTFS-RT/GBFS inputs",role:"self-hosted-multimodal-public-transit-routing-and-accessibility",endpoint:"https://docs.opentripplanner.org/",license:"LGPL",access:"open-source self-hosted",capabilities:["walking","cycling","scheduled-transit","GTFS-RT","GBFS","multimodal-itineraries","travel-time-windows"],runtime_policy:"compute-staging only; never rely on a third-party public demo; ingest only license-approved GTFS/OSM inputs"},
   geofabrik_osm_china:{provider:"geofabrik_osm_china",coverage:"China",role:"daily-OSM-network-building-POI-backup-and-routing-graph-input",endpoint:"https://download.geofabrik.de/asia/china-latest.osm.pbf",license:"ODbL-1.0",evidence_kind:"community-observed/mapped",bounded_runtime:"32-byte reachability probe in Worker; full PBF only external/compute staging"},
   kontur_population:{provider:"kontur_population",coverage:"global",resolution:"400m H3",role:"population-density-crosscheck-for-site-selection",endpoint:"https://www.kontur.io/datasets/",license:"CC-BY",commercial_use:true,access:"free downloadable H3 dataset; paid API disabled",evidence_kind:"modelled/derived"},
   transitland_free:{provider:"transitland_free",coverage:"global where feeds exist",role:"current-transit-feed-stop-route-backup",endpoint:"https://transit.land/api/v2/rest",access:"free API key",free_tier:"10000 REST requests/month; 1000 routing requests/month",license_policy:"filter source feeds by license metadata; no historical/bulk paid products"}
@@ -32,6 +41,9 @@ async function sourceProbe(provider){
   if(provider==="geofabrik_osm_china")return{...SOURCE_INFO[provider],probe:await rangeProbe(SOURCE_INFO[provider].endpoint)};
   return SOURCE_INFO[provider]
 }
+function stacBody(args){const body={limit:clamp(args?.limit,1,20,10)};if(args?.bbox!==undefined)body.bbox=bboxArray(args.bbox);const dt=stacDatetime(args?.datetime),cs=collections(args?.collections);if(dt)body.datetime=dt;if(cs)body.collections=cs;if(!body.bbox&&!dt&&!cs)fail("ARG_REQUIRED:stac_filter");return body}
+async function stacSearch(provider,args){const base=provider==="planetary_computer"?SOURCE_INFO.planetary_computer.endpoint:provider==="copernicus_dataspace_stac"?SOURCE_INFO.copernicus_dataspace_stac.endpoint.replace(/\/$/,""):SOURCE_INFO.earth_search_stac.endpoint;const body=stacBody(args),result=await requestJson(`${base}/search`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});return{provider,operation:"stac_search",bounded:true,query:body,result}}
+async function geoBoundaries(args){const country=iso3(args?.country),level=adm(args?.adm),url=`${SOURCE_INFO.geoboundaries_gbopen.endpoint}/${country}/${level}/`,metadata=await getJson(url);return{source:"geoboundaries_gbopen",release_type:"gbOpen",country,adm:level,license:"CC-BY-4.0",attribution_required:true,metadata}}
 function transitlandUrl(operation,args){
   const u=new URL(`https://transit.land/api/v2/rest/${operation}`);u.searchParams.set("limit",String(clamp(args?.limit,1,50,20)));
   if(args?.search)u.searchParams.set("search",text(args.search,120));
@@ -44,22 +56,28 @@ function transitlandUrl(operation,args){
   if(operation==="stops"&&args?.location){const p=point(args.location);u.searchParams.set("lat",String(p.lat));u.searchParams.set("lon",String(p.lng));u.searchParams.set("radius",String(clamp(args.radius_m,1,10000,3000)));u.searchParams.set("license_commercial_use_allowed","exclude_no");}
   return u;
 }
-async function transitland(operation,args,env){const key=text(env?.TRANSITLAND_API_KEY,500);if(!key)fail("UPSTREAM_AUTH_FAILED",503,{missing:"TRANSITLAND_API_KEY"});const u=transitlandUrl(operation,args);const data=await getJson(u,{apikey:key});return{provider:"transitland_free",operation,free_tier_only:true,license_filtered:true,data}}
+async function transitland(operation,args,env){const key=text(env?.TRANSITLAND_API_KEY,500);if(!key)fail("UPSTREAM_AUTH_FAILED",503,{missing:"TRANSITLAND_API_KEY"});const u=transitlandUrl(operation,args),data=await getJson(u,{apikey:key});return{provider:"transitland_free",operation,free_tier_only:true,license_filtered:true,data}}
 
 export const OPERATIONS={
+  geospatial_commercial:["geoboundaries_metadata","earth_search_stac_search","opentripplanner_source_info"],
   esa_worldcover:["tile_info","tile_probe"],
   sinolc1_china:["source_info"],
   cmtbh30_china:["source_info","metadata_probe"],
   glo3d_building_footprints:["source_info"],
   geolink_uv_china:["source_info","metadata_probe"],
-  planetary_computer:["source_info","stac_probe"],
-  copernicus_dataspace_stac:["source_info","stac_probe"],
+  planetary_computer:["source_info","stac_probe","stac_search"],
+  copernicus_dataspace_stac:["source_info","stac_probe","stac_search"],
   geofabrik_osm_china:["source_info","range_probe"],
   kontur_population:["source_info"],
   transitland_free:["source_info","feeds","stops"]
 };
 export async function runAdapter(provider,operation,args={},env={}){
   if(!OPERATIONS[provider]?.includes(operation))fail("ADAPTER_OPERATION_NOT_APPROVED",403);
+  if(provider==="geospatial_commercial"){
+    if(operation==="geoboundaries_metadata")return{provider,operation,public_open_data:true,data:await geoBoundaries(args)};
+    if(operation==="earth_search_stac_search")return{provider,operation,public_open_data:true,data:await stacSearch("earth_search_stac",args)};
+    if(operation==="opentripplanner_source_info")return{provider,operation,public_open_source:true,data:SOURCE_INFO.opentripplanner_local};
+  }
   if(provider==="esa_worldcover"){
     if(operation==="tile_info")return{provider,operation,public_open_data:true,data:worldcoverInfo(args)};
     if(operation==="tile_probe")return{provider,operation,public_open_data:true,data:await worldcoverProbe(args)};
@@ -69,7 +87,8 @@ export async function runAdapter(provider,operation,args={},env={}){
     return transitland(operation,args,env);
   }
   if(operation==="source_info")return{provider,operation,public_open_data:true,data:SOURCE_INFO[provider]};
+  if(operation==="stac_search")return{provider,operation,public_open_data:true,data:await stacSearch(provider,args)};
   if(["metadata_probe","stac_probe","range_probe"].includes(operation))return{provider,operation,public_open_data:true,data:await sourceProbe(provider)};
   fail("ADAPTER_NOT_IMPLEMENTED",501);
 }
-export const __test={SOURCE_INFO,bbox,transitlandUrl,worldcoverInfo};
+export const __test={SOURCE_INFO,bbox,bboxArray,stacBody,transitlandUrl,worldcoverInfo};
