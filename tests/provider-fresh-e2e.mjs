@@ -22,6 +22,20 @@ const network=setupServer(
       if(svc==="mcp-case-search-service")return j({jsonrpc:"2.0",id:b.id,result:{content:[{type:"text",text:'[{"title":"劳动合同纠纷案"}]'}],isError:false}});
     }
     return j({error:"unexpected"},{status:500});
+  }),
+  http.post("https://open.chineselaw.com/mcp/law/stream",async({request})=>{
+    assert.equal(request.headers.get("authorization"),"Bearer unit-yuandian-token");
+    const b=await request.json();
+    if(b.method==="initialize")return HttpResponse.json({jsonrpc:"2.0",id:b.id,result:{protocolVersion:"2025-11-25",capabilities:{},serverInfo:{name:"yuandian-law",version:"1"}}},{headers:{"mcp-session-id":"unit-yuandian-session"}});
+    assert.equal(request.headers.get("mcp-session-id"),"unit-yuandian-session");
+    assert.equal(request.headers.get("mcp-protocol-version"),"2025-11-25");
+    if(b.method==="notifications/initialized")return new HttpResponse(null,{status:202});
+    if(b.method==="tools/call"){
+      assert.equal(b.params?.name,"yuandian_law_vector_search");
+      assert.match(String(b.params?.arguments?.query||""),/地图管理条例/);
+      return j({jsonrpc:"2.0",id:b.id,result:{structuredContent:{result:[{title:"地图管理条例",article:"第三十四条",content:"互联网地图服务单位应当将存放地图数据的服务器设在中华人民共和国境内。"}]},isError:false}});
+    }
+    return j({jsonrpc:"2.0",id:b.id,error:{code:-32601,message:"unexpected method"}},{status:400});
   })
 );
 network.listen({onUnhandledRequest:"error"});
@@ -29,7 +43,7 @@ const server=createTestHarness({workers:[{configPath:"./wrangler.provider-selfte
 try{
   await server.listen();
   const r=await server.fetch("https://intelligence.internal/v1/selftest/providers",{method:"POST"}),b=await r.json();
-  assert.equal(r.status,200);assert.equal(b.ok,true);assert.equal(b.selftest,"provider-fresh-e2e");assert.equal(b.ai_called,false);assert.equal(b.providers_checked,4);assert.equal(b.bigquery_query_scan,false);assert.equal(b.bigquery_bytes_billed,0);assert.equal(b.checks.length,4);assert.ok(b.checks.every(x=>x.ok===true&&x.terminal_status==="pass"&&x.lock_released===true));assert.equal(b.checks.find(x=>x.id==="pkulaw-health")?.status,"healthy");assert.equal(b.checks.find(x=>x.id==="google-patents-public")?.bigquery_bytes_billed,0);assert.match(b.receipt_digest,/^[a-f0-9]{64}$/);
+  assert.equal(r.status,200);assert.equal(b.ok,true);assert.equal(b.selftest,"provider-fresh-e2e");assert.equal(b.ai_called,false);assert.equal(b.providers_checked,5);assert.equal(b.bigquery_query_scan,false);assert.equal(b.bigquery_bytes_billed,0);assert.equal(b.checks.length,5);assert.ok(b.checks.every(x=>x.ok===true&&x.terminal_status==="pass"&&x.lock_released===true));assert.equal(b.checks.find(x=>x.id==="pkulaw-health")?.status,"healthy");assert.equal(b.checks.find(x=>x.id==="google-patents-public")?.bigquery_bytes_billed,0);const yd=b.checks.find(x=>x.id==="yuandian-law-mcp");assert.equal(yd?.transport,"mcp-streamable-http");assert.equal(yd?.mcp_tool,"yuandian_law_vector_search");assert.equal(yd?.has_data,true);assert.match(b.receipt_digest,/^[a-f0-9]{64}$/);
   const denied=await server.fetch("https://public.example/v1/selftest/providers",{method:"POST"});assert.equal(denied.status,403);
-  console.log(JSON.stringify({ok:true,suite:"provider-fresh-e2e",checks:4,internal_only:true,bigquery_zero_scan:true}));
+  console.log(JSON.stringify({ok:true,suite:"provider-fresh-e2e",checks:5,internal_only:true,bigquery_zero_scan:true,yuandian_mcp:true}));
 }finally{await server.close().catch(()=>{});network.close()}
