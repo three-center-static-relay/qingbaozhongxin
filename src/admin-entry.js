@@ -1,6 +1,7 @@
 import app,{CenterGate} from "./production-guard.js";
 export {CenterGate};
 
+// Deployment attestation trigger: required runtime secrets are validated by Wrangler; no runtime behavior change.
 const ORIGIN="https://intelligence.internal";
 const SERVICE="intelligence-worker";
 const json=(body,status=200)=>Response.json(body,{status,headers:{"cache-control":"no-store"}});
