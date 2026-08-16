@@ -23,21 +23,6 @@ export const AIFIN_CATALOG={
     execution_policy:"Direct calls use only seven fixed official Wind MCP endpoints and the official 34-tool allowlist. No remote skill installation, no child process, no arbitrary URL, no automatic tools/call retry.",
     arbitrary_url:false
   },
-  yuandian:{
-    category:"legal-cn",
-    access:"key",
-    secret_groups:[["YD_API_KEY"],["YUANDIAN_API_KEY"]],
-    adapter:"yuandian.mcp-streamable-http",
-    integration:"official-streamable-http-mcp",
-    scope:"law-case-enterprise-read-only-fixed-official-mcp-servers",
-    endpoints:{
-      law:"https://open.chineselaw.com/mcp/law/stream",
-      case:"https://open.chineselaw.com/mcp/case/stream",
-      company:"https://open.chineselaw.com/mcp/company/stream"
-    },
-    auth:"Bearer YD_API_KEY",
-    arbitrary_url:false
-  },
   ...AKSHARE_CATALOG,
   ...WEB_SEARCH_CATALOG,
   ...LITERATURE_LIVE_CATALOG,
