@@ -1,7 +1,6 @@
 import guard,{CenterGate} from "./guard.js";
 import {runLiteratureSelftest} from "./literature-selftest.js";
 import {runProviderSelftest} from "./provider-selftest.js";
-import {runWindSelftest} from "./wind-selftest.js";
 import {runTiandituNetworkDiagnostic} from "./tianditu-network-diagnostic.js";
 export {CenterGate};
 const json=(x,s=200)=>Response.json(x,{status:s,headers:{"cache-control":"no-store"}});
@@ -17,10 +16,6 @@ export default{
     if(req.method==="POST"&&u.pathname==="/v1/selftest/providers"){
       if(u.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"provider selftest is service-binding internal only"},403);
       return runProviderSelftest(guard,env,ctx);
-    }
-    if(req.method==="POST"&&u.pathname==="/v1/selftest/wind"){
-      if(u.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"Wind selftest is service-binding internal only"},403);
-      return runWindSelftest(env);
     }
     return guard.fetch(req,env,ctx);
   },
