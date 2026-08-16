@@ -1,0 +1,31 @@
+{
+  "schema":"commercial-spatial-knowledge-graph-v1",
+  "updated_at":"2026-08-17T00:20:00+08:00",
+  "domain":"geospatial-commercial",
+  "purpose":"Entity-resolved temporal commercial geography graph for site selection, trade area, competition, cannibalization, accessibility and white-space analysis.",
+  "identity_policy":{
+    "preferred_stable_ids":["overture_gers_id","wikidata_qid","geonames_id","osm_type_id","provider_native_id","h3_cell"],
+    "coordinate_system_canonical":"WGS84",
+    "china_map_coordinates":"retain original coordinate system plus normalized WGS84 with transformation provenance",
+    "automatic_merge_threshold":"high-confidence-only",
+    "ambiguous_matches":"retain separate nodes and same_entity_candidate edge",
+    "source_provenance_required":true
+  },
+  "node_types":["place","admin_area","h3_cell","poi","brand","mall","building","entrance_exit","transit_stop","transit_route","road_segment","parking_facility","urban_village","observation","time_slice","source"],
+  "edge_types":[
+    "located_in","contains","brand_of","entrance_of","serves","connects_to","nearby","competes_with","cannibalizes_proxy",
+    "same_entity","same_entity_candidate","part_of_trade_area","accessible_within","parking_serves","mapped_to_building",
+    "changed_to","observed_at","derived_from","evidence_for"
+  ],
+  "temporal_policy":{
+    "valid_from_and_valid_to_when_known":true,
+    "snapshot_release_id_required_for_overture_osm_and_bulk_layers":true,
+    "historical_osm_source":"ohsome_api",
+    "poi_open_close_is_proxy":true,
+    "do_not_infer_real_business_closure_from_single_missing_source":true
+  },
+  "evidence_classes":["observed_public_aggregate","official_reference","community_mapped","remote_sensing_observed","modelled","synthetic","proxy"],
+  "commercial_graph_features":["tenant_mix","brand_density","competitor_graph","mall_store_hierarchy","entrance_accessibility","transit_service_graph","parking_supply_graph","poi_turnover","commercial_supply_change","cross-source-entity-confidence"],
+  "privacy_policy":{"personal_nodes":false,"device_ids":false,"raw_person_trajectories":false,"aggregate_only":true},
+  "boundary":"The graph improves entity resolution, temporal supply and accessibility reasoning; it does not create proprietary mobile footfall, dwell, OD or private consumer profiles."
+}
