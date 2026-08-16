@@ -1,0 +1,100 @@
+{
+  "schema_version":"2026-08-16.1",
+  "id":"knowledge-graph-knowledgebase-archives",
+  "label_zh":"知识图谱、知识库、档案库",
+  "parent":"intelligence-center",
+  "type":"intelligence-subdomain",
+  "replaces_center":false,
+  "purpose":"Federated discovery and bounded read-only retrieval across global knowledge graphs, scholarly metadata, public libraries, archives, cultural heritage collections, government data catalogs, research repositories and sector knowledge systems.",
+  "coverage_model":{
+    "mode":"federated-not-mirrored",
+    "literal_all_sources_claim":false,
+    "reason":"No finite static registry can truthfully contain every country, region, industry, archive, library, database and future source. Coverage is achieved by authoritative aggregators, national anchors, open registries and protocol-based discovery, then expanded by allowlisted source onboarding.",
+    "source_priority":["primary official source","national or supranational aggregator","institutional repository","global scholarly or cultural aggregator","secondary web discovery"],
+    "web_discovery":["exa","tavily"],
+    "web_discovery_rule":"Exa and Tavily are discovery/corroboration layers only. They may discover candidate primary sources but must not upgrade an unverified page into authoritative evidence.",
+    "mcp_api_discovery":["mcp_registry","apis_guru","smithery","glama","pulsemcp","mcp_so","docker_mcp","google_mcp_registry","azure_mcp_registry"],
+    "mcp_security_rule":"Registry discovery does not imply installation or execution. New MCP/API endpoints remain catalog-only until origin, terms, authentication, read/write surface, rate limits and bounded-operation allowlists are reviewed."
+  },
+  "protocol_families":[
+    {"id":"rest-json","use":"bounded record and dataset search","policy":"fixed official host and path; no arbitrary URL"},
+    {"id":"sparql-rdf","use":"knowledge graph and linked-data queries","policy":"fixed query templates or explicit query allowlists; no arbitrary update operations"},
+    {"id":"oai-pmh","use":"repository and archive metadata harvesting","policy":"metadata-only, bounded page/resumption-token traversal, provider terms respected"},
+    {"id":"sru-cql","use":"library and archival search","policy":"fixed CQL templates generated from bounded user terms"},
+    {"id":"iiif","use":"cultural heritage manifests and image metadata","policy":"metadata/manifests first; binary media not proxied by default"},
+    {"id":"dcat-ckan","use":"government and open-data catalog discovery","policy":"catalog metadata first; dataset payload fetched only by separately approved source adapter"},
+    {"id":"dataverse","use":"institutional research-data repositories","policy":"public metadata and explicitly open files only"},
+    {"id":"sdmx","use":"official statistics and macroeconomic data","policy":"bounded dimensions and time ranges"}
+  ],
+  "identity_backbone":[
+    {"provider":"wikidata","role":"global entity graph and cross-identifiers","status":"existing"},
+    {"provider":"dbpedia_lookup","role":"Wikipedia-derived entity resolution","status":"existing"},
+    {"provider":"openalex","role":"scholarly works-authors-institutions-sources-topics graph","status":"existing"},
+    {"provider":"crossref","role":"DOI scholarly metadata and relationships","status":"existing"},
+    {"provider":"datacite","role":"research data/output DOI metadata","status":"existing"},
+    {"provider":"ror","role":"research organization identifiers","status":"existing"},
+    {"provider":"orcid","role":"researcher public identity registry","status":"existing-catalog"},
+    {"provider":"opencitations","role":"citation graph","status":"existing"},
+    {"provider":"bnf_data_sparql","role":"BnF semantic authority/works/places/archives graph","status":"catalog-only"},
+    {"provider":"viaf_authorities","role":"cross-library authority identifiers","status":"catalog-only"},
+    {"provider":"getty_vocabularies","role":"art/architecture/people/place controlled vocabularies","status":"existing-catalog"}
+  ],
+  "scholarly_and_research_backbone":[
+    "crossref","openalex","datacite","openaire","base","core","doaj","semantic_scholar","unpaywall","re3data","zenodo","figshare","harvard_dataverse","osf","arxiv","biorxiv","medrxiv","dblp","inspirehep","nasa_ads","repec","agris","pubmed","ncbi_entrez","europe_pmc","gbif_literature","pangaea"
+  ],
+  "library_archive_cultural_backbone":[
+    "library_of_congress","nara_catalog","dpla","europeana","ndl_search","gallica","bnf_data_sparql","finna","digitalnz","deutsche_digitale_bibliothek","smithsonian","met_museum","rijksmuseum","rijksmuseum_library_sru","art_institute_chicago","vam_collections","cleveland_museum","getty_collection","project_gutenberg"
+  ],
+  "government_open_data_backbone":[
+    "data_gov_us","data_europa","worldbank","imf","oecd","bis","un_comtrade","wto","adb","us_census_api","us_bls_api","us_bea_api","usaspending","ted_eu_procurement","who_gho","cdc_open_data","openfda","congress_gov","regulations_gov","govinfo"
+  ],
+  "new_or_hardened_live_adapters":[
+    {"provider":"library_of_congress","operation":"search","auth":"public","endpoint":"https://www.loc.gov/search/"},
+    {"provider":"nara_catalog","operation":"search","auth":"NARA_API_KEY or NARA_CATALOG_API_KEY","endpoint":"https://catalog.archives.gov/api/v2/records/search"},
+    {"provider":"europeana","operation":"search","auth":"EUROPEANA_API_KEY","endpoint":"https://api.europeana.eu/record/v2/search.json"},
+    {"provider":"dpla","operation":"search","auth":"DPLA_API_KEY","endpoint":"https://api.dp.la/v2/items"},
+    {"provider":"gallica","operation":"search","auth":"public","endpoint":"https://gallica.bnf.fr/SRU"},
+    {"provider":"ndl_search","operation":"search","auth":"public; provider terms/application requirements apply","endpoint":"https://ndlsearch.ndl.go.jp/api/sru"},
+    {"provider":"data_gov_us","operation":"search","auth":"DATA_GOV_API_KEY or GSA_DATA_GOV_API_KEY","endpoint":"https://api.gsa.gov/technology/datagov/v4/search"},
+    {"provider":"data_europa","operation":"search","auth":"public","endpoint":"https://data.europa.eu/api/hub/search/ckan/package_search"}
+  ],
+  "geographic_resolution_policy":{
+    "country":"Resolve official national library, national archives, national statistics/open-data portal, national research repository network and national legal/publication portal first; then supranational/global aggregators.",
+    "subnational_region":"Resolve province/state/city official open-data and archive/library portals, then local universities/research institutes, then national and global aggregators.",
+    "cross_border_region":"Use supranational portals and harmonized global datasets, preserving each source jurisdiction and provenance.",
+    "institution":"Resolve canonical organization identity through ROR/Wikidata/VIAF where applicable, then locate official repository/API/OAI-PMH/SRU endpoints.",
+    "language":"Preserve source-language title/description and language code; translation is a downstream presentation layer and never overwrites source metadata."
+  },
+  "industry_resolution_policy":{
+    "finance_markets":["official central bank/regulator/exchange","company filings","BIS/IMF/World Bank/OECD","scholarly research"],
+    "industry_trade":["national statistics/customs","UN Comtrade/WTO","industry regulator","academic/think-tank datasets"],
+    "energy":["national energy regulator/statistics","EIA/IEA-compatible public sources where licensed","satellite/environment corroboration","research repositories"],
+    "agriculture_food":["national agriculture statistics","USDA/AGRIS","trade data","remote sensing","research repositories"],
+    "health_medicine":["WHO/national public health agencies","PubMed/NCBI/Europe PMC","clinical registries","regulatory databases","institutional research repositories"],
+    "science_technology":["OpenAlex/Crossref/DataCite","patent offices","research repositories","standards bodies","official R&D statistics"],
+    "law_policy":["official gazettes/legislatures/courts/regulators","national archives","legal databases with explicit access rights","scholarly commentary"],
+    "transport_logistics":["transport regulators/open data","aviation/maritime/rail public systems","trade and geospatial data","research repositories"],
+    "environment_climate":["national environment agencies","NASA/Copernicus/NOAA-compatible official sources","PANGAEA/GBIF","research repositories"],
+    "culture_history":["national libraries/archives/museums","Europeana/DPLA/Finna/DigitalNZ","Wikidata/VIAF/Getty","scholarly repositories"],
+    "education_social":["ministries/statistics offices","ERIC/ICPSR/IPUMS-compatible sources","university repositories","census and survey data"],
+    "computing_ai":["official standards/security advisories","research graphs","Hugging Face/open repositories","university/lab datasets"]
+  },
+  "record_contract":{
+    "required_provenance_fields":["provider","source_url_or_identifier","retrieved_at","source_authority_class"],
+    "preferred_identifiers":["DOI","ARK","Handle","URN","ISBN","ISSN","ROR","ORCID","VIAF","Wikidata QID","catalog record ID"],
+    "rights_fields":["license","rights_statement","access_level","reuse_restrictions"],
+    "dedupe_keys":["canonical persistent identifier","provider record id","normalized title+creator+date only as fallback"],
+    "raw_content_policy":"Do not indiscriminately mirror copyrighted full text or binary archives. Store/query metadata and source links by default; retrieve content only when license/access rights and a bounded task require it."
+  },
+  "runtime_invariants":[
+    "read-only by default",
+    "fixed allowlisted upstreams only",
+    "no arbitrary URL fetch",
+    "no arbitrary SPARQL UPDATE or remote code execution",
+    "bounded query terms, pagination and response bytes",
+    "no automatic retry storms",
+    "provider authentication secrets stay in runtime secret storage, never Git",
+    "rate limits and provider terms are authoritative",
+    "restricted, licensed, confidential or personal records are metadata-only until explicit authorized access exists"
+  ]
+}
