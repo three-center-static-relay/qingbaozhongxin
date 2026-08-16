@@ -1,5 +1,6 @@
 export const FREE_COMMERCIAL_SPATIAL_CATALOG={
   baidu_maps:{
+    stack_version:"free-commercial-spatial-v2-20260816",
     category:"maps-cn-free-tier",
     access:"key",
     secret_groups:[["BAIDU_MAP_AK"],["BAIDU_MAP_API_KEY"]],
@@ -11,6 +12,7 @@ export const FREE_COMMERCIAL_SPATIAL_CATALOG={
     arbitrary_url:false
   },
   h3:{
+    stack_version:"free-commercial-spatial-v2-20260816",
     category:"spatial-index-local-free",
     access:"public",
     adapter:"h3.local",
@@ -21,6 +23,7 @@ export const FREE_COMMERCIAL_SPATIAL_CATALOG={
     arbitrary_url:false
   },
   openrouteservice:{
+    stack_version:"free-commercial-spatial-v2-20260816",
     category:"routing-accessibility-free-tier",
     access:"key",
     secret_groups:[["OPENROUTESERVICE_API_KEY"],["ORS_API_KEY"]],
@@ -33,6 +36,7 @@ export const FREE_COMMERCIAL_SPATIAL_CATALOG={
     arbitrary_url:false
   },
   worldmove:{
+    stack_version:"free-commercial-spatial-v2-20260816",
     category:"open-synthetic-human-mobility",
     access:"public",
     adapter:"worldmove.official-open-data",
