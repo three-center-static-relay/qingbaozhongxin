@@ -1,13 +1,18 @@
 {
-  "schema_version":"3.1",
+  "schema_version":"4.0",
   "branch_id":"top-hospital-medical",
-  "label_zh":"医学诊断分析循证治疗与护理",
+  "label_zh":"顶级综合医院全科医学能力",
   "parent":"intelligence-center",
   "type":"intelligence-subdomain",
   "replaces_center":false,
+  "constitution_registry":"data-assets/medical-branch-constitution.json",
+  "all_specialties_registry":"data-assets/medical-all-specialties-capability-registry.json",
   "capability_registry":"data-assets/medical-top-tier-capability-stack.json",
   "specialty_source_registry":"data-assets/medical-top-tier-specialty-sources.json",
   "capabilities":{
+    "all_major_specialties_and_subspecialties":true,
+    "top_tier_comprehensive_hospital_breadth_target":true,
+    "cross_specialty_multimorbidity_analysis":true,
     "clinical_diagnosis":true,
     "differential_diagnosis":true,
     "red_flag_and_urgency_analysis":true,
@@ -34,6 +39,7 @@
     "diagnostic_test_selection":true,
     "treatment_option_comparison":true,
     "individualized_treatment_plan_design_support":true,
+    "procedure_and_intervention_option_analysis":true,
     "clinical_calculators_and_risk_scores":true,
     "nursing_assessment_and_care":true,
     "self_care_and_rehabilitation_support":true,
@@ -43,7 +49,9 @@
     "precision_oncology_support":true,
     "fhir_record_ingestion":true,
     "dicomweb_image_retrieval":true,
-    "medical_terminology_normalization":true
+    "medical_terminology_normalization":true,
+    "longitudinal_case_analysis":true,
+    "second_opinion_support":true
   },
   "machine_sources":[
     "WHO ICD-11 API","UMLS UTS API","LOINC APIs","UCUM","MedlinePlus Connect","MedlinePlus Web Service","openFDA Drug Label API","DailyMed API","RxNorm API","RxClass API","PubMed NCBI E-utilities","PubMed Central","Europe PMC API","ClinicalTrials.gov API v2","PubTator3 API","NCBI ClinVar via E-utilities","Monarch Initiative API","Orphadata API","EMBL-EBI OLS API","NCI EVS API","NCBI Genetic Testing Registry API","CPIC API","ClinPGx API","CIViC API","Open Targets GraphQL API","EMA medicine JSON data","BioMCP","WHO SMART Guidelines","HL7 FHIR","HL7 CQL","DICOMweb","LactMed","LiverTox"
