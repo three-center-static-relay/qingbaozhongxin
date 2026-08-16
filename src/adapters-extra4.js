@@ -11,13 +11,18 @@ function trafficPolygon(v){const parts=Array.isArray(v)?v:String(v||"").split(";
 function coordTypeIn(v){return["bd09ll","gcj02","wgs84"].includes(v)?v:"bd09ll"}
 function coordTypeOut(v){return["bd09ll","gcj02"].includes(v)?v:"bd09ll"}
 function roadGrade(v){if(v===undefined||v===null||v==="")return"0";const p=String(v).split(",").map(x=>Number(x.trim()));if(!p.length||p.length>5||p.some(x=>!Number.isInteger(x)||x<0||x>5))throw Object.assign(new Error("INVALID_ROAD_GRADE"),{status:400});return[...new Set(p)].join(",")}
+function regionName(v){const s=text(v,60);if(!s||!/^[\p{L}\p{N}\s·\-]{1,60}$/u.test(s))throw Object.assign(new Error("INVALID_REGION"),{status:400});return s}
+function norm(v){return text(v,300).toLowerCase().replace(/[\s\-—_·•()（）\[\]【】,:：，。/\\]/g,"")}
+function relevance(item,keyword){const q=norm(keyword),title=norm(item?.title),address=norm(item?.address),category=norm(item?.category);if(!q)return 0;let score=0;if(title===q)score+=1000;else if(title.includes(q))score+=700;else if(title.length>=2&&q.includes(title))score+=500;if(address.includes(q))score+=180;if(category.includes(q))score+=160;const chars=[...new Set(q)].filter(Boolean),hay=`${title}${address}${category}`,overlap=chars.length?chars.filter(ch=>hay.includes(ch)).length/chars.length:0;score+=Math.round(overlap*100);const d=Number(item?._distance);if(Number.isFinite(d))score+=Math.max(0,50-Math.min(50,d/100));return score}
+function rankTencent(body,keyword){const b=ensureTencent(body),items=Array.isArray(b?.data)?b.data:[];const ranked=items.map(x=>({...x,_relevance_score:relevance(x,keyword)})).sort((a,b)=>b._relevance_score-a._relevance_score||(Number(a?._distance)||1e12)-(Number(b?._distance)||1e12));return{...b,data:ranked,keyword_applied:text(keyword,80),relevance_ranked:true}}
 function baiduKey(env){return env.BAIDU_MAP_AK||env.BAIDU_MAP_API_KEY||""}
 function tencentKey(env){return env.TENCENT_LBS_API_KEY||env.TENCENT_MAP_API_KEY||""}
 function ensureBaidu(body){if(Number(body?.status)!==0)throw Object.assign(new Error("UPSTREAM_BUSINESS_ERROR"),{status:502,details:{status:body?.status,message:body?.message}});return body}
 function ensureTencent(body){if(Number(body?.status)!==0)throw Object.assign(new Error("UPSTREAM_BUSINESS_ERROR"),{status:502,details:{status:body?.status,message:body?.message}});return body}
 function freeTraffic(body){const b=ensureBaidu(body);if(Array.isArray(b?.road_traffic))for(const road of b.road_traffic)if(road&&typeof road==="object")delete road.traffic_detail;return b}
 async function baiduTraffic(path,params,env){const ak=baiduKey(env);if(!ak)throw Object.assign(new Error("UPSTREAM_AUTH_FAILED"),{status:503});const u=new URL(`https://api.map.baidu.com${path}`);u.searchParams.set("ak",String(ak));for(const[k,v]of Object.entries(params))if(v!==undefined&&v!==null&&String(v)!=="")u.searchParams.set(k,String(v));return freeTraffic(await getJson(u))}
-export const OPERATIONS={baidu_maps:["geocode","reverse_geocode","traffic_road","traffic_bound","traffic_polygon","traffic_around"],tencent_maps:["geocode","reverse_geocode","place_nearby"]};
+async function tencentPlace(keyword,boundary,limit,key){const u=new URL("https://apis.map.qq.com/ws/place/v1/search");u.searchParams.set("keyword",text(keyword,80));u.searchParams.set("boundary",boundary);u.searchParams.set("page_size",String(clamp(limit,1,20,10)));u.searchParams.set("page_index","1");u.searchParams.set("key",String(key));return rankTencent(await getJson(u),keyword)}
+export const OPERATIONS={baidu_maps:["geocode","reverse_geocode","traffic_road","traffic_bound","traffic_polygon","traffic_around"],tencent_maps:["geocode","reverse_geocode","place_text","place_nearby"]};
 export async function runAdapter(provider,operation,args,env){
   if(!OPERATIONS[provider]?.includes(operation))throw Object.assign(new Error("ADAPTER_OPERATION_NOT_APPROVED"),{status:403});
   if(provider==="baidu_maps"){
@@ -33,7 +38,8 @@ export async function runAdapter(provider,operation,args,env){
     const key=tencentKey(env);if(!key)throw Object.assign(new Error("UPSTREAM_AUTH_FAILED"),{status:503});
     if(operation==="geocode"){const u=new URL("https://apis.map.qq.com/ws/geocoder/v1/");u.searchParams.set("address",text(required(args,"address"),200));u.searchParams.set("key",String(key));if(args.region)u.searchParams.set("region",text(args.region,60));return{provider,operation,data:ensureTencent(await getJson(u))}}
     if(operation==="reverse_geocode"){const u=new URL("https://apis.map.qq.com/ws/geocoder/v1/");u.searchParams.set("location",coordLatLng(required(args,"location")));u.searchParams.set("key",String(key));u.searchParams.set("get_poi",args.get_poi===false?"0":"1");return{provider,operation,data:ensureTencent(await getJson(u))}}
-    if(operation==="place_nearby"){const center=coordLatLng(required(args,"location")),radius=clamp(args.radius,10,5000,1000),u=new URL("https://apis.map.qq.com/ws/place/v1/search");u.searchParams.set("keyword",text(required(args,"keyword"),80));u.searchParams.set("boundary",`nearby(${center},${radius})`);u.searchParams.set("page_size",String(clamp(args.limit,1,20,10)));u.searchParams.set("page_index","1");u.searchParams.set("key",String(key));return{provider,operation,data:ensureTencent(await getJson(u))}}
+    if(operation==="place_text"){const keyword=text(required(args,"keyword"),80),region=regionName(required(args,"region"));return{provider,operation,data:await tencentPlace(keyword,`region(${region},0)`,args.limit,key)}}
+    if(operation==="place_nearby"){const keyword=text(required(args,"keyword"),80),center=coordLatLng(required(args,"location")),radius=clamp(args.radius,10,5000,1000);return{provider,operation,data:await tencentPlace(keyword,`nearby(${center},${radius})`,args.limit,key)}}
   }
   throw Object.assign(new Error("ADAPTER_NOT_IMPLEMENTED"),{status:501});
 }
