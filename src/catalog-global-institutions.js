@@ -1,18 +1,21 @@
 export const GLOBAL_INSTITUTION_CATALOG={
   global_institution_discovery:{
-    category:"global-institution-web-discovery",
+    category:"top-tier-free-global-institution-discovery",
     access:"key",
     secrets:["EXA_API_KEY","TAVILY_API_KEY"],
     adapter:"global_institution_discovery.exa+tavily-multiround",
     integration:"official-exa-rest+official-tavily-rest",
-    scope:"candidate-discovery-for-universities-government-agencies-banks-companies-think-tanks-research-institutes-international-organizations-associations-libraries-archives-museums-databases-knowledge-graphs-and-machine-interfaces",
-    execution_policy:"bounded 1-3 rounds; Exa then Tavily per round; candidate discovery only; no automatic installation/onboarding; official/primary sources must be independently verified before promotion",
+    scope:"discover only global-level, national-apex, apex-industry, globally-leading or national-flagship institutions and authoritative data sources",
+    selection_policy:"top-tier-free only: global or national apex authority, apex industry body, globally leading or national flagship institution; stable no-fee public access or no-fee registration-key access required; reject subnational/local/small/ordinary/paid-only/trial-only/paywalled sources",
+    execution_policy:"bounded 1-3 rounds; Exa then Tavily per round; candidate discovery only; no automatic installation/onboarding; official primary source, top-tier status and free-access status must all be independently verified before promotion",
     arbitrary_url:false,
     write:false
   },
   gleif:{
     category:"global-legal-entity-registry",
     access:"public",
+    free_access:"verified-public-no-fee",
+    tier:"global-authority",
     adapter:"gleif.search",
     integration:"official-gleif-api-v1-jsonapi",
     scope:"global-LEI-legal-entities-ownership-BIC-ISIN-mappings-and-entity-resolution",
@@ -21,21 +24,11 @@ export const GLOBAL_INSTITUTION_CATALOG={
     arbitrary_url:false,
     write:false
   },
-  opencorporates_global:{
-    category:"global-company-registry-aggregator",
-    access:"key",
-    secrets:["OPENCORPORATES_API_TOKEN"],
-    adapter:"catalog-only",
-    integration:"official-rest-v0.4",
-    scope:"company-and-officer-search-across-jurisdictions-with-source-provenance",
-    endpoint:"https://api.opencorporates.com/v0.4",
-    license_note:"open-data projects may use share-alike open terms; other use may require a paid plan; verify current account terms before enabling live calls",
-    arbitrary_url:false,
-    write:false
-  },
   iati_registry:{
     category:"global-development-humanitarian-organization-registry",
-    access:"external-source",
+    access:"free-key-or-public",
+    free_access:"verified-free-account-key-and-open-data",
+    tier:"global-authority",
     adapter:"catalog-only",
     integration:"official-IATI-registry-CKAN+API-gateway",
     scope:"governments-multilateral-private-sector-and-civil-society-development-humanitarian-publishers-and-datasets",
@@ -44,8 +37,10 @@ export const GLOBAL_INSTITUTION_CATALOG={
     write:false
   },
   fdic_bankfind:{
-    category:"bank-registry-us",
+    category:"national-bank-registry-us",
     access:"public",
+    free_access:"verified-public-no-fee",
+    tier:"national-apex-regulator",
     adapter:"catalog-only",
     integration:"official-FDIC-BankFind-Suite-API+bulk-data",
     scope:"current-former-FDIC-insured-banks-branches-financials-structure-changes-failures-deposits",
@@ -54,8 +49,10 @@ export const GLOBAL_INSTITUTION_CATALOG={
     write:false
   },
   eba_credit_institutions:{
-    category:"bank-registry-eu-eea",
+    category:"supranational-bank-registry-eu-eea",
     access:"public",
+    free_access:"verified-public-no-fee",
+    tier:"supranational-apex-regulator",
     adapter:"catalog-only",
     integration:"official-EBA-credit-institution-register+national-register-links",
     scope:"EU-EEA-authorised-credit-institutions-EEA-branches-non-EEA-branches-and-national-supervisory-registers",
@@ -64,8 +61,10 @@ export const GLOBAL_INSTITUTION_CATALOG={
     write:false
   },
   eba_payments_register:{
-    category:"payments-electronic-money-registry-eu-eea",
+    category:"supranational-payments-electronic-money-registry-eu-eea",
     access:"public",
+    free_access:"verified-public-no-fee",
+    tier:"supranational-apex-regulator",
     adapter:"catalog-only",
     integration:"official-EBA-PSD2-central-register",
     scope:"EU-EEA-payment-and-electronic-money-institutions-plus-national-registers",
@@ -73,43 +72,11 @@ export const GLOBAL_INSTITUTION_CATALOG={
     arbitrary_url:false,
     write:false
   },
-  edinet_japan:{
-    category:"company-filings-japan",
-    access:"key",
-    secrets:["EDINET_API_KEY"],
-    adapter:"catalog-only",
-    integration:"official-FSA-EDINET-API-v2",
-    scope:"Japan-securities-filings-submitters-issuers-funds-XBRL-and-code-lists",
-    endpoint:"https://api.edinet-fsa.go.jp/api/v2",
-    arbitrary_url:false,
-    write:false
-  },
-  whed_global:{
-    category:"global-higher-education-directory",
-    access:"external-source",
-    adapter:"catalog-only",
-    integration:"IAU-UNESCO-WHED-authoritative-web-directory",
-    scope:"accredited-higher-education-institutions-systems-credentials-and-Global-WHED-IDs",
-    endpoint:"https://whed.net/",
-    machine_access_note:"public quick search is available; advanced/extract access is account-controlled; do not treat WHED as a public unrestricted API",
-    arbitrary_url:false,
-    write:false
-  },
-  opendoar_global:{
-    category:"global-open-access-repository-directory",
-    access:"key",
-    secrets:["OPENDOAR_API_KEY"],
-    adapter:"catalog-only",
-    integration:"official-Jisc-OpenDOAR-new-API-platform",
-    scope:"quality-assured-open-access-repositories-institutional-subject-and-departmental",
-    endpoint:"https://api.openpolicyfinder.jisc.ac.uk",
-    registration_note:"new API key requests were temporarily paused during migration through July 2026; verify current availability before requesting",
-    arbitrary_url:false,
-    write:false
-  },
   unesco_datahub:{
-    category:"international-organization-and-country-directory",
+    category:"global-intergovernmental-country-directory",
     access:"public",
+    free_access:"public-no-fee",
+    tier:"global-intergovernmental-authority",
     adapter:"catalog-only",
     integration:"official-UNESCO-DataHub-API",
     scope:"member-states-national-commissions-UNESCO-institutes-governance-and-open-datasets",
