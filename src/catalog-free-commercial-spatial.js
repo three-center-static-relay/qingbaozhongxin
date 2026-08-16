@@ -1,6 +1,6 @@
 export const FREE_COMMERCIAL_SPATIAL_CATALOG={
   geospatial_commercial:{
-    stack_version:"free-commercial-spatial-v4-20260816",
+    stack_version:"free-commercial-spatial-v5-20260816",
     category:"domain-branch-geospatial-commercial",
     access:"public",
     adapter:"geospatial_commercial.domain",
@@ -10,7 +10,7 @@ export const FREE_COMMERCIAL_SPATIAL_CATALOG={
     arbitrary_url:false
   },
   commercial_web_research:{
-    stack_version:"free-commercial-spatial-v4-20260816",
+    stack_version:"free-commercial-spatial-v5-20260816",
     category:"china-commercial-geospatial-web-evidence-fusion",
     access:"key",
     secret_groups:[["EXA_API_KEY"],["TAVILY_API_KEY"],["FIRECRAWL_API_KEY"]],
@@ -21,6 +21,34 @@ export const FREE_COMMERCIAL_SPATIAL_CATALOG={
     evidence_policy:"web-derived-market-evidence-only; never observed-footfall-dwell-time-mobile-OD-or-private-consumer-profile",
     arbitrary_url:false,
     write:false
+  },
+  cbra_china:{
+    stack_version:"free-commercial-spatial-v5-20260816",
+    category:"china-building-rooftop-area-2_5m-multiannual",
+    access:"public",
+    adapter:"bulk-bounded-staging-required",
+    integration:"Zenodo/National-Cryosphere-Desert-Data-Center-GeoTIFF",
+    scope:"China-full-coverage-building-rooftop-area-2016-2021-2.5m-215-grid-tiles",
+    endpoint:"https://doi.org/10.5281/zenodo.7861676",
+    license:"CC-BY-4.0",
+    billing:"open-data-no-key",
+    evidence_policy:"remote-sensing-derived-building-rooftop-area; modelled-observation-not-cadastral-ground-truth",
+    staging_policy:"never-download-national-archive-through-worker; select year+intersecting-tile then bounded raster window in compute staging",
+    arbitrary_url:false
+  },
+  microsoft_building_density_height:{
+    stack_version:"free-commercial-spatial-v5-20260816",
+    category:"global-building-density-height-temporal-open-data",
+    access:"public",
+    adapter:"bulk-bounded-cog-staging-required",
+    integration:"Microsoft-AI-for-Good-public-COG+GeoPackage-index",
+    scope:"global-100m-2020Q4-and-2023Q4-plus-Guangdong-quarterly-40m-2020Q2-through-2025Q2",
+    endpoint:"https://opendata.aiforgood.ai/building-density/tile_index.gpkg",
+    license:"CDLA-Permissive-2.0",
+    billing:"open-data-no-key",
+    evidence_policy:"satellite-ML-derived-building-density-and-height; use-as-urban-form-and-change-signal",
+    staging_policy:"query tile index/AOI first; stream only intersecting COG windows; never scan global layer in worker",
+    arbitrary_url:false
   },
   baidu_maps:{
     stack_version:"free-commercial-spatial-v2-20260816",
@@ -100,21 +128,6 @@ export const FREE_COMMERCIAL_SPATIAL_CATALOG={
     free_tier:"free-account-required-for-api;catalog-access-free",
     billing_policy:"free-account-only; no paid fallback",
     evidence_policy:"feed-catalog-metadata-only; individual-feed-license-and-authentication-must-be-respected",
-    arbitrary_url:false
-  },
-  openaq:{
-    stack_version:"free-commercial-spatial-v3-20260816",
-    category:"global-air-quality-environmental-exposure",
-    access:"key",
-    secrets:["OPENAQ_API_KEY"],
-    adapter:"openaq.v3-bounded",
-    integration:"official-rest-v3",
-    scope:"nearby-monitor-discovery-and-location-latest-measurements",
-    endpoint:"https://api.openaq.org/v3",
-    registration_url:"https://explore.openaq.org/register",
-    free_tier:"general-use-60-requests-per-minute-2000-per-hour-as-of-2026-08",
-    billing_policy:"general-use-free-tier-only; no custom-paid-rate fallback",
-    evidence_policy:"public-environmental-measurements-with-OpenAQ-and-underlying-source-attribution; not a complete census of all monitors",
     arbitrary_url:false
   },
   esa_worldcover:{
