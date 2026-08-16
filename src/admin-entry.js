@@ -23,10 +23,16 @@ async function readGate(env){
 
 function classifyZenodo403(error){
   if(Number(error?.details?.http_status)!==403)return null;
-  const raw=String(error?.details?.body||"").toLowerCase();
-  if(/ip address|ip has been blocked|you are being blocked|blocked.*support@zenodo\.org|contact.*support@zenodo\.org/.test(raw))return"IP_BLOCKED";
-  if(/cloudflare|captcha|attention required|challenge|bot/.test(raw))return"WAF_CHALLENGE";
-  if(/scope|missing authorization|not authorized|permission|forbidden/.test(raw))return"AUTHORIZATION_FORBIDDEN";
+  const raw=String(error?.details?.body||"").trim();
+  const lower=raw.toLowerCase();
+  if(/ip address|ip has been blocked|you are being blocked|blocked.*support@zenodo\.org|contact.*support@zenodo\.org/.test(lower))return"IP_BLOCKED";
+  if(/<!doctype html|<html|cloudflare|captcha|attention required|challenge|cf-ray/.test(lower))return"WAF_OR_HTML_FORBIDDEN";
+  let parsed=null;try{parsed=JSON.parse(raw)}catch{}
+  const message=String(parsed?.message||"").trim().toLowerCase();
+  if(/scope|missing authorization|not authorized|permission/.test(message))return"AUTHORIZATION_SCOPE";
+  if(parsed&&Number(parsed?.status)===403&&/^forbidden\.?$/.test(message))return"ZENODO_JSON_FORBIDDEN_GENERIC";
+  if(parsed&&Number(parsed?.status)===403)return"ZENODO_JSON_OTHER_403";
+  if(/^forbidden\.?$/.test(lower))return"GENERIC_FORBIDDEN";
   return"OTHER_403";
 }
 
@@ -52,20 +58,7 @@ async function adminContext(env,ctx){
   const gate=await readGate(env);
   const version=env.CF_VERSION_METADATA||{};
   const ok=health.http_status===200&&health.body?.ok===true&&source.http_status===200&&source.body?.ok===true&&gate.ok===true;
-  return json({
-    ok,
-    service:SERVICE,
-    admin_read_only:true,
-    deployment_attestation:DEPLOYMENT_ATTESTATION,
-    observed_at:new Date().toISOString(),
-    runtime_version:{id:version.id||null,tag:version.tag||null,timestamp:version.timestamp||null},
-    health:health.body,
-    source:source.body,
-    acceptance:acceptance.body,
-    active_task:gate.active||null,
-    active_state_verified:gate.ok===true,
-    secrets_redacted:true
-  },ok?200:503);
+  return json({ok,service:SERVICE,admin_read_only:true,deployment_attestation:DEPLOYMENT_ATTESTATION,observed_at:new Date().toISOString(),runtime_version:{id:version.id||null,tag:version.tag||null,timestamp:version.timestamp||null},health:health.body,source:source.body,acceptance:acceptance.body,active_task:gate.active||null,active_state_verified:gate.ok===true,secrets_redacted:true},ok?200:503);
 }
 
 export default{
@@ -79,7 +72,5 @@ export default{
     }
     return app.fetch(req,env,ctx);
   },
-  async scheduled(controller,env,ctx){
-    if(typeof app.scheduled==="function")return app.scheduled(controller,env,ctx);
-  }
+  async scheduled(controller,env,ctx){if(typeof app.scheduled==="function")return app.scheduled(controller,env,ctx)}
 };
