@@ -1,4 +1,4 @@
-export const GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION="geospatial-commercial-v5-20260816";
+export const GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION="geospatial-commercial-v6-20260816";
 
 export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
   id:"geospatial-commercial",
@@ -56,13 +56,19 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
     routing_accessibility:["amap","baidu_maps","tencent_maps","openrouteservice","valhalla_local","osrm_local"],
     earth_observation_discovery:["earthengine","google_earth_observation","planetary_computer","copernicus_dataspace_stac","nasa_cmr","nasa_stac","nasa_gibs"]
   },
+  shared_free_tools:{
+    administrative_boundaries:["geoboundaries_gbOpen_CC_BY_4_0"],
+    eo_backup_search:["element84_earth_search_free_public_STAC"],
+    multimodal_transit_engine:["opentripplanner_local_LGPL"],
+    local_road_routing_engines:["valhalla_local_MIT","osrm_local_BSD_2_clause"]
+  },
   feature_layers:[
-    "place_identity","administrative_hierarchy","population_total","age_sex_structure","population_density","population_h3_crosscheck",
-    "poi_density","poi_mix","brand_presence","brand_competition","commercial_supply","competitor_density","poi_change_delta",
+    "place_identity","administrative_hierarchy","administrative_boundary","population_total","age_sex_structure","population_density","population_h3_crosscheck",
+    "poi_density","poi_mix","brand_presence","brand_competition","commercial_supply","competitor_density","poi_change_delta","business_area_label","poi_rating","poi_cost_proxy","indoor_poi_hierarchy","poi_entrance_exit",
     "building_rooftop_2_5m","building_density","building_surface","building_height","building_volume","individual_building_height","building_function",
     "building_age","building_quality","building_style","nonresidential_built_form","settlement_extent","building_change","vertical_urban_growth",
     "land_cover_1m","land_cover_10m","near_real_time_built_probability","urban_change","urban_village_renewal_proxy","night_activity_proxy",
-    "road_accessibility","walking_accessibility","driving_accessibility","public_transit_accessibility","real_time_traffic","public_transit_feed_availability",
+    "road_accessibility","walking_accessibility","driving_accessibility","public_transit_accessibility","multimodal_transit_travel_time","real_time_traffic","public_transit_feed_availability",
     "synthetic_mobility_prior","spatial_quality_provenance"
   ],
   analysis_families:[
