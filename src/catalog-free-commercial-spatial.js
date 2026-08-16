@@ -9,19 +9,6 @@ export const FREE_COMMERCIAL_SPATIAL_CATALOG={
     billing:"local-manifest-no-api-fee",
     arbitrary_url:false
   },
-  commercial_web_research:{
-    stack_version:"free-commercial-spatial-v6-20260816",
-    category:"china-commercial-geospatial-web-evidence-fusion",
-    access:"key",
-    secret_groups:[["EXA_API_KEY"],["TAVILY_API_KEY"],["FIRECRAWL_API_KEY"]],
-    adapter:"commercial_web_research.multi_search",
-    integration:"bounded-sequential-exa+tavily+firecrawl-search",
-    scope:"planning-project-pipeline-open-close-brand-competition-rent-and-market-context-signals",
-    billing_policy:"use-only-configured-provider-entitlements; bounded-max-3-rounds-3-providers; no-paid-fallback",
-    evidence_policy:"web-derived-market-evidence-only; never observed-footfall-dwell-time-mobile-OD-or-private-consumer-profile",
-    arbitrary_url:false,
-    write:false
-  },
   cmab_china:{
     stack_version:"free-commercial-spatial-v6-20260816",
     category:"china-national-multi-attribute-buildings",
