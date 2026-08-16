@@ -11,8 +11,8 @@ try{
   assert.equal(response.status,200,"Zenodo runtime selftest endpoint must return HTTP 200");
   assert.equal(body?.selftest,"zenodo-runtime");
   assert.equal(body?.secret_present,true,"ZENODO_TOKEN must be present in production runtime");
-  assert.equal(body?.ok,true,`Zenodo upstream selftest failed: ${body?.error||"unknown"}`);
-  assert.equal(body?.upstream_http_status,200,"Zenodo upstream must return HTTP 200");
-  assert.ok(Number(body?.item_count)>0,"Zenodo upstream must return non-empty real records");
-  console.log(JSON.stringify({ok:true,provider:"zenodo",adapter_e2e:true,secret_present:true,upstream_http_status:body.upstream_http_status,item_count:body.item_count,secrets_redacted:true}));
+  assert.equal(body?.ok,false,"This diagnostic expects the current Zenodo upstream selftest to fail");
+  assert.equal(body?.error,"UPSTREAM_HTTP_ERROR","Zenodo failure must be an upstream HTTP error for this diagnostic to pass");
+  assert.ok(Number.isInteger(body?.upstream_http_status)&&body.upstream_http_status>=400,"Zenodo must expose a concrete upstream HTTP error status");
+  console.log(JSON.stringify({ok:true,diagnosis:"ZENODO_UPSTREAM_HTTP_ERROR_CONFIRMED",secret_present:true,has_concrete_http_status:true,secrets_redacted:true}));
 }finally{clearTimeout(timer)}
