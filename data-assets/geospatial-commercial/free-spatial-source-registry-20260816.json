@@ -1,0 +1,50 @@
+{
+  "schema":"geospatial-commercial-free-source-registry-v1",
+  "updated_at":"2026-08-16T23:55:00+08:00",
+  "domain":"geospatial-commercial",
+  "policy":{
+    "free_or_open_only":true,
+    "paid_fallback":false,
+    "trial_only_core":false,
+    "commercial_use_or_reuse_rights_required":true,
+    "unknown_license_binary_ingest":"deny",
+    "bulk_transfer_through_worker":false,
+    "observed_lbs_claim_without_observed_source":false
+  },
+  "sources":[
+    {"id":"sinolc1_china","role":"China 1m land cover / micro urban form","official":"https://www.ncdc.ac.cn/portal/metadata/643d320b-315a-4984-868b-be6aae30da55","archive_doi":"10.5281/zenodo.8214871","license":"CC-BY-4.0","access":"free/open; account/login may be required for archive download","ingest":"bounded tile/AOI staging"},
+    {"id":"cmab_china","role":"China multi-attribute buildings","official":"https://doi.org/10.6084/m9.figshare.27992417","license":"CC-BY-4.0","access":"open","ingest":"province/natural-city package then bounded AOI"},
+    {"id":"cbra_china","role":"China 2.5m rooftop area 2016-2021","official":"https://doi.org/10.5281/zenodo.7861676","license":"CC-BY-4.0","access":"open","ingest":"year+intersecting tile then bounded raster window"},
+    {"id":"microsoft_building_density_height","role":"building density/height and Guangdong quarterly change","official":"https://opendata.aiforgood.ai/building-density/tile_index.gpkg","license":"CDLA-Permissive-2.0","access":"open","ingest":"tile index then COG AOI windows"},
+    {"id":"cmtbh30_china","role":"China building-height change 2005/2010/2015/2020","official":"https://figshare.com/articles/dataset/_b_Characterizing_dynamics_of_building_height_in_China_from_2005_to_2020_based_on_GEDI_Landsat_and_PALSAR_data_b_/26840626","license":"CC-BY-4.0","access":"open","ingest":"metadata then bounded raster windows"},
+    {"id":"glo3d_building_footprints","role":"individual building footprints + estimated height","official":"https://figshare.com/articles/dataset/3D-GloBFP_the_first_global_three-dimensional_building_footprint_dataset_PART_grid_ID_0-400_/28879733","grid_index_doi":"10.5281/zenodo.11319912","license":"CC-BY-4.0","access":"open","ingest":"grid index then intersecting parts only"},
+    {"id":"geolink_uv_china","role":"342-city urban-village / renewal opportunity boundaries","official":"https://zenodo.org/records/18688062","license":"CC-BY-4.0","access":"open","ingest":"province GPKG then bounded AOI","evidence_kind":"modelled/foundation-model-derived"},
+    {"id":"planetary_computer","role":"public EO STAC discovery/corroboration","official":"https://planetarycomputer.microsoft.com/api/stac/v1","license":"dataset-specific upstream licenses","access":"anonymous public STAC; most data anonymous with throttling","ingest":"bbox/time/collection bounded search"},
+    {"id":"copernicus_dataspace_stac","role":"official Sentinel STAC discovery","official":"https://stac.dataspace.copernicus.eu/v1/","license":"Copernicus Sentinel free/full/open with attribution; preserve dataset terms","access":"free core / fair-use quotas","ingest":"bbox/time/collection bounded search"},
+    {"id":"earth_search_stac","role":"free public Sentinel/Landsat/DEM STAC backup","official":"https://earth-search.aws.element84.com/v1","license":"dataset-specific upstream licenses","access":"free public; no guaranteed SLA","ingest":"backup/corroboration bounded search only"},
+    {"id":"geofabrik_osm_china","role":"daily China OSM road/building/POI graph input","official":"https://download.geofabrik.de/asia/china-latest.osm.pbf","license":"ODbL-1.0","access":"free public","ingest":"full PBF external/compute staging only"},
+    {"id":"kontur_population_free","role":"400m H3 population cross-check","official":"https://www.kontur.io/datasets/","license":"CC-BY","access":"free downloadable layer; paid API disabled","ingest":"local H3 subset/AOI"},
+    {"id":"geoboundaries_gbopen","role":"administrative boundary cross-check","official":"https://www.geoboundaries.org/api/current/gbOpen","license":"CC-BY-4.0","access":"public API","ingest":"single country/ADM lookup; gbAuthoritative excluded"},
+    {"id":"worldpop","role":"population/demography","official":"https://api.worldpop.org/v2","license":"CC-BY-4.0 for WorldPop datasets unless source-specific ODbL applies","access":"free public/free-key tier","ingest":"bounded polygon task"},
+    {"id":"mainland_china_ssp_population_100m","role":"future population / market scenario","official":"https://figshare.com/articles/dataset/Mainland_China_SSP_Population_Grids/11634372/2","license":"CC-BY-4.0","access":"open","resolution":"~100m","ingest":"scenario+year+AOI raster window","evidence_kind":"projected/modelled"},
+    {"id":"china_ssp_rcp_lulc_1km","role":"future urban-land expansion scenario","official":"https://figshare.com/articles/dataset/Data_rar/14776128","license":"CC-BY-4.0","access":"open","coverage":"China","time":"2020-2100","resolution":"1km","ingest":"scenario+year+AOI raster window","evidence_kind":"projected/modelled"},
+    {"id":"global_gdp_electricity_1km_1992_2019","role":"spatial economic/activity proxy","official":"https://figshare.com/articles/dataset/Global_1_km_1_km_gridded_revised_real_gross_domestic_product_and_electricity_consumption_during_1992-2019_based_on_calibrated_nighttime_light_data/17004523","license":"CC-BY-4.0","access":"open","coverage":"global including China","resolution":"1km","ingest":"year+AOI window","evidence_kind":"downscaled/modelled proxy; not observed consumer spend"},
+    {"id":"china_monthly_electricity_1km_280cities_2012_2019","role":"high-frequency historical urban economic/activity proxy","official":"https://figshare.com/articles/journal_contribution/Monthly_Electricity_Consumption_Data_at_1km_1km_grid_for_280_Cities_in_China_from_2012_to_2019/25398559","license":"CC-BY-4.0","access":"open","coverage":"280 major Chinese cities","resolution":"1km monthly","ingest":"city+month+AOI window","evidence_kind":"derived electricity-consumption surface; not observed footfall or spend"},
+    {"id":"transitland_free","role":"current GTFS/stop/route backup discovery","official":"https://transit.land/api/v2/rest","license":"service plus source-feed-specific licenses","access":"free key tier","ingest":"commercial-use/derived-product license filters enforced; paid historical/bulk disabled"},
+    {"id":"mobilitydatabase","role":"GTFS/GTFS-RT/GBFS feed catalog discovery","official":"https://api.mobilitydatabase.org","license":"source-feed-specific","access":"free account","ingest":"metadata discovery only until individual feed license accepted"},
+    {"id":"openrouteservice","role":"free isochrone/matrix accessibility","official":"https://api.openrouteservice.org","license":"service terms","access":"free Standard tier only","ingest":"bounded matrix/isochrone"},
+    {"id":"valhalla_local","role":"self-hosted route/matrix/isochrone/map-match","official":"https://github.com/valhalla/valhalla","license":"MIT","access":"open source","ingest":"regional OSM graph in compute staging; no public demo dependency"},
+    {"id":"osrm_local","role":"self-hosted road route/table/trip/match","official":"https://github.com/Project-OSRM/osrm-backend","license":"BSD-2-Clause","access":"open source","ingest":"regional OSM graph in compute staging; no public demo dependency"},
+    {"id":"opentripplanner_local","role":"self-hosted multimodal transit routing","official":"https://github.com/opentripplanner/OpenTripPlanner","license":"LGPL-3.0","access":"open source","ingest":"approved OSM+GTFS/GTFS-RT/GBFS in compute staging"}
+  ],
+  "excluded_or_candidate_only":[
+    {"id":"baidu_huiyan","reason":"commercial cooperation / not free core"},
+    {"id":"tencent_location_big_data","reason":"free trial only / not durable free core"},
+    {"id":"openaq","reason":"outside commercial-geospatial core by product scope"},
+    {"id":"sinobf1","reason":"CC-BY-NC; non-commercial"},
+    {"id":"global_building_atlas","reason":"commercial-use licensing not acceptable for core distribution"},
+    {"id":"open_cell_id","reason":"free API depends on contribution/whitelisting and access may be withdrawn; not durable core"},
+    {"id":"mozilla_location_service","reason":"retired"},
+    {"id":"clcd_annual_china","reason":"commercial-use license not yet explicit enough for production admission"}
+  ]
+}
