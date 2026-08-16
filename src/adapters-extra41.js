@@ -17,17 +17,17 @@ function normalizeEuropeana(x){return{id:x?.id??null,title:first(x?.title),creat
 function normalizeDpla(x){const s=x?.sourceResource||{};return{id:x?.id??null,title:first(s?.title),creator:first(s?.creator),date:first(s?.date?.displayDate??s?.date),description:first(s?.description),type:first(s?.type),language:first(s?.language?.name??s?.language),provider:x?.provider?.name??null,is_shown_at:x?.isShownAt??null}}
 function normalizeNara(x){const d=x?.record||x?.description||x;return{id:d?.naId??d?.naid??d?.id??null,title:d?.title??d?.titleNaId??null,level:d?.levelOfDescription??null,date:d?.productionDateArray??d?.date??null,record_group:d?.recordGroupNumber??null,series:d?.seriesTitle??null,scope:d?.scopeAndContentNote??null,raw_summary:Object.fromEntries(Object.entries(d||{}).filter(([k])=>/title|date|naid|level|recordgroup|series|description|scope/i.test(k)).slice(0,20))}}
 function normalizeDataset(x){return{id:x?.id??x?.identifier??x?.name??null,title:x?.title??x?.name??null,publisher:x?.publisher?.name??x?.publisher??x?.organization?.title??null,description:x?.description??x?.notes??null,keywords:x?.keyword??x?.tags??null,modified:x?.modified??x?.metadata_modified??x?.last_harvested_date??null,landing_page:x?.landingPage??x?.url??null}}
-export const OPERATIONS={loc:["search"],nara_catalog:["search"],europeana:["search"],dpla:["search"],gallica:["search"],ndl_search:["search"],data_gov_us:["search"],data_europa:["search"]};
+export const OPERATIONS={library_of_congress:["search"],nara_catalog:["search"],europeana:["search"],dpla:["search"],gallica:["search"],ndl_search:["search"],data_gov_us:["search"],data_europa:["search"]};
 export async function runAdapter(provider,operation,args={},env={}){
   if(operation!=="search"||!OPERATIONS[provider]?.includes(operation))err("ADAPTER_OPERATION_NOT_APPROVED",403,{provider,operation});
   const q=query(args?.query),limit=clamp(args?.limit,1,25,10),page=clamp(args?.page,1,100,1);
-  if(provider==="loc"){
+  if(provider==="library_of_congress"){
     const u=new URL("https://www.loc.gov/search/");u.searchParams.set("fo","json");u.searchParams.set("at","pagination,results");u.searchParams.set("q",q);u.searchParams.set("c",String(limit));u.searchParams.set("sp",String(page));
     const body=await request(u);return{provider,operation,total:Number(body?.pagination?.of??0)||null,page,items:arr(body?.results).slice(0,limit).map(normalizeLoc),source_mode:"Library of Congress official JSON API; public; bounded; read-only"};
   }
   if(provider==="nara_catalog"){
     const u=new URL("https://catalog.archives.gov/api/v2/records/search");u.searchParams.set("q",q);u.searchParams.set("limit",String(limit));u.searchParams.set("page",String(page));
-    const body=await request(u,{headers:{"x-api-key":envSecret(env,["NARA_CATALOG_API_KEY"])}}),items=arr(body?.body?.hits?.hits||body?.hits?.hits||body?.records||body?.results).slice(0,limit).map(x=>normalizeNara(x?._source||x));return{provider,operation,total:Number(body?.body?.hits?.total?.value??body?.hits?.total?.value??body?.total??0)||null,page,items,source_mode:"US National Archives Catalog API v2; key-authenticated; read-only; bounded"};
+    const body=await request(u,{headers:{"x-api-key":envSecret(env,["NARA_API_KEY","NARA_CATALOG_API_KEY"])}}),items=arr(body?.body?.hits?.hits||body?.hits?.hits||body?.records||body?.results).slice(0,limit).map(x=>normalizeNara(x?._source||x));return{provider,operation,total:Number(body?.body?.hits?.total?.value??body?.hits?.total?.value??body?.total??0)||null,page,items,source_mode:"US National Archives Catalog API v2; key-authenticated; read-only; bounded"};
   }
   if(provider==="europeana"){
     const u=new URL("https://api.europeana.eu/record/v2/search.json");u.searchParams.set("wskey",envSecret(env,["EUROPEANA_API_KEY"]));u.searchParams.set("query",q);u.searchParams.set("rows",String(limit));u.searchParams.set("start",String((page-1)*limit+1));u.searchParams.set("profile","standard");
