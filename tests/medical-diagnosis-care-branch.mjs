@@ -20,7 +20,7 @@ for(const banned of ["expert-center routing","compute-center routing","multi-age
 }
 
 assert.ok(branch.safety_rules.some(x=>/never written into GitHub/i.test(x)));
-assert.ok(branch.safety_rules.some(x=>/single photo/i.test(x)));
+assert.ok(branch.excluded_scope.some(x=>/single photo/i.test(x)));
 assert.ok(branch.safety_rules.some(x=>/life, vision/i.test(x)));
 assert.ok(branch.authoritative_free_evidence_sources.length>=10);
 assert.ok(branch.authoritative_free_evidence_sources.every(x=>["public","public-api"].includes(x.access)));
@@ -40,4 +40,4 @@ assert.ok(evidence.direct_use_rules.some(x=>/observed versus inferred/i.test(x))
 assert.ok(evidence.direct_use_rules.some(x=>/illegible handwriting/i.test(x)));
 assert.ok(evidence.direct_use_rules.some(x=>/red flags/i.test(x)));
 
-console.log(JSON.stringify({ok:true,suite:"medical-diagnosis-care-branch",capabilities:["diagnostic-analysis","clinical-evidence-interpretation","nursing-self-care"],orchestration_removed:true,patient_data_to_github:false}));
+console.log(JSON.stringify({ok:true,suite:"medical-diagnosis-care-branch",capabilities:["diagnostic-analysis","clinical-evidence-interpretation","nursing-self-care"],orchestration_removed:true,patient_data_to_github:false,single_photo_autodiagnosis_excluded:true}));
