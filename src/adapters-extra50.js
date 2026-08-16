@@ -27,7 +27,7 @@ function kaggleHeaders(env){
 }
 
 export const OPERATIONS={
-  zenodo:["search"],
+  zenodo:["search","search_public"],
   huggingface:["datasets_search"],
   kaggle:["datasets_search","dataset_files"],
   harvard_dataverse:["search"],
@@ -35,7 +35,7 @@ export const OPERATIONS={
   figshare:["search"]
 };
 
-async function zenodoSearch(args,env){const q=required(args.query,"query",500),limit=clamp(args.limit,1,25,10),page=clamp(args.page,1,100,1),sort=["bestmatch","mostrecent"].includes(args.sort)?args.sort:"bestmatch",u=new URL("https://zenodo.org/api/records");u.searchParams.set("q",q);u.searchParams.set("size",String(limit));u.searchParams.set("page",String(page));u.searchParams.set("sort",sort);const headers={};if(env.ZENODO_TOKEN)headers.authorization=`Bearer ${env.ZENODO_TOKEN}`;const r=await fetchBounded(u,{headers});return{provider:"zenodo",operation:"search",total:r.body?.hits?.total??null,items:r.body?.hits?.hits||[],page,limit}}
+async function zenodoSearch(args,env,useToken=true){const q=required(args.query,"query",500),limit=clamp(args.limit,1,25,10),page=clamp(args.page,1,100,1),sort=["bestmatch","mostrecent"].includes(args.sort)?args.sort:"bestmatch",u=new URL("https://zenodo.org/api/records");u.searchParams.set("q",q);u.searchParams.set("size",String(limit));u.searchParams.set("page",String(page));u.searchParams.set("sort",sort);const headers={};if(useToken&&env.ZENODO_TOKEN)headers.authorization=`Bearer ${env.ZENODO_TOKEN}`;const r=await fetchBounded(u,{headers});return{provider:"zenodo",operation:useToken?"search":"search_public",total:r.body?.hits?.total??null,items:r.body?.hits?.hits||[],page,limit}}
 async function huggingfaceDatasets(args,env){const q=required(args.query,"query",300),limit=clamp(args.limit,1,30,10),sort=["downloads","likes","lastModified","createdAt","trendingScore"].includes(args.sort)?args.sort:"downloads",u=new URL("https://huggingface.co/api/datasets");u.searchParams.set("search",q);u.searchParams.set("limit",String(limit));u.searchParams.set("sort",sort);u.searchParams.set("direction","-1");const headers={};if(env.HUGGINGFACE_TOKEN)headers.authorization=`Bearer ${env.HUGGINGFACE_TOKEN}`;const r=await fetchBounded(u,{headers});return{provider:"huggingface",operation:"datasets_search",items:Array.isArray(r.body)?r.body:[]}}
 async function kaggleDatasets(args,env){const q=required(args.query,"query",300),page=clamp(args.page,1,100,1),sort=["hottest","votes","updated","active"].includes(args.sort)?args.sort:"hottest",filetype=["all","csv","sqlite","json","bigQuery"].includes(args.file_type)?args.file_type:"all",license=["all","cc","gpl","odb","other"].includes(args.license)?args.license:"all",u=new URL("https://www.kaggle.com/api/v1/datasets/list");u.searchParams.set("group","public");u.searchParams.set("sortBy",sort);u.searchParams.set("filetype",filetype);u.searchParams.set("license",license);u.searchParams.set("search",q);u.searchParams.set("page",String(page));if(args.max_size)u.searchParams.set("maxSize",String(clamp(args.max_size,1,1000000000000,1000000000)));if(args.min_size)u.searchParams.set("minSize",String(clamp(args.min_size,0,1000000000000,0)));const r=await fetchBounded(u,{headers:kaggleHeaders(env)});return{provider:"kaggle",operation:"datasets_search",page,items:Array.isArray(r.body)?r.body:(r.body?.datasets||[])}}
 async function kaggleFiles(args,env){const owner=safeSlug(args.owner,"owner"),dataset=safeSlug(args.dataset,"dataset"),u=`https://www.kaggle.com/api/v1/datasets/list/${encodeURIComponent(owner)}/${encodeURIComponent(dataset)}`,r=await fetchBounded(u,{headers:kaggleHeaders(env)});return{provider:"kaggle",operation:"dataset_files",owner,dataset,items:Array.isArray(r.body)?r.body:(r.body?.datasetFiles||r.body?.files||[])}}
@@ -44,7 +44,8 @@ async function pangaeaList(args){const limit=clamp(args.limit,1,50,20),u=new URL
 async function figshareSearch(args,env){const q=required(args.query,"query",500),limit=clamp(args.limit,1,50,10),page=clamp(args.page,1,100,1),headers={"content-type":"application/json"};if(env.FIGSHARE_TOKEN)headers.authorization=`token ${env.FIGSHARE_TOKEN}`;const r=await fetchBounded("https://api.figshare.com/v2/articles/search",{method:"POST",headers,body:JSON.stringify({search_for:q,page,page_size:limit,order:"published_date",order_direction:"desc"})});return{provider:"figshare",operation:"search",page,items:Array.isArray(r.body)?r.body:[]}}
 
 export async function runAdapter(provider,operation,args={},env={}){
-  if(provider==="zenodo"&&operation==="search")return zenodoSearch(args,env);
+  if(provider==="zenodo"&&operation==="search")return zenodoSearch(args,env,true);
+  if(provider==="zenodo"&&operation==="search_public")return zenodoSearch(args,env,false);
   if(provider==="huggingface"&&operation==="datasets_search")return huggingfaceDatasets(args,env);
   if(provider==="kaggle"&&operation==="datasets_search")return kaggleDatasets(args,env);
   if(provider==="kaggle"&&operation==="dataset_files")return kaggleFiles(args,env);
