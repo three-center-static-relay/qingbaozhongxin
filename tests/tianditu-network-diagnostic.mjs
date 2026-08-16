@@ -9,12 +9,16 @@ try{
   let seenUrl="";
   globalThis.fetch=async url=>{seenUrl=String(url);return new Response("<html><title>Access Denied</title>WAF blocked</html>",{status:403,headers:{"content-type":"text/html"}})};
   const wafResponse=await runTiandituNetworkDiagnostic(envHarness()),waf=await wafResponse.json();
-  assert.equal(waf.classification,"WAF_OR_ACCESS_POLICY_BLOCK");assert.equal(waf.http_status,403);assert.equal(waf.network_reached,true);assert.equal(waf.http_reached,true);assert.equal(waf.real_key_used,false);assert.equal(new URL(seenUrl).searchParams.get("tk"),__test.FAKE_TK);assert.equal(seenUrl.includes("REAL_KEY_MUST_NEVER_BE_USED"),false);assert.equal(seenUrl.includes("REAL_ALIAS_MUST_NEVER_BE_USED"),false);
+  assert.equal(waf.classification,"WAF_OR_ACCESS_POLICY_BLOCK");assert.equal(waf.http_status,403);assert.equal(waf.network_reached,true);assert.equal(waf.http_reached,true);assert.equal(waf.application_reached,false);assert.equal(waf.real_key_used,false);assert.equal(new URL(seenUrl).searchParams.get("tk"),__test.FAKE_TK);assert.equal(seenUrl.includes("REAL_KEY_MUST_NEVER_BE_USED"),false);assert.equal(seenUrl.includes("REAL_ALIAS_MUST_NEVER_BE_USED"),false);
+
+  globalThis.fetch=async url=>{seenUrl=String(url);return new Response('<!DOCTYPE html><html><head><meta http-equiv="Server" content="CloudWAF"><title>访问被拦截！</title></head><body>访问被拦截！</body></html>',{status:418,headers:{"content-type":"text/html; charset=utf-8"}})};
+  const waf418Response=await runTiandituNetworkDiagnostic(envHarness()),waf418=await waf418Response.json();
+  assert.equal(waf418.classification,"WAF_OR_ACCESS_POLICY_BLOCK");assert.equal(waf418.http_status,418);assert.equal(waf418.network_reached,true);assert.equal(waf418.http_reached,true);assert.equal(waf418.application_reached,false);assert.match(waf418.preview,/CloudWAF|访问被拦截/);
 
   globalThis.fetch=async url=>{seenUrl=String(url);return Response.json({status:{infocode:2001,cndesc:"Key或参数校验失败"},count:0},{status:200})};
   const appResponse=await runTiandituNetworkDiagnostic(envHarness()),app=await appResponse.json();
   assert.equal(app.classification,"APPLICATION_LAYER_REACHED_FAKE_KEY_REJECTED_OR_BUSINESS_ERROR");assert.equal(app.http_status,200);assert.equal(app.application_reached,true);assert.equal(app.infocode,2001);assert.equal(app.real_key_used,false);assert.equal(new URL(seenUrl).searchParams.get("tk"),__test.FAKE_TK);
 
   const direct=__test.classify(401,"application/json",'{"message":"invalid key"}',{message:"invalid key"});assert.equal(direct.classification,"AUTH_LAYER_REACHED");
-  console.log(JSON.stringify({ok:true,suite:"tianditu-network-diagnostic",fake_key_only:true,waf_classification:true,application_layer_classification:true,real_key_never_used:true,cache_minutes:10}));
+  console.log(JSON.stringify({ok:true,suite:"tianditu-network-diagnostic",fake_key_only:true,waf_403_classification:true,waf_418_cloudwaf_classification:true,application_layer_classification:true,real_key_never_used:true,cache_minutes:10}));
 }finally{globalThis.fetch=originalFetch}
