@@ -1,13 +1,26 @@
 export const FREE_COMMERCIAL_SPATIAL_CATALOG={
   geospatial_commercial:{
-    stack_version:"free-commercial-spatial-v3-20260816",
+    stack_version:"free-commercial-spatial-v4-20260816",
     category:"domain-branch-geospatial-commercial",
     access:"public",
     adapter:"geospatial_commercial.domain",
     integration:"shared-evidence-multi-provider-domain-manifest",
-    scope:"free-only-commercial-geospatial-capability-manifest-and-feature-plan",
+    scope:"china-first-free-commercial-geospatial-capability-manifest-and-feature-plan",
     billing:"local-manifest-no-api-fee",
     arbitrary_url:false
+  },
+  commercial_web_research:{
+    stack_version:"free-commercial-spatial-v4-20260816",
+    category:"china-commercial-geospatial-web-evidence-fusion",
+    access:"key",
+    secret_groups:[["EXA_API_KEY"],["TAVILY_API_KEY"],["FIRECRAWL_API_KEY"]],
+    adapter:"commercial_web_research.multi_search",
+    integration:"bounded-sequential-exa+tavily+firecrawl-search",
+    scope:"planning-project-pipeline-open-close-brand-competition-rent-and-market-context-signals",
+    billing_policy:"use-only-configured-provider-entitlements; bounded-max-3-rounds-3-providers; no-paid-fallback",
+    evidence_policy:"web-derived-market-evidence-only; never observed-footfall-dwell-time-mobile-OD-or-private-consumer-profile",
+    arbitrary_url:false,
+    write:false
   },
   baidu_maps:{
     stack_version:"free-commercial-spatial-v2-20260816",
