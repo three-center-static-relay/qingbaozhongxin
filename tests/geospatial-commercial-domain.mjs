@@ -16,6 +16,8 @@ assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.mobilitydatabase.billing_policy.inc
 assert.deepEqual(OPERATIONS.geospatial_commercial,["capabilities"]);
 assert.ok(OPERATIONS.geonames.includes("search"));
 assert.ok(OPERATIONS.mobilitydatabase.includes("gtfs_search"));
+assert.equal(OPERATIONS.mobilitydatabase.includes("download"),false);
+assert.equal(OPERATIONS.mobilitydatabase.includes("feed_get"),false);
 
 const originalFetch=globalThis.fetch;
 try{
@@ -61,4 +63,4 @@ try{
   await assert.rejects(()=>runAdapter("mobilitydatabase","metadata",{},{}),e=>e?.status===503&&e?.message==="UPSTREAM_AUTH_FAILED");
 } finally {globalThis.fetch=originalFetch;}
 
-console.log(JSON.stringify({ok:true,suite:"geospatial-commercial-domain",domain:GEOSPATIAL_COMMERCIAL_DOMAIN.version,free_only:true,new_free_sources:["geonames","mobilitydatabase"]}));
+console.log(JSON.stringify({ok:true,suite:"geospatial-commercial-domain",domain:GEOSPATIAL_COMMERCIAL_DOMAIN.version,free_only:true,new_free_sources:["geonames","mobilitydatabase"],raw_feed_proxy:false}));
