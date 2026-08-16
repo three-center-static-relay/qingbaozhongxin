@@ -11,6 +11,6 @@ try{
   assert.equal(body?.secret_present,true);
   assert.equal(body?.ok,false);
   assert.equal(body?.upstream_http_status,403);
-  assert.equal(body?.upstream_error_class,"ZENODO_JSON_FORBIDDEN_GENERIC","Zenodo 403 must be the standard generic JSON Forbidden response for this diagnostic to pass");
-  console.log(JSON.stringify({ok:true,diagnosis:"ZENODO_JSON_FORBIDDEN_GENERIC",secret_present:true,upstream_http_status:403,secrets_redacted:true}));
+  assert.equal(body?.upstream_error_class,"GENERIC_FORBIDDEN","Zenodo 403 must be a plain generic Forbidden response for this diagnostic to pass");
+  console.log(JSON.stringify({ok:true,diagnosis:"ZENODO_GENERIC_FORBIDDEN",secret_present:true,upstream_http_status:403,secrets_redacted:true}));
 }finally{clearTimeout(timer)}
