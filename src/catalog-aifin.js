@@ -1,6 +1,7 @@
 import {AKSHARE_CATALOG} from "./catalog-akshare.js";
 import {WEB_SEARCH_CATALOG} from "./catalog-web-search.js";
 import {LITERATURE_LIVE_CATALOG} from "./catalog-literature-live.js";
+import {KNOWLEDGE_ARCHIVES_CATALOG} from "./catalog-knowledge-archives.js";
 export const AIFIN_CATALOG={
   aifin_market:{
     category:"finance-cn-ai-agent-mcp",
@@ -22,5 +23,6 @@ export const AIFIN_CATALOG={
   },
   ...AKSHARE_CATALOG,
   ...WEB_SEARCH_CATALOG,
-  ...LITERATURE_LIVE_CATALOG
+  ...LITERATURE_LIVE_CATALOG,
+  ...KNOWLEDGE_ARCHIVES_CATALOG
 };
