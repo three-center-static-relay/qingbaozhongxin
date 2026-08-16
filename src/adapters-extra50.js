@@ -19,6 +19,19 @@ async function fetchBounded(url,init={},mode="json",timeoutMs=DEFAULT_TIMEOUT_MS
 function decodeXml(s){return String(s??"").replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g,"$1").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&amp;/g,"&")}
 function firstTag(xml,tag){const m=xml.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`,"i"));return m?decodeXml(m[1].replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim()):null}
 function allTags(xml,tag,limit=12){const out=[],re=new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`,"gi");let m;while((m=re.exec(xml))&&out.length<limit)out.push(decodeXml(m[1].replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim()));return out.filter(Boolean)}
+function parseOaiDcRecords(xml,limit){
+  const records=[],re=/<record(?:\s[^>]*)?>([\s\S]*?)<\/record>/gi;let m;
+  while((m=re.exec(xml))&&records.length<limit){
+    const block=m[1],header=(block.match(/<header(?:\s[^>]*)?>([\s\S]*?)<\/header>/i)||[])[1]||"";
+    const deleted=/<header(?:\s[^>]*)?\sstatus=["']deleted["']/i.test(block);
+    records.push({identifier:firstTag(header,"identifier"),datestamp:firstTag(header,"datestamp"),deleted,title:firstTag(block,"dc:title"),creators:allTags(block,"dc:creator",12),subjects:allTags(block,"dc:subject",12),dates:allTags(block,"dc:date",6),types:allTags(block,"dc:type",6),identifiers:allTags(block,"dc:identifier",8),description:firstTag(block,"dc:description"),rights:allTags(block,"dc:rights",4)});
+  }
+  const token=firstTag(xml,"resumptionToken");
+  const tokenTag=xml.match(/<resumptionToken([^>]*)>/i);const attrs=tokenTag?.[1]||"";const sizeMatch=attrs.match(/completeListSize=["'](\d+)["']/i);
+  const oaiError=xml.match(/<error\s+code=["']([^"']+)["'][^>]*>([\s\S]*?)<\/error>/i);
+  if(oaiError)err("UPSTREAM_OAI_ERROR",502,{code:oaiError[1],message:decodeXml(oaiError[2].replace(/<[^>]+>/g," ").trim()).slice(0,500)});
+  return{items:records,resumption_token:token||null,complete_list_size:sizeMatch?Number(sizeMatch[1]):null};
+}
 function parsePangaea(xml,limit){const records=[],re=/<record(?:\s[^>]*)?>([\s\S]*?)<\/record>/gi;let m;while((m=re.exec(xml))&&records.length<limit){const block=m[1],identifier=firstTag(block,"identifier"),title=firstTag(block,"dc:title"),descriptions=allTags(block,"dc:description",3),creators=allTags(block,"dc:creator",12),subjects=allTags(block,"dc:subject",12),dates=allTags(block,"dc:date",4);records.push({identifier,title,creators,subjects,dates,description:descriptions[0]||null})}const token=firstTag(xml,"resumptionToken");return{items:records,resumption_token:token||null}}
 function kaggleHeaders(env){
   if(env.KAGGLE_API_TOKEN)return{authorization:`Bearer ${String(env.KAGGLE_API_TOKEN)}`};
@@ -27,7 +40,7 @@ function kaggleHeaders(env){
 }
 
 export const OPERATIONS={
-  zenodo:["search"],
+  zenodo:["search","oai_list_records"],
   huggingface:["datasets_search"],
   kaggle:["datasets_search","dataset_files"],
   harvard_dataverse:["search"],
@@ -46,6 +59,13 @@ async function zenodoSearch(args,env){
   const total=Array.isArray(body)?body.length:(typeof rawTotal==="number"?rawTotal:(Number.isFinite(Number(rawTotal?.value))?Number(rawTotal.value):null));
   return{provider:"zenodo",operation:"search",total,items,page,limit};
 }
+async function zenodoOaiList(args){
+  const limit=clamp(args.limit,1,50,20),u=new URL("https://zenodo.org/oai2d");u.searchParams.set("verb","ListRecords");
+  if(args.resumption_token){u.searchParams.set("resumptionToken",required(args.resumption_token,"resumption_token",1200))}
+  else{u.searchParams.set("metadataPrefix","oai_dc");if(args.set)u.searchParams.set("set",required(args.set,"set",160));if(args.from)u.searchParams.set("from",required(args.from,"from",40));if(args.until)u.searchParams.set("until",required(args.until,"until",40))}
+  const r=await fetchBounded(u,{},"text",20000),parsed=parseOaiDcRecords(r.body,limit);
+  return{provider:"zenodo",operation:"oai_list_records",metadata_prefix:"oai_dc",...parsed};
+}
 async function huggingfaceDatasets(args,env){const q=required(args.query,"query",300),limit=clamp(args.limit,1,30,10),sort=["downloads","likes","lastModified","createdAt","trendingScore"].includes(args.sort)?args.sort:"downloads",u=new URL("https://huggingface.co/api/datasets");u.searchParams.set("search",q);u.searchParams.set("limit",String(limit));u.searchParams.set("sort",sort);u.searchParams.set("direction","-1");const headers={};if(env.HUGGINGFACE_TOKEN)headers.authorization=`Bearer ${env.HUGGINGFACE_TOKEN}`;const r=await fetchBounded(u,{headers});return{provider:"huggingface",operation:"datasets_search",items:Array.isArray(r.body)?r.body:[]}}
 async function kaggleDatasets(args,env){const q=required(args.query,"query",300),page=clamp(args.page,1,100,1),sort=["hottest","votes","updated","active"].includes(args.sort)?args.sort:"hottest",filetype=["all","csv","sqlite","json","bigQuery"].includes(args.file_type)?args.file_type:"all",license=["all","cc","gpl","odb","other"].includes(args.license)?args.license:"all",u=new URL("https://www.kaggle.com/api/v1/datasets/list");u.searchParams.set("group","public");u.searchParams.set("sortBy",sort);u.searchParams.set("filetype",filetype);u.searchParams.set("license",license);u.searchParams.set("search",q);u.searchParams.set("page",String(page));if(args.max_size)u.searchParams.set("maxSize",String(clamp(args.max_size,1,1000000000000,1000000000)));if(args.min_size)u.searchParams.set("minSize",String(clamp(args.min_size,0,1000000000000,0)));const r=await fetchBounded(u,{headers:kaggleHeaders(env)});return{provider:"kaggle",operation:"datasets_search",page,items:Array.isArray(r.body)?r.body:(r.body?.datasets||[])}}
 async function kaggleFiles(args,env){const owner=safeSlug(args.owner,"owner"),dataset=safeSlug(args.dataset,"dataset"),u=`https://www.kaggle.com/api/v1/datasets/list/${encodeURIComponent(owner)}/${encodeURIComponent(dataset)}`,r=await fetchBounded(u,{headers:kaggleHeaders(env)});return{provider:"kaggle",operation:"dataset_files",owner,dataset,items:Array.isArray(r.body)?r.body:(r.body?.datasetFiles||r.body?.files||[])}}
@@ -55,6 +75,7 @@ async function figshareSearch(args,env){const q=required(args.query,"query",500)
 
 export async function runAdapter(provider,operation,args={},env={}){
   if(provider==="zenodo"&&operation==="search")return zenodoSearch(args,env);
+  if(provider==="zenodo"&&operation==="oai_list_records")return zenodoOaiList(args);
   if(provider==="huggingface"&&operation==="datasets_search")return huggingfaceDatasets(args,env);
   if(provider==="kaggle"&&operation==="datasets_search")return kaggleDatasets(args,env);
   if(provider==="kaggle"&&operation==="dataset_files")return kaggleFiles(args,env);
