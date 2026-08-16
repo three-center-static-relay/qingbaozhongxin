@@ -3,7 +3,7 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION="geospatial-commercial-v4-2026
 export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
   id:"geospatial-commercial",
   version:GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION,
-  purpose:"China-first commercial geospatial decision-intelligence branch with reusable global open-data layers and bounded current-web market research.",
+  purpose:"China-first commercial geospatial decision-intelligence branch using durable map, population, building, mobility, transport, earth-observation and open spatial-data capabilities.",
   free_only:true,
   benchmark_target:{
     reference_products:["Baidu Huiyan commercial-geospatial","Tencent LBS commercial/mall analytics"],
@@ -13,11 +13,17 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
     ],
     parity_rule:"Never claim parity for observed phone footfall, dwell time, mobile OD, cross-mall audience overlap, or private consumer profiles without a separately approved observed-LBS source."
   },
+  discovery_policy:{
+    discovery_search_tools:["exa","tavily","firecrawl"],
+    role:"temporary-global-tool-and-data-source-discovery-only",
+    production_dependency:false,
+    production_feature_source:false,
+    rule:"Search engines may discover candidate APIs, MCPs and datasets, but candidates enter this domain only after independent license, stability, access-mode and bounded-runtime validation."
+  },
   evidence_policy:{
     observed_vs_proxy_must_be_explicit:true,
     mobile_lbs_observed:false,
     payment_card_spend_observed:false,
-    web_signal_is_observed_lbs:false,
     synthetic_mobility_is_observed_lbs:false,
     arbitrary_url_fetch:false,
     paid_fallback:false,
@@ -36,8 +42,7 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
     synthetic_mobility:["worldmove"],
     transit_discovery:["mobilitydatabase"],
     routing_accessibility:["amap","baidu_maps","tencent_maps","openrouteservice"],
-    earth_observation_discovery:["earthengine","google_earth_observation","nasa_cmr","nasa_stac","nasa_gibs"],
-    web_market_intelligence:["commercial_web_research","exa","tavily","firecrawl","jina"]
+    earth_observation_discovery:["earthengine","google_earth_observation","nasa_cmr","nasa_stac","nasa_gibs"]
   },
   feature_layers:[
     "place_identity","administrative_hierarchy","population_total","age_sex_structure","population_density",
@@ -46,8 +51,7 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
     "building_age","building_quality","building_style","nonresidential_built_form","settlement_extent","building_change",
     "land_cover_10m","near_real_time_built_probability","urban_change","night_activity_proxy","road_accessibility","walking_accessibility",
     "driving_accessibility","public_transit_accessibility","real_time_traffic","public_transit_feed_availability",
-    "synthetic_mobility_prior","project_pipeline_web_signal","commercial_open_close_web_signal",
-    "planning_policy_web_signal","retail_rent_web_signal","investment_activity_web_signal","spatial_quality_provenance"
+    "synthetic_mobility_prior","spatial_quality_provenance"
   ],
   analysis_families:[
     "site_selection","trade_area","market_potential","retail_gap","white_space","competition","cannibalization_proxy",
@@ -63,7 +67,6 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
     "no-observed-dwell-time-or-origin-destination-mobile-signaling",
     "no-observed-cross-mall-audience-overlap",
     "no-payment-card-spend-or-private-income-profile",
-    "web-search-signals-are-market-evidence-not-human-mobility-ground-truth",
     "open-data-and-modelled-proxies-must-not-be-presented-as-baidu-huiyan-or-tencent-location-ground-truth"
   ]
 });
