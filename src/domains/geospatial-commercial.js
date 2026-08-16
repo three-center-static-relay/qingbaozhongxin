@@ -1,4 +1,4 @@
-export const GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION="geospatial-commercial-v3-20260816";
+export const GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION="geospatial-commercial-v4-20260816";
 
 export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
   id:"geospatial-commercial",
@@ -30,20 +30,21 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
     commercial_poi_crosscheck:["overture_maps","foursquare_os_places"],
     spatial_index:["h3"],
     population_demography:["worldpop","ghsl"],
-    buildings_urban_form:["cbra_china","microsoft_building_density_height","ghsl","dlr_wsf","overture_maps"],
-    land_cover_change:["esa_worldcover","copernicus_lcfm"],
+    buildings_urban_form:["cmab_china","cbra_china","microsoft_building_density_height","ghsl","dlr_wsf","overture_maps"],
+    land_cover_change:["esa_worldcover","copernicus_lcfm","google_dynamic_world"],
     activity_proxies:["night_lights"],
     synthetic_mobility:["worldmove"],
     transit_discovery:["mobilitydatabase"],
     routing_accessibility:["amap","baidu_maps","tencent_maps","openrouteservice"],
-    earth_observation_discovery:["nasa_cmr","nasa_stac","nasa_gibs"],
+    earth_observation_discovery:["earthengine","google_earth_observation","nasa_cmr","nasa_stac","nasa_gibs"],
     web_market_intelligence:["commercial_web_research","exa","tavily","firecrawl","jina"]
   },
   feature_layers:[
     "place_identity","administrative_hierarchy","population_total","age_sex_structure","population_density",
     "poi_density","poi_mix","brand_presence","brand_competition","commercial_supply","competitor_density",
-    "building_rooftop_2_5m","building_density","building_surface","building_height","building_volume","nonresidential_built_form","settlement_extent",
-    "building_change","land_cover_10m","urban_change","night_activity_proxy","road_accessibility","walking_accessibility",
+    "building_rooftop_2_5m","building_density","building_surface","building_height","building_volume","building_function",
+    "building_age","building_quality","building_style","nonresidential_built_form","settlement_extent","building_change",
+    "land_cover_10m","near_real_time_built_probability","urban_change","night_activity_proxy","road_accessibility","walking_accessibility",
     "driving_accessibility","public_transit_accessibility","real_time_traffic","public_transit_feed_availability",
     "synthetic_mobility_prior","project_pipeline_web_signal","commercial_open_close_web_signal",
     "planning_policy_web_signal","retail_rent_web_signal","investment_activity_web_signal","spatial_quality_provenance"
