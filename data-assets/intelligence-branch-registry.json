@@ -1,5 +1,5 @@
 {
-  "schema_version":"1.0",
+  "schema_version":"1.1",
   "center":"intelligence-center",
   "root_identity":"general-purpose evidence, data, information and public-intelligence acquisition center",
   "architecture_rule":"All domain branches are additive subdomains. No branch may rename, replace, narrow or become the Intelligence Center root service.",
@@ -11,7 +11,8 @@
     {"id":"law-policy","type":"intelligence-subdomain","scope":"law, regulation, policy and public administration","replaces_center":false},
     {"id":"geospatial-location","type":"intelligence-subdomain","scope":"maps, population, mobility proxies, remote sensing and location intelligence","replaces_center":false},
     {"id":"global-advisory","type":"intelligence-subdomain","scope":"think tanks, universities, strategy research, declassified archives, consulting and institutional research","replaces_center":false},
-    {"id":"industry-sector","type":"intelligence-subdomain","scope":"industry, trade, energy, transport, manufacturing, agriculture, technology, healthcare and other sector intelligence","replaces_center":false}
+    {"id":"industry-sector","type":"intelligence-subdomain","scope":"industry, trade, energy, transport, manufacturing, agriculture, technology, healthcare and other sector intelligence","replaces_center":false},
+    {"id":"knowledge-graph-knowledgebase-archives","label_zh":"知识图谱、知识库、档案库","type":"intelligence-subdomain","scope":"federated global knowledge graphs, scholarly and research metadata, libraries, archives, museums, cultural heritage, government data catalogs and public knowledge systems across countries, regions and industries","replaces_center":false}
   ],
   "invariants":[
     "src/index.js remains the generic intelligence-worker entry point",
