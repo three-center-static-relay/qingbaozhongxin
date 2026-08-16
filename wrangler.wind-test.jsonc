@@ -1,7 +1,0 @@
-{
-  "$schema":"node_modules/wrangler/config-schema.json",
-  "name":"intelligence-wind-runtime-test",
-  "main":"tests/fixtures/wind-worker.js",
-  "compatibility_date":"2026-08-15",
-  "vars":{"WIND_API_KEY":"unit-wind-key"}
-}
