@@ -1,12 +1,12 @@
 {
-  "schema_version":"1.1",
+  "schema_version":"1.2",
   "center":"intelligence-center",
   "root_identity":"general-purpose evidence, data, information and public-intelligence acquisition center",
   "architecture_rule":"All domain branches are additive subdomains. No branch may rename, replace, narrow or become the Intelligence Center root service.",
   "root_service":"intelligence-worker",
   "branches":[
     {"id":"nasa-earth-space","type":"intelligence-subdomain","scope":"NASA Earth observation, space science, remote sensing and public mission data","replaces_center":false},
-    {"id":"top-hospital-medical","type":"intelligence-subdomain","scope":"clinical evidence, biomedical data, hospital research, medical datasets, medication, imaging/pathology/genomics sources and medical-tool discovery","replaces_center":false},
+    {"id":"top-hospital-medical","label_zh":"医学诊断分析与护理","type":"intelligence-subdomain","scope":"direct diagnostic analysis, interpretation of supplied clinical evidence, red-flag assessment, nursing and self-care guidance using authoritative medical evidence; no expert/compute routing or hospital/research workflow layer","replaces_center":false},
     {"id":"finance-markets","type":"intelligence-subdomain","scope":"financial markets, securities, macro, company filings and investment research","replaces_center":false},
     {"id":"law-policy","type":"intelligence-subdomain","scope":"law, regulation, policy and public administration","replaces_center":false},
     {"id":"geospatial-location","type":"intelligence-subdomain","scope":"maps, population, mobility proxies, remote sensing and location intelligence","replaces_center":false},
@@ -18,6 +18,6 @@
     "src/index.js remains the generic intelligence-worker entry point",
     "provider catalog remains cross-domain",
     "domain registries may add sources and routing metadata but may not redefine center identity",
-    "downstream compute or expert tools remain generic center capabilities and are referenced by branches rather than turning those centers into domain-specific centers"
+    "medical branch does not create a separate orchestration, compute, expert or hospital workflow runtime"
   ]
 }
