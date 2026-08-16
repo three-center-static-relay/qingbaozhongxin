@@ -42,8 +42,8 @@ export async function runAdapter(provider,operation,args={},env={}){
     const raw=await request(u,{format:"xml"}),total=Number(xmlTag(raw,"numberOfRecords")||0)||null;return{provider,operation,total,page,items:xmlRecords(raw,limit),source_mode:"BnF Gallica official SRU 1.2; fixed CQL template; bounded Dublin Core metadata"};
   }
   if(provider==="ndl_search"){
-    const term=cleanCql(q),u=new URL("https://ndlsearch.ndl.go.jp/api/sru");u.searchParams.set("operation","searchRetrieve");u.searchParams.set("version","1.2");u.searchParams.set("query",`title=\"${term}\" OR any=\"${term}\"`);u.searchParams.set("maximumRecords",String(limit));u.searchParams.set("startRecord",String((page-1)*limit+1));
-    const raw=await request(u,{format:"xml"}),total=Number(xmlTag(raw,"numberOfRecords")||0)||null;return{provider,operation,total,page,items:xmlRecords(raw,limit),source_mode:"National Diet Library Search official SRU; fixed CQL template; bounded metadata; provider terms apply"};
+    const term=cleanCql(q),u=new URL("https://ndlsearch.ndl.go.jp/api/sru");u.searchParams.set("operation","searchRetrieve");u.searchParams.set("version","1.2");u.searchParams.set("query",`title=\"${term}\"`);u.searchParams.set("maximumRecords",String(limit));u.searchParams.set("startRecord",String((page-1)*limit+1));
+    const raw=await request(u,{format:"xml"}),total=Number(xmlTag(raw,"numberOfRecords")||0)||null;return{provider,operation,total,page,items:xmlRecords(raw,limit),source_mode:"National Diet Library Search official SRU; documented title CQL template; bounded metadata; provider terms apply"};
   }
   if(provider==="data_gov_us"){
     const u=new URL("https://api.gsa.gov/technology/datagov/v4/search");u.searchParams.set("q",q);u.searchParams.set("per_page",String(limit));if(args?.after)u.searchParams.set("after",text(args.after,1500));
