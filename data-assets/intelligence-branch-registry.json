@@ -1,5 +1,5 @@
 {
-  "schema_version":"1.4",
+  "schema_version":"1.5",
   "center":"intelligence-center",
   "root_identity":"general-purpose evidence, data, information and public-intelligence acquisition center",
   "architecture_rule":"All domain branches are additive subdomains. No branch may rename, replace, narrow or become the Intelligence Center root service.",
@@ -12,12 +12,14 @@
     {"id":"geospatial-location","type":"intelligence-subdomain","scope":"maps, population, mobility proxies, remote sensing and location intelligence","replaces_center":false},
     {"id":"global-advisory","type":"intelligence-subdomain","scope":"think tanks, universities, strategy research, declassified archives, consulting and institutional research","replaces_center":false},
     {"id":"industry-sector","type":"intelligence-subdomain","scope":"industry, trade, energy, transport, manufacturing, agriculture, technology, healthcare and other sector intelligence","replaces_center":false},
-    {"id":"knowledge-graph-knowledgebase-archives","label_zh":"知识图谱、知识库、档案库","type":"intelligence-subdomain","scope":"federated global knowledge graphs, scholarly and research metadata, libraries, archives, museums, cultural heritage, government data catalogs and public knowledge systems across countries, regions and industries","replaces_center":false}
+    {"id":"knowledge-graph-knowledgebase-archives","label_zh":"知识图谱、知识库、档案库","type":"intelligence-subdomain","scope":"federated global knowledge graphs, scholarly and research metadata, libraries, archives, museums, cultural heritage, government data catalogs and public knowledge systems across countries, regions and industries","replaces_center":false},
+    {"id":"professional-web-intelligence","label_zh":"专业网络信息收集","type":"intelligence-subdomain","scope":"shared professional public-web discovery, multi-round retrieval, cross-source corroboration and page reading using Exa Search, Tavily Search, Firecrawl Search and Jina Reader; supplies provenance-bearing evidence candidates to all domain branches and never replaces structured domain APIs/databases","providers":["exa.search","tavily.search","firecrawl.search","jina.read"],"replaces_center":false}
   ],
   "invariants":[
     "src/index.js remains the generic intelligence-worker entry point",
     "provider catalog remains cross-domain",
     "domain registries add domain capabilities and source metadata without redefining center identity",
+    "professional-web-intelligence is a shared acquisition branch; Exa/Tavily/Firecrawl/Jina are retrieval tools rather than authoritative domain truth sources",
     "top-hospital-medical remains capability-only and may expand specialty breadth, tools and authoritative sources without adding a medical workflow or orchestration runtime"
   ]
 }
