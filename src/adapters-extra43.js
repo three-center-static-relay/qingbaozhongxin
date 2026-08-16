@@ -4,6 +4,7 @@ import {OPERATIONS as MEDICAL_LIVE_OPERATIONS,runAdapter as runMedicalLive} from
 import {OPERATIONS as MEDICAL_LIVE2_OPERATIONS,runAdapter as runMedicalLive2} from "./adapters-extra46.js";
 import {OPERATIONS as MEDICAL_LIVE3_OPERATIONS,runAdapter as runMedicalLive3} from "./adapters-extra47.js";
 import {OPERATIONS as MEDICAL_LIVE4_OPERATIONS,runAdapter as runMedicalLive4} from "./adapters-extra48.js";
+import {OPERATIONS as MEDICAL_LIVE5_OPERATIONS,runAdapter as runMedicalLive5} from "./adapters-extra49.js";
 
 const text=(v,n=1200)=>String(v??"").trim().slice(0,n);
 const clamp=(v,min,max,d)=>{const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,Math.trunc(n))):d};
@@ -44,16 +45,12 @@ async function searchMedical(args,env){
   if(exa.status==="fulfilled")for(const x of exa.value?.items||[])items.push(normalize(x,"exa"));
   if(tavily.status==="fulfilled")for(const x of tavily.value?.items||[])items.push(normalize(x,"tavily"));
   if(!items.length)err("MEDICAL_SEARCH_UNAVAILABLE",502,{exa:exa.status==="rejected"?String(exa.reason?.message||exa.reason):null,tavily:tavily.status==="rejected"?String(tavily.reason?.message||tavily.reason):null});
-  return{
-    provider:"medical_top_tier_search",operation:"search",query:q,specialty:specialty||null,mode:mode||null,official_domains:include,
-    engines:{exa:exa.status==="fulfilled",tavily:tavily.status==="fulfilled"},
-    items:dedupe(items),
-    source_mode:"direct Exa+Tavily retrieval restricted to top-tier official medical and specialty domains; no generated search answer"
-  };
+  return{provider:"medical_top_tier_search",operation:"search",query:q,specialty:specialty||null,mode:mode||null,official_domains:include,engines:{exa:exa.status==="fulfilled",tavily:tavily.status==="fulfilled"},items:dedupe(items),source_mode:"direct Exa+Tavily retrieval restricted to top-tier official medical and specialty domains; no generated search answer"};
 }
 
-export const OPERATIONS={medical_top_tier_search:["search"],...MEDICAL_LIVE_OPERATIONS,...MEDICAL_LIVE2_OPERATIONS,...MEDICAL_LIVE3_OPERATIONS,...MEDICAL_LIVE4_OPERATIONS,...SPATIAL_OPERATIONS};
+export const OPERATIONS={medical_top_tier_search:["search"],...MEDICAL_LIVE_OPERATIONS,...MEDICAL_LIVE2_OPERATIONS,...MEDICAL_LIVE3_OPERATIONS,...MEDICAL_LIVE4_OPERATIONS,...MEDICAL_LIVE5_OPERATIONS,...SPATIAL_OPERATIONS};
 export async function runAdapter(provider,operation,args={},env={}){
+  if(MEDICAL_LIVE5_OPERATIONS[provider]?.includes(operation))return runMedicalLive5(provider,operation,args,env);
   if(MEDICAL_LIVE4_OPERATIONS[provider]?.includes(operation))return runMedicalLive4(provider,operation,args,env);
   if(MEDICAL_LIVE3_OPERATIONS[provider]?.includes(operation))return runMedicalLive3(provider,operation,args,env);
   if(MEDICAL_LIVE2_OPERATIONS[provider]?.includes(operation))return runMedicalLive2(provider,operation,args,env);
