@@ -3,6 +3,7 @@ import {WEB_SEARCH_CATALOG} from "./catalog-web-search.js";
 import {LITERATURE_LIVE_CATALOG} from "./catalog-literature-live.js";
 import {KNOWLEDGE_ARCHIVES_CATALOG} from "./catalog-knowledge-archives.js";
 import {GLOBAL_INSTITUTION_CATALOG} from "./catalog-global-institutions.js";
+import {RUNTIME_CATALOG_OVERRIDES} from "./catalog-runtime-overrides.js";
 export const AIFIN_CATALOG={
   aifin_market:{
     category:"finance-cn-ai-agent-mcp",
@@ -26,5 +27,6 @@ export const AIFIN_CATALOG={
   ...WEB_SEARCH_CATALOG,
   ...LITERATURE_LIVE_CATALOG,
   ...KNOWLEDGE_ARCHIVES_CATALOG,
-  ...GLOBAL_INSTITUTION_CATALOG
+  ...GLOBAL_INSTITUTION_CATALOG,
+  ...RUNTIME_CATALOG_OVERRIDES
 };
