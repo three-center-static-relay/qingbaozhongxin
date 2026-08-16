@@ -3,6 +3,7 @@ import fs from "node:fs";
 
 const branch=JSON.parse(fs.readFileSync(new URL("../data-assets/top-hospital-medical-branch.json",import.meta.url),"utf8"));
 const registry=JSON.parse(fs.readFileSync(new URL("../data-assets/intelligence-branch-registry.json",import.meta.url),"utf8"));
+const evidence=JSON.parse(fs.readFileSync(new URL("../data-assets/personal-clinical-evidence-registry.json",import.meta.url),"utf8"));
 
 assert.equal(branch.branch_id,"top-hospital-medical");
 assert.equal(branch.label_zh,"医学诊断分析与护理");
@@ -31,5 +32,12 @@ assert.match(med.scope,/no expert\/compute routing/i);
 
 const forbiddenTopLevel=["routing_policy","medical_tool_registry","hospital_and_research_dataset_sources","top_hospital_open_research_anchors"];
 for(const k of forbiddenTopLevel)assert.equal(Object.prototype.hasOwnProperty.call(branch,k),false,`${k} must be removed from direct-care branch`);
+
+assert.equal(evidence.name,"direct-medical-diagnosis-analysis-care-evidence");
+assert.match(evidence.policy,/No multi-stage workflow/i);
+assert.ok(evidence.sources.length>=12);
+assert.ok(evidence.direct_use_rules.some(x=>/observed versus inferred/i.test(x)));
+assert.ok(evidence.direct_use_rules.some(x=>/illegible handwriting/i.test(x)));
+assert.ok(evidence.direct_use_rules.some(x=>/red flags/i.test(x)));
 
 console.log(JSON.stringify({ok:true,suite:"medical-diagnosis-care-branch",capabilities:["diagnostic-analysis","clinical-evidence-interpretation","nursing-self-care"],orchestration_removed:true,patient_data_to_github:false}));
