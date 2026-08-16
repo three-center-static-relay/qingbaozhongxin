@@ -21,6 +21,15 @@ async function readGate(env){
   return {http_status:response.status,...body};
 }
 
+function classifyZenodo403(error){
+  if(Number(error?.details?.http_status)!==403)return null;
+  const raw=String(error?.details?.body||"").toLowerCase();
+  if(/ip address|ip has been blocked|you are being blocked|blocked.*support@zenodo\.org|contact.*support@zenodo\.org/.test(raw))return"IP_BLOCKED";
+  if(/cloudflare|captcha|attention required|challenge|bot/.test(raw))return"WAF_CHALLENGE";
+  if(/scope|missing authorization|not authorized|permission|forbidden/.test(raw))return"AUTHORIZATION_FORBIDDEN";
+  return"OTHER_403";
+}
+
 async function providerRuntimeSelftest(provider,env){
   const isZenodo=provider==="zenodo";
   const secretName=isZenodo?"ZENODO_TOKEN":"KAGGLE_API_TOKEN";
@@ -30,9 +39,9 @@ async function providerRuntimeSelftest(provider,env){
   try{
     const result=await runAdapter(provider,operation,args,env);
     const itemCount=Array.isArray(result?.items)?result.items.length:0;
-    return json({ok:itemCount>0,selftest:`${provider}-runtime`,secret_present:secretPresent,upstream_http_status:200,item_count:itemCount,total:result?.total??null,error:null,secrets_redacted:true});
+    return json({ok:itemCount>0,selftest:`${provider}-runtime`,secret_present:secretPresent,upstream_http_status:200,item_count:itemCount,total:result?.total??null,error:null,upstream_error_class:null,secrets_redacted:true});
   }catch(error){
-    return json({ok:false,selftest:`${provider}-runtime`,secret_present:secretPresent,upstream_http_status:Number(error?.details?.http_status)||null,error:String(error?.message||`${provider.toUpperCase()}_SELFTEST_FAILED`),adapter_status:Number(error?.status)||500,secrets_redacted:true});
+    return json({ok:false,selftest:`${provider}-runtime`,secret_present:secretPresent,upstream_http_status:Number(error?.details?.http_status)||null,error:String(error?.message||`${provider.toUpperCase()}_SELFTEST_FAILED`),adapter_status:Number(error?.status)||500,upstream_error_class:isZenodo?classifyZenodo403(error):null,secrets_redacted:true});
   }
 }
 
