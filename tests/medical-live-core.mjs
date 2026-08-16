@@ -15,8 +15,14 @@ assert.ok(OPERATIONS.monarch_api.includes("case_phenotype"));
 const oldFetch=globalThis.fetch;
 const calls=[];
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{"content-type":"application/json"}});
+function requestUrl(input){
+  if(input instanceof URL)return input;
+  if(typeof input==="string")return new URL(input);
+  if(input&&typeof input.url==="string")return new URL(input.url);
+  throw new TypeError("unsupported fetch input in medical-live-core mock");
+}
 globalThis.fetch=async(input,init={})=>{
-  const u=new URL(typeof input==="string"?input:input.url);calls.push({url:u.href,method:init.method||"GET",headers:init.headers||{}});
+  const u=requestUrl(input);calls.push({url:u.href,method:init.method||"GET",headers:init.headers||{}});
   if(u.hostname==="icdaccessmanagement.who.int")return json({access_token:"who-token",expires_in:3600});
   if(u.hostname==="id.who.int")return json({destinationEntities:[{id:"http://id.who.int/icd/entity/1",title:"Test disease",theCode:"1A00"}]});
   if(u.hostname==="uts-ws.nlm.nih.gov"&&u.pathname.includes("/search/current"))return json({result:{results:[{ui:"C0000001",name:"Test concept",rootSource:"MTH"}]}});
@@ -46,5 +52,5 @@ try{
   const ols=await runAdapter("ebi_ols","search",{query:"seizure",ontology:"hp"},{});assert.equal(ols.items.length,1);
   assert.ok(calls.some(x=>x.url.includes("icdaccessmanagement.who.int/connect/token")));
   assert.ok(calls.some(x=>x.url.includes("api.fda.gov/drug/label.json")));
-  console.log(JSON.stringify({ok:true,suite:"medical-live-core",providers:live,live_count:live.length,mocked_upstream_contracts:true,arbitrary_url:false,write:false}));
+  console.log(JSON.stringify({ok:true,suite:"medical-live-core",providers:live,live_count:live.length,mocked_upstream_contracts:true,url_object_fetch:true,arbitrary_url:false,write:false}));
 }finally{globalThis.fetch=oldFetch}
