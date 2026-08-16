@@ -5,6 +5,9 @@
     "stress": "node tests/stress.mjs",
     "test:copernicus": "node tests/copernicus-cds.mjs"
   },
+  "dependencies": {
+    "h3-js": "4.5.0"
+  },
   "devDependencies": {
     "wrangler": "^4.0.0",
     "msw": "^2.0.0"
