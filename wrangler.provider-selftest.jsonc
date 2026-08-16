@@ -9,6 +9,7 @@
     "RATE_LIMIT_PER_MIN": "300",
     "GOOGLE_CLOUD_ACCESS_TOKEN": "unit-google-token",
     "GOOGLE_CLOUD_PROJECT": "unit-project",
-    "PKULAW_MCP_TOKEN": "unit-pkulaw-token"
+    "PKULAW_MCP_TOKEN": "unit-pkulaw-token",
+    "WIND_API_KEY": "unit-wind-key"
   }
 }
