@@ -3,7 +3,7 @@ import {GLOBAL_HIGH_VALUE_CATALOG} from "./catalog-global-highvalue.js";
 import {SPLUS_CATALOG} from "./catalog-splus.js";
 import {AIFIN_CATALOG} from "./catalog-aifin.js";
 import {FREE_COMMERCIAL_SPATIAL_CATALOG} from "./catalog-free-commercial-spatial.js";
-export const CATALOG_VERSION="2026-08-16.36";
+export const CATALOG_VERSION="2026-08-16.37";
 export const EXCLUDED_PROVIDERS=EXISTING_EXCLUDED;
 export const CATALOG={
   ...EXISTING_CATALOG,
@@ -11,6 +11,12 @@ export const CATALOG={
   ...SPLUS_CATALOG,
   ...AIFIN_CATALOG,
   ...FREE_COMMERCIAL_SPATIAL_CATALOG,
+  huggingface:{...EXISTING_CATALOG.huggingface,category:"ai-dataset-model-hub",access:"optional-key",secrets:["HUGGINGFACE_TOKEN"],adapter:"huggingface.models+datasets-search",integration:"official-hub-rest",scope:"public-model-and-dataset-discovery",endpoint:"https://huggingface.co/api",registration_url:"https://huggingface.co/settings/tokens",arbitrary_url:false},
+  kaggle:{category:"community-dataset-hub",access:"key",secret_groups:[["KAGGLE_API_TOKEN"],["KAGGLE_USERNAME","KAGGLE_KEY"]],adapter:"kaggle.datasets-search+files",integration:"official-kaggle-api",scope:"bounded-public-dataset-discovery-and-file-metadata",endpoint:"https://www.kaggle.com/api/v1",registration_url:"https://www.kaggle.com/settings/api",auth_note:"prefer KAGGLE_API_TOKEN; legacy KAGGLE_USERNAME+KAGGLE_KEY remains supported",arbitrary_url:false},
+  zenodo:{...EXISTING_CATALOG.zenodo,access:"optional-key",secrets:["ZENODO_TOKEN"],adapter:"zenodo.search",integration:"official-rest",scope:"public-record-and-dataset-discovery",endpoint:"https://zenodo.org/api/records",registration_url:"https://zenodo.org/account/settings/applications/tokens/new/",arbitrary_url:false},
+  harvard_dataverse:{...EXISTING_CATALOG.harvard_dataverse,access:"public",optional_secrets:["HARVARD_DATAVERSE_API_TOKEN","DATAVERSE_API_TOKEN"],adapter:"harvard_dataverse.search",integration:"official-dataverse-search-api",scope:"public-datasets-files-dataverses; token optional for unpublished authorized content",endpoint:"https://dataverse.harvard.edu/api/search",arbitrary_url:false},
+  pangaea:{...EXISTING_CATALOG.pangaea,access:"public",adapter:"pangaea.oai-pmh",integration:"official-oai-pmh",scope:"bounded-citable-earth-environment-metadata-harvest",endpoint:"https://ws.pangaea.de/oai/provider",arbitrary_url:false},
+  figshare:{...EXISTING_CATALOG.figshare,access:"public",optional_secrets:["FIGSHARE_TOKEN"],adapter:"figshare.search",integration:"official-rest-v2",scope:"public-article-and-dataset-discovery; token optional for account/private access",endpoint:"https://api.figshare.com/v2/articles/search",registration_url:"https://figshare.com/account/applications",arbitrary_url:false},
   worldbank:{...EXISTING_CATALOG.worldbank,adapter:"worldbank.indicator+metadata+topic+multi-indicator",integration:"official-indicators-api-v2",scope:"countries-indicators-topics-single-and-bounded-multi-indicator",arbitrary_url:false},
   imf:{...EXISTING_CATALOG.imf,adapter:"imf.datamapper-v2",integration:"official-datamapper-v2",scope:"indicators-countries-regions-groups-bounded-timeseries",endpoint:"https://www.imf.org/external/datamapper/api/v2",arbitrary_url:false},
   bis:{...EXISTING_CATALOG.bis,adapter:"bis.sdmx-v2",integration:"official-sdmx-rest-v2",scope:"structures-and-bounded-data-queries",endpoint:"https://stats.bis.org/api/v2",arbitrary_url:false},
