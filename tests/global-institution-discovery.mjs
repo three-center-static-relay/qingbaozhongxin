@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {CATALOG} from "../src/catalog.js";
+import {GLOBAL_INSTITUTION_CATALOG} from "../src/catalog-global-institutions.js";
 import {OPERATIONS,runAdapter} from "../src/adapters.js";
 
 for(const p of ["global_institution_discovery","gleif"]){
@@ -10,7 +11,10 @@ for(const p of ["global_institution_discovery","gleif"]){
 }
 assert.deepEqual(CATALOG.global_institution_discovery.secrets,["EXA_API_KEY","TAVILY_API_KEY"]);
 assert.match(CATALOG.global_institution_discovery.selection_policy,/top-tier-free only/);
-for(const removed of ["opencorporates_global","whed_global","opendoar_global","edinet_japan"])assert.equal(CATALOG[removed],undefined,`${removed} must not be in top-tier-free catalog until free machine access is independently verified`);
+for(const removed of ["opencorporates_global","whed_global","opendoar_global","edinet_japan"]){
+  assert.equal(GLOBAL_INSTITUTION_CATALOG[removed],undefined,`${removed} must not be in the top-tier-free institution discovery subcatalog until free machine access is independently verified`);
+}
+assert.ok(CATALOG.edinet_japan,"EDINET may remain in the aggregated high-value catalog independently of the top-tier-free institution discovery subcatalog");
 
 const realFetch=globalThis.fetch;
 const calls=[];
