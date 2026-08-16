@@ -8,11 +8,15 @@ assert.equal(GEOSPATIAL_COMMERCIAL_DOMAIN.id,"geospatial-commercial");
 assert.equal(GEOSPATIAL_COMMERCIAL_DOMAIN.free_only,true);
 assert.equal(GEOSPATIAL_COMMERCIAL_DOMAIN.evidence_policy.paid_fallback,false);
 assert.equal(GEOSPATIAL_COMMERCIAL_DOMAIN.evidence_policy.mobile_lbs_observed,false);
-for(const p of ["worldpop","ghsl","overture_maps","foursquare_os_places","dlr_wsf","night_lights","worldmove","h3","baidu_maps","tencent_maps","amap","geonames","mobilitydatabase","esa_worldcover","cmab_china","cbra_china","microsoft_building_density_height","earthengine","commercial_web_research","exa","tavily","firecrawl"]){
+for(const p of ["worldpop","ghsl","overture_maps","foursquare_os_places","dlr_wsf","night_lights","worldmove","h3","baidu_maps","tencent_maps","amap","geonames","mobilitydatabase","esa_worldcover","cmab_china","cbra_china","microsoft_building_density_height","earthengine"]){
   assert.ok(JSON.stringify(GEOSPATIAL_COMMERCIAL_DOMAIN.provider_groups).includes(p),`domain missing ${p}`);
 }
-for(const banned of ["openaq","air_quality_exposure","tianditu","osm_overpass","tencent_location_big_data"]){assert.equal(JSON.stringify(GEOSPATIAL_COMMERCIAL_DOMAIN).includes(banned),false)}
+for(const discovery of ["exa","tavily","firecrawl"])assert.ok(GEOSPATIAL_COMMERCIAL_DOMAIN.discovery_policy.discovery_search_tools.includes(discovery));
+assert.equal(GEOSPATIAL_COMMERCIAL_DOMAIN.discovery_policy.production_dependency,false);
+assert.equal(GEOSPATIAL_COMMERCIAL_DOMAIN.discovery_policy.production_feature_source,false);
+for(const banned of ["openaq","air_quality_exposure","tianditu","osm_overpass","tencent_location_big_data","commercial_web_research"]){assert.equal(JSON.stringify(GEOSPATIAL_COMMERCIAL_DOMAIN.provider_groups).includes(banned),false)}
 assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.openaq,undefined);
+assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.commercial_web_research,undefined);
 assert.equal(OPEN_DATA_OPERATIONS.openaq,undefined);
 assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.geonames.billing_policy.includes("no premium"),true);
 assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.mobilitydatabase.billing_policy.includes("no paid"),true);
@@ -20,7 +24,6 @@ assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.esa_worldcover.license,"CC-BY-4.0")
 assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.cmab_china.license,"CC-BY-4.0");
 assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.cbra_china.license,"CC-BY-4.0");
 assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.microsoft_building_density_height.license,"CDLA-Permissive-2.0");
-assert.ok(FREE_COMMERCIAL_SPATIAL_CATALOG.commercial_web_research);
 assert.deepEqual(OPERATIONS.geospatial_commercial,["capabilities"]);
 assert.ok(OPERATIONS.geonames.includes("search"));
 assert.ok(OPERATIONS.mobilitydatabase.includes("gtfs_search"));
@@ -43,7 +46,7 @@ try{
 
   const manifest=await runAdapter("geospatial_commercial","capabilities",{},{});
   assert.equal(manifest.data.id,"geospatial-commercial");
-  assert.equal(JSON.stringify(manifest.data).includes("openaq"),false);
+  assert.equal(JSON.stringify(manifest.data.provider_groups).includes("commercial_web_research"),false);
   assert.equal(JSON.stringify(manifest.data).includes("cmab_china"),true);
   assert.equal(JSON.stringify(manifest.data).includes("cbra_china"),true);
   assert.equal(JSON.stringify(manifest.data).includes("microsoft_building_density_height"),true);
@@ -90,4 +93,4 @@ try{
   await assert.rejects(()=>runAdapter("mobilitydatabase","metadata",{},{}),e=>e?.status===503&&e?.message==="UPSTREAM_AUTH_FAILED");
 } finally {globalThis.fetch=originalFetch;}
 
-console.log(JSON.stringify({ok:true,suite:"geospatial-commercial-domain",domain:GEOSPATIAL_COMMERCIAL_DOMAIN.version,free_only:true,new_free_sources:["geonames","mobilitydatabase","esa_worldcover","cmab_china","cbra_china","microsoft_building_density_height"],earthengine_dataset_plan:["GOOGLE/DYNAMICWORLD/V1"],web_research:["exa","tavily","firecrawl"],air_quality_in_domain:false,raw_feed_proxy:false,arbitrary_url:false}));
+console.log(JSON.stringify({ok:true,suite:"geospatial-commercial-domain",domain:GEOSPATIAL_COMMERCIAL_DOMAIN.version,free_only:true,new_free_sources:["geonames","mobilitydatabase","esa_worldcover","cmab_china","cbra_china","microsoft_building_density_height"],earthengine_dataset_plan:["GOOGLE/DYNAMICWORLD/V1"],discovery_only_tools:["exa","tavily","firecrawl"],air_quality_in_domain:false,raw_feed_proxy:false,arbitrary_url:false}));
