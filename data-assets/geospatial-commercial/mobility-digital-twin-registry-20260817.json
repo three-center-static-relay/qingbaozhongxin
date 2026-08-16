@@ -1,0 +1,23 @@
+{
+  "schema":"geospatial-commercial-mobility-digital-twin-registry-v1",
+  "updated_at":"2026-08-17T00:20:00+08:00",
+  "policy":{"free_or_open_only":true,"paid_fallback":false,"commercial_compatibility_required":true,"observed_phone_lbs_claim":false,"public_aggregate_calibration_only":true},
+  "accepted_open_source_tools":[
+    {"id":"activitysim","official":"https://activitysim.github.io/activitysim/develop/","license":"BSD-3-Clause","role":"activity-based travel demand and daily activity chains","runtime":"compute staging"},
+    {"id":"aequilibrae","official":"https://github.com/AequilibraE/aequilibrae","license":"MIT with attribution clause","role":"OD matrices, skims, road assignment and transit assignment","runtime":"compute staging"},
+    {"id":"conveyal_r5","official":"https://github.com/conveyal/r5","license":"MIT","role":"many-to-many departure-window multimodal accessibility","runtime":"compute staging with pinned version"},
+    {"id":"eclipse_sumo","official":"https://eclipse.dev/sumo/","license":"EPL-2.0","role":"microscopic/mesoscopic traffic and intermodal scenario simulation","runtime":"compute staging"},
+    {"id":"popcorn_population","official":"https://github.com/prs-eth/Popcorn","license":"Apache-2.0","role":"Sentinel-1/2 high-resolution population/occupancy modelling","runtime":"compute; optional GPU"},
+    {"id":"ohsome_api","official":"https://api.ohsome.org/v1","upstream":"OpenStreetMap/OSHDB","license":"OSM data ODbL; API software AGPL-3.0","role":"historical POI/building/road counts, geometry and change analysis","runtime":"bounded intelligence API"}
+  ],
+  "public_observation_candidates":[
+    {"id":"beijing_public_mobility","status":"qualified-free-account-adapter-candidate","official":"https://data.beijing.gov.cn/","access":"relevant datasets marked unconditional open; API documentation requires logged-in userKey","candidate_secret":"BEIJING_OPEN_DATA_USER_KEY","signals":["bus_vehicle_positions","bus_historical_tracks","parking_remaining_spaces","public-transport-crowding ecosystem"]},
+    {"id":"shenzhen_public_mobility","status":"candidate-only","official":"https://opendata.sz.gov.cn/","signals":["shared_bike_daily_orders","road_segment_speed","street_realtime_data","parking_occupancy"],"blocker":"record exact API authentication and reuse terms before adapter admission"},
+    {"id":"shanghai_public_mobility","status":"candidate-only","official":"https://data.sh.gov.cn/","signals":["scenic_spot_realtime_visitors","parking","high-timeliness traffic"],"blocker":"record exact current dataset endpoint and open condition before adapter admission"}
+  ],
+  "rejected_shortcuts":[
+    {"id":"mapbox_tomtom_here_paid_traffic","reason":"not durable free China-core observed-LBS replacement"},
+    {"id":"scraped_dianping_meituan_private_behavior","reason":"no approved durable public API/license; do not bypass access controls"},
+    {"id":"private_device_tracking_or_wifi_fingerprinting","reason":"privacy/legal boundary and no approved source"}
+  ]
+}
