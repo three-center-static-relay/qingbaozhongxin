@@ -1,15 +1,16 @@
-export const GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION="geospatial-commercial-v7-20260816";
+export const GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION="geospatial-commercial-v8-20260817";
 
 export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
   id:"geospatial-commercial",
   version:GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION,
-  purpose:"China-first commercial geospatial decision-intelligence branch using durable free map, population, building, mobility, transport, earth-observation, socioeconomic and open spatial-data capabilities.",
+  purpose:"China-first commercial geospatial decision-intelligence branch using durable free map, population, building, mobility, transport, earth-observation, socioeconomic, knowledge-graph and open spatial-data capabilities.",
   free_only:true,
   benchmark_target:{
     reference_products:["Baidu Huiyan commercial-geospatial","Tencent LBS commercial/mall analytics"],
     target_scope:[
       "site-selection","trade-area","market-potential","retail-gap","white-space","competition",
-      "accessibility","commercial-supply","project-pipeline","urban-form","population-market","traffic-context","future-market-scenarios"
+      "accessibility","commercial-supply","project-pipeline","urban-form","population-market","traffic-context","future-market-scenarios",
+      "temporal-accessibility","modelled-OD","modelled-footfall-and-dwell-proxies","public-observation-calibration"
     ],
     parity_rule:"Never claim parity for observed phone footfall, dwell time, mobile OD, cross-mall audience overlap, or private consumer profiles without a separately approved observed-LBS source."
   },
@@ -37,6 +38,9 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
     payment_card_spend_observed:false,
     synthetic_mobility_is_observed_lbs:false,
     socioeconomic_downscaling_is_observed_spend:false,
+    public_aggregate_mobility_is_phone_lbs:false,
+    modelled_od_is_observed_od:false,
+    modelled_dwell_is_observed_dwell:false,
     arbitrary_url_fetch:false,
     paid_fallback:false,
     walled_or_blocked_sources_are_not_core:true,
@@ -60,8 +64,12 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
   shared_free_tools:{
     administrative_boundaries:["geoboundaries_gbOpen_CC_BY_4_0"],
     eo_backup_search:["element84_earth_search_free_public_STAC"],
-    multimodal_transit_engine:["opentripplanner_local_LGPL"],
+    multimodal_transit_engine:["opentripplanner_local_LGPL","conveyal_r5_MIT"],
     local_road_routing_engines:["valhalla_local_MIT","osrm_local_BSD_2_clause"],
+    mobility_digital_twin_models:["activitysim_BSD_3_clause","aequilibrae_MIT_attribution","eclipse_sumo_EPL_2_0","popcorn_population_Apache_2_0"],
+    historical_spatial_change:["ohsome_api_OSM_history_ODbL"],
+    public_mobility_calibration_candidates:["beijing_public_mobility_free_account","shenzhen_public_mobility_pending_terms","shanghai_public_mobility_pending_endpoint"],
+    commercial_spatial_knowledge_graph:["commercial-spatial-knowledge-graph-v1"],
     socioeconomic_activity_layers:[
       "global_gridded_real_GDP_and_electricity_1km_1992_2019_CC_BY_4_0",
       "china_280_city_monthly_electricity_1km_2012_2019_CC_BY_4_0"
@@ -72,19 +80,21 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
     ]
   },
   feature_layers:[
-    "place_identity","administrative_hierarchy","administrative_boundary","population_total","age_sex_structure","population_density","population_h3_crosscheck","future_population_scenario",
-    "poi_density","poi_mix","brand_presence","brand_competition","commercial_supply","competitor_density","poi_change_delta","business_area_label","poi_rating","poi_cost_proxy","indoor_poi_hierarchy","poi_entrance_exit",
+    "place_identity","administrative_hierarchy","administrative_boundary","population_total","age_sex_structure","population_density","population_h3_crosscheck","future_population_scenario","population_nowcast",
+    "poi_density","poi_mix","brand_presence","brand_competition","commercial_supply","competitor_density","poi_change_delta","poi_turnover","commercial_supply_change","business_area_label","poi_rating","poi_cost_proxy","indoor_poi_hierarchy","poi_entrance_exit",
     "building_rooftop_2_5m","building_density","building_surface","building_height","building_volume","individual_building_height","building_function",
     "building_age","building_quality","building_style","nonresidential_built_form","settlement_extent","building_change","vertical_urban_growth",
     "land_cover_1m","land_cover_10m","near_real_time_built_probability","urban_change","future_urban_expansion_scenario","urban_village_renewal_proxy","night_activity_proxy",
     "gridded_gdp_activity_proxy","gridded_electricity_activity_proxy",
-    "road_accessibility","walking_accessibility","driving_accessibility","public_transit_accessibility","multimodal_transit_travel_time","real_time_traffic","public_transit_feed_availability",
-    "synthetic_mobility_prior","spatial_quality_provenance"
+    "road_accessibility","walking_accessibility","driving_accessibility","public_transit_accessibility","multimodal_transit_travel_time","temporal_accessibility","real_time_traffic","public_transit_feed_availability",
+    "observed_public_transport_activity","observed_parking_occupancy","observed_shared_bike_activity","observed_road_speed_activity",
+    "activity_chain_demand","modelled_od_demand","modelled_destination_attraction","modelled_dwell_proxy","road_assignment_pressure","transit_assignment_pressure",
+    "synthetic_mobility_prior","commercial_entity_graph","spatial_quality_provenance"
   ],
   analysis_families:[
     "site_selection","trade_area","market_potential","retail_gap","white_space","competition","cannibalization_proxy",
     "accessibility","territory_design","location_allocation","logistics_network","urban_change","real_estate_potential","urban_renewal_opportunity",
-    "commercial_supply_pipeline","brand_expansion","project_screening","scenario_analysis","future_market_scenario_analysis"
+    "commercial_supply_pipeline","brand_expansion","project_screening","scenario_analysis","future_market_scenario_analysis","mobility_digital_twin","temporal_demand_calibration"
   ],
   reusable_compute_primitives:[
     "commercial_spatial_fusion","spatial_feature_fusion","site_ranking","white_space","facility_location","vrp","resource_allocation",
@@ -95,6 +105,8 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
     "no-observed-dwell-time-or-origin-destination-mobile-signaling",
     "no-observed-cross-mall-audience-overlap",
     "no-payment-card-spend-or-private-income-profile",
+    "public-bus-bike-parking-road-speed-observations-are-aggregate-calibration-signals-not-device-level-LBS",
+    "modelled-OD-footfall-dwell-and-population-nowcasts-must-retain-modelled-or-proxy-labels-and-uncertainty",
     "gridded-GDP-electricity-and-future-SSP-layers-are-modelled-or-downscaled-proxies-not-observed-consumer-spend",
     "free/open-data-and-modelled-proxies-must-not-be-presented-as-baidu-huiyan-or-tencent-location-ground-truth"
   ]
