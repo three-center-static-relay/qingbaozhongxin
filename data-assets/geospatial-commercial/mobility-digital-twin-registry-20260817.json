@@ -1,9 +1,11 @@
 {
-  "schema":"geospatial-commercial-mobility-digital-twin-registry-v1",
-  "updated_at":"2026-08-17T00:20:00+08:00",
+  "schema":"geospatial-commercial-mobility-digital-twin-registry-v2",
+  "updated_at":"2026-08-17T00:30:00+08:00",
   "policy":{"free_or_open_only":true,"paid_fallback":false,"commercial_compatibility_required":true,"observed_phone_lbs_claim":false,"public_aggregate_calibration_only":true},
   "accepted_open_source_tools":[
     {"id":"activitysim","official":"https://activitysim.github.io/activitysim/develop/","license":"BSD-3-Clause","role":"activity-based travel demand and daily activity chains","runtime":"compute staging"},
+    {"id":"scikit_mobility","official":"https://scikit-mobility.github.io/scikit-mobility/","license":"BSD-3-Clause","role":"mobility-flow metrics, gravity/radiation flow synthesis, synthetic trajectories and privacy-risk analysis","runtime":"compute staging"},
+    {"id":"movingpandas","official":"https://movingpandas.org/","license":"BSD-3-Clause","role":"approved public operational trajectory cleaning, stop detection, trip splitting and aggregation","runtime":"compute staging"},
     {"id":"aequilibrae","official":"https://github.com/AequilibraE/aequilibrae","license":"MIT with attribution clause","role":"OD matrices, skims, road assignment and transit assignment","runtime":"compute staging"},
     {"id":"conveyal_r5","official":"https://github.com/conveyal/r5","license":"MIT","role":"many-to-many departure-window multimodal accessibility","runtime":"compute staging with pinned version"},
     {"id":"eclipse_sumo","official":"https://eclipse.dev/sumo/","license":"EPL-2.0","role":"microscopic/mesoscopic traffic and intermodal scenario simulation","runtime":"compute staging"},
