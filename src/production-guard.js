@@ -1,12 +1,14 @@
 import guard,{CenterGate} from "./guard.js";
 import {runLiteratureSelftest} from "./literature-selftest.js";
 import {runProviderSelftest} from "./provider-selftest.js";
+import {runTiandituNetworkDiagnostic} from "./tianditu-network-diagnostic.js";
 export {CenterGate};
 const json=(x,s=200)=>Response.json(x,{status:s,headers:{"cache-control":"no-store"}});
 
 export default{
   async fetch(req,env,ctx){
     const u=new URL(req.url);
+    if(req.method==="POST"&&u.pathname==="/v1/diagnostics/tianditu-network")return runTiandituNetworkDiagnostic(env);
     if(req.method==="POST"&&u.pathname==="/v1/selftest/literature"){
       if(u.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"literature selftest is service-binding internal only"},403);
       return runLiteratureSelftest(guard,env,ctx);
