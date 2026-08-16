@@ -32,18 +32,6 @@ export const FREE_COMMERCIAL_SPATIAL_CATALOG={
     billing_policy:"free-standard-only; no automatic paid upgrade",
     arbitrary_url:false
   },
-  osm_overpass:{
-    category:"osm-readonly-commercial-semantics-free",
-    access:"public",
-    adapter:"osm_overpass.fixed-nearby",
-    integration:"OSM-Wiki-listed-public-overpass-instance",
-    scope:"fixed-commercial-transit-feature-categories-within-1500m",
-    endpoint:"https://overpass.private.coffee/api/interpreter",
-    billing:"public-free",
-    upstream_policy:"use only the fixed Cloudflare-reachable public instance; overpass-api.de removed after production HTTP-521 E2E failure",
-    fair_use:"single-active-task; no parallel queries; <=200 elements; <=1500m; no arbitrary Overpass QL",
-    arbitrary_url:false
-  },
   worldmove:{
     category:"open-synthetic-human-mobility",
     access:"public",
