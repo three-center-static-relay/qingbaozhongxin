@@ -5,6 +5,7 @@ import {OPERATIONS as MEDICAL_LIVE2_OPERATIONS,runAdapter as runMedicalLive2} fr
 import {OPERATIONS as MEDICAL_LIVE3_OPERATIONS,runAdapter as runMedicalLive3} from "./adapters-extra47.js";
 import {OPERATIONS as MEDICAL_LIVE4_OPERATIONS,runAdapter as runMedicalLive4} from "./adapters-extra48.js";
 import {OPERATIONS as MEDICAL_LIVE5_OPERATIONS,runAdapter as runMedicalLive5} from "./adapters-extra49.js";
+import {OPERATIONS as PUBLIC_DATASET_OPERATIONS,runAdapter as runPublicDatasets} from "./adapters-extra50.js";
 
 const text=(v,n=1200)=>String(v??"").trim().slice(0,n);
 const clamp=(v,min,max,d)=>{const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,Math.trunc(n))):d};
@@ -48,8 +49,9 @@ async function searchMedical(args,env){
   return{provider:"medical_top_tier_search",operation:"search",query:q,specialty:specialty||null,mode:mode||null,official_domains:include,engines:{exa:exa.status==="fulfilled",tavily:tavily.status==="fulfilled"},items:dedupe(items),source_mode:"direct Exa+Tavily retrieval restricted to top-tier official medical and specialty domains; no generated search answer"};
 }
 
-export const OPERATIONS={medical_top_tier_search:["search"],...MEDICAL_LIVE_OPERATIONS,...MEDICAL_LIVE2_OPERATIONS,...MEDICAL_LIVE3_OPERATIONS,...MEDICAL_LIVE4_OPERATIONS,...MEDICAL_LIVE5_OPERATIONS,...SPATIAL_OPERATIONS};
+export const OPERATIONS={medical_top_tier_search:["search"],...PUBLIC_DATASET_OPERATIONS,...MEDICAL_LIVE_OPERATIONS,...MEDICAL_LIVE2_OPERATIONS,...MEDICAL_LIVE3_OPERATIONS,...MEDICAL_LIVE4_OPERATIONS,...MEDICAL_LIVE5_OPERATIONS,...SPATIAL_OPERATIONS};
 export async function runAdapter(provider,operation,args={},env={}){
+  if(PUBLIC_DATASET_OPERATIONS[provider]?.includes(operation))return runPublicDatasets(provider,operation,args,env);
   if(MEDICAL_LIVE5_OPERATIONS[provider]?.includes(operation))return runMedicalLive5(provider,operation,args,env);
   if(MEDICAL_LIVE4_OPERATIONS[provider]?.includes(operation))return runMedicalLive4(provider,operation,args,env);
   if(MEDICAL_LIVE3_OPERATIONS[provider]?.includes(operation))return runMedicalLive3(provider,operation,args,env);
