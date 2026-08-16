@@ -1,0 +1,12 @@
+import {MEDICAL_TOP_TIER_CATALOG as BASE} from "./catalog-medical-top-tier.js";
+
+export const MEDICAL_LIVE_OVERRIDES={
+  who_icd11:{...BASE.who_icd11,adapter:"who_icd11.live-v2",integration:"official-WHO-ICD-API-v2-OAuth2",scope:"ICD-11 MMS terminology search, diagnostic normalization, hierarchy-ready coding",endpoint:"https://id.who.int/",write:false,arbitrary_url:false},
+  umls_uts:{...BASE.umls_uts,adapter:"umls_uts.live-current",integration:"official-NLM-UMLS-REST-current",scope:"UMLS concept search, semantic filtering and CUI definitions",endpoint:"https://uts-ws.nlm.nih.gov/rest",write:false,arbitrary_url:false},
+  medlineplus_connect:{...BASE.medlineplus_connect,adapter:"medlineplus_connect.live",integration:"official-NLM-MedlinePlus-Connect",scope:"ICD-10-CM, SNOMED CT, RxCUI, NDC, LOINC and CPT linked patient education",endpoint:"https://connect.medlineplus.gov/service",write:false,arbitrary_url:false},
+  openfda_drug_label:{...BASE.openfda_drug_label,access:"optional-key",secrets:undefined,optional_secrets:["OPENFDA_API_KEY"],adapter:"openfda_drug_label.live",integration:"official-openFDA-drug-label-REST",scope:"bounded drug-label lookup for indications, warnings, contraindications, adverse reactions, interactions, dosage and special populations",endpoint:"https://api.fda.gov/drug/label.json",write:false,arbitrary_url:false},
+  rxclass:{...BASE.rxclass,adapter:"rxclass.live",integration:"official-NLM-RxClass-REST",scope:"drug-to-class lookup and bounded class-member retrieval",endpoint:"https://rxnav.nlm.nih.gov/REST/rxclass/",write:false,arbitrary_url:false},
+  pubtator3:{...BASE.pubtator3,adapter:"pubtator3.live",integration:"official-NCBI-PubTator3-REST",scope:"semantic biomedical literature search and entity normalization for disease, drug, gene and variant concepts",endpoint:"https://www.ncbi.nlm.nih.gov/research/pubtator3-api/",write:false,arbitrary_url:false},
+  monarch_api:{...BASE.monarch_api,adapter:"monarch.v3-live",integration:"official-Monarch-v3-REST",scope:"disease-gene-phenotype search, entity lookup and case-phenotype matrices",endpoint:"https://api-v3.monarchinitiative.org/v3/api",write:false,arbitrary_url:false},
+  ebi_ols:{...BASE.ebi_ols,adapter:"ebi_ols4.live",integration:"official-EMBL-EBI-OLS4-REST",scope:"biomedical ontology term search with optional ontology restriction",endpoint:"https://www.ebi.ac.uk/ols4/api/",write:false,arbitrary_url:false}
+};
