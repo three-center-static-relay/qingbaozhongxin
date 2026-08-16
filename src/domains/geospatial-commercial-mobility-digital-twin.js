@@ -1,4 +1,4 @@
-export const COMMERCIAL_MOBILITY_DIGITAL_TWIN_VERSION="commercial-mobility-digital-twin-v1-20260817";
+export const COMMERCIAL_MOBILITY_DIGITAL_TWIN_VERSION="commercial-mobility-digital-twin-v2-20260817";
 
 export const COMMERCIAL_MOBILITY_DIGITAL_TWIN=Object.freeze({
   id:"commercial-mobility-digital-twin",
@@ -17,6 +17,8 @@ export const COMMERCIAL_MOBILITY_DIGITAL_TWIN=Object.freeze({
   },
   open_source_models:{
     activitysim:{role:"synthetic-household-person daily activity chains, destination/mode/time-of-day demand",license:"BSD-3-Clause",runtime:"compute-staging",network:false},
+    scikit_mobility:{role:"aggregate mobility-flow analysis plus gravity/radiation and synthetic trajectory/flow generation with privacy-risk tooling",license:"BSD-3-Clause",runtime:"compute-staging",network:false,evidence_kind:"modelled-or-approved-aggregate-inputs-only"},
+    movingpandas:{role:"aggregate/operational trajectory cleaning, stop detection, trip splitting and spatiotemporal aggregation for approved public vehicle traces",license:"BSD-3-Clause",runtime:"compute-staging",network:false,evidence_kind:"public-operational-trajectories-not-person-tracking"},
     aequilibrae:{role:"OD matrices, skims, multi-class user-equilibrium road assignment, GTFS transit assignment",license:"MIT-with-attribution-clause",runtime:"compute-staging",network:false},
     conveyal_r5:{role:"many-to-many probabilistic transit/walk/bike/car accessibility across departure-time windows",license:"MIT",runtime:"compute-staging",network:false,api_stability:"pin-version"},
     eclipse_sumo:{role:"microscopic/mesoscopic traffic and intermodal scenario simulation for congestion/access calibration",license:"EPL-2.0",runtime:"compute-staging",network:false},
@@ -31,7 +33,9 @@ export const COMMERCIAL_MOBILITY_DIGITAL_TWIN=Object.freeze({
   fusion_pipeline:[
     "entity-resolve-POI-building-transit-parking-admin-into-commercial-spatial-knowledge-graph",
     "build-time-sliced-population-and-occupancy-surfaces",
+    "clean-and-aggregate-approved-public-operational-trajectories-without-person-identifiers",
     "generate-synthetic-activity-chains-and-destination-demand",
+    "estimate-gravity-radiation-and-activity-based-modelled-mobility-flows",
     "construct-modelled-OD-and-network-skims",
     "assign-road-and-transit-flows",
     "compute-many-to-many-time-window-accessibility",
@@ -40,7 +44,7 @@ export const COMMERCIAL_MOBILITY_DIGITAL_TWIN=Object.freeze({
     "return-observed-modelled-proxy-tags-and-source-receipts-for-every-feature"
   ],
   normalized_feature_outputs:[
-    "population_nowcast","activity_chain_demand","modelled_od_demand","modelled_destination_attraction","modelled_dwell_proxy",
+    "population_nowcast","activity_chain_demand","synthetic_flow_demand","modelled_od_demand","modelled_destination_attraction","modelled_dwell_proxy",
     "temporal_accessibility","road_assignment_pressure","transit_assignment_pressure","observed_public_transport_activity",
     "observed_parking_occupancy","observed_shared_bike_activity","observed_road_speed_activity","poi_turnover","commercial_supply_change"
   ],
