@@ -4,40 +4,45 @@ import fs from "node:fs";
 const branch=JSON.parse(fs.readFileSync(new URL("../data-assets/top-hospital-medical-branch.json",import.meta.url),"utf8"));
 const registry=JSON.parse(fs.readFileSync(new URL("../data-assets/intelligence-branch-registry.json",import.meta.url),"utf8"));
 const evidence=JSON.parse(fs.readFileSync(new URL("../data-assets/personal-clinical-evidence-registry.json",import.meta.url),"utf8"));
+const stack=JSON.parse(fs.readFileSync(new URL("../data-assets/medical-top-tier-capability-stack.json",import.meta.url),"utf8"));
 
 assert.equal(branch.branch_id,"top-hospital-medical");
-assert.equal(branch.label_zh,"医学诊断分析与护理");
-assert.equal(branch.capabilities?.diagnostic_analysis?.enabled,true);
-assert.equal(branch.capabilities?.clinical_evidence_interpretation?.enabled,true);
-assert.equal(branch.capabilities?.nursing_and_self_care?.enabled,true);
+assert.equal(branch.label_zh,"医学诊断分析循证治疗与护理");
+assert.equal(branch.capability_registry,"data-assets/medical-top-tier-capability-stack.json");
 
-for(const field of ["ranked_differential_diagnosis","red_flags_and_urgency","nursing_and_self_care","uncertainty_and_information_gaps"]){
-  assert.ok(branch.direct_output_contract.includes(field),`missing direct output ${field}`);
+for(const key of [
+  "clinical_diagnosis","differential_diagnosis","laboratory_interpretation","ct_mri_pet_xray_ultrasound_image_support",
+  "dicom_series_support","pathology_report_support","whole_slide_pathology_support","ecg_and_waveform_support",
+  "drug_interaction_analysis","pharmacogenomic_support","evidence_based_medicine","treatment_option_comparison",
+  "individualized_treatment_plan_design_support","clinical_calculators_and_risk_scores","nursing_assessment_and_care",
+  "rare_disease_phenotype_reasoning","genetic_test_interpretation_support","precision_oncology_support"
+]) assert.equal(branch.capabilities?.[key],true,`missing capability ${key}`);
+
+for(const removed of ["direct_output_contract","excluded_scope","safety_rules","routing_policy","workflow","process","policy"]){
+  assert.equal(Object.prototype.hasOwnProperty.call(branch,removed),false,`${removed} must not be a top-level medical-branch process/rule block`);
 }
 
-for(const banned of ["expert-center routing","compute-center routing","multi-agent or committee workflow","hospital operations workflow","PACS or DICOM server deployment","image-model training or segmentation pipelines"]){
-  assert.ok(branch.excluded_scope.includes(banned),`missing excluded mechanism ${banned}`);
+assert.equal(stack.free_access_only,true);
+assert.ok(stack.official_and_open_machine_sources.length>=25);
+assert.ok(stack.medical_file_and_imaging_tools.length>=10);
+for(const id of ["who_icd11_api","umls_uts_api","loinc_api","medlineplus_connect","openfda_drug_label","rxclass","pubtator3","monarch","ebi_ols","nci_evs","ncbi_gtr","cpic","clinpgx","civic","open_targets","biomcp","who_smart_guidelines","hl7_fhir","hl7_cql","dicomweb","lactmed","livertox"]){
+  assert.ok(stack.official_and_open_machine_sources.some(x=>x.id===id),`missing source ${id}`);
+}
+for(const id of ["pydicom","highdicom","simpleitk","nibabel","monai_core","openslide","ohif_viewer","3d_slicer","qupath","wfdb_python"]){
+  assert.ok(stack.medical_file_and_imaging_tools.some(x=>x.id===id),`missing tool ${id}`);
 }
 
-assert.ok(branch.safety_rules.some(x=>/never written into GitHub/i.test(x)));
-assert.ok(branch.excluded_scope.some(x=>/single photo/i.test(x)));
-assert.ok(branch.safety_rules.some(x=>/life, vision/i.test(x)));
-assert.ok(branch.authoritative_free_evidence_sources.length>=10);
-assert.ok(branch.authoritative_free_evidence_sources.every(x=>["public","public-api"].includes(x.access)));
+assert.equal(evidence.name,"medical-diagnosis-evidence-treatment-care-sources");
+assert.ok(evidence.sources.length>=30);
+assert.equal(Object.prototype.hasOwnProperty.call(evidence,"policy"),false);
+assert.equal(Object.prototype.hasOwnProperty.call(evidence,"direct_use_rules"),false);
+assert.equal(Object.prototype.hasOwnProperty.call(evidence,"evidence_priority"),false);
 
 const med=registry.branches.find(x=>x.id==="top-hospital-medical");
 assert.ok(med);
-assert.match(med.scope,/diagnostic analysis/i);
-assert.match(med.scope,/no expert\/compute routing/i);
+assert.match(med.scope,/CT\/MRI\/PET/i);
+assert.match(med.scope,/evidence-based medicine/i);
+assert.match(med.scope,/treatment-option/i);
+assert.match(med.scope,/nursing/i);
 
-const forbiddenTopLevel=["routing_policy","medical_tool_registry","hospital_and_research_dataset_sources","top_hospital_open_research_anchors"];
-for(const k of forbiddenTopLevel)assert.equal(Object.prototype.hasOwnProperty.call(branch,k),false,`${k} must be removed from direct-care branch`);
-
-assert.equal(evidence.name,"direct-medical-diagnosis-analysis-care-evidence");
-assert.match(evidence.policy,/No multi-stage workflow/i);
-assert.ok(evidence.sources.length>=12);
-assert.ok(evidence.direct_use_rules.some(x=>/observed versus inferred/i.test(x)));
-assert.ok(evidence.direct_use_rules.some(x=>/illegible handwriting/i.test(x)));
-assert.ok(evidence.direct_use_rules.some(x=>/red flags/i.test(x)));
-
-console.log(JSON.stringify({ok:true,suite:"medical-diagnosis-care-branch",capabilities:["diagnostic-analysis","clinical-evidence-interpretation","nursing-self-care"],orchestration_removed:true,patient_data_to_github:false,single_photo_autodiagnosis_excluded:true}));
+console.log(JSON.stringify({ok:true,suite:"medical-top-tier-capability-stack",capability_only:true,free_access_only:true,multimodal:true,ct_mri_dicom:true,evidence_medicine:true,medication:true,treatment_design:true,nursing:true,precision_medicine:true}));
