@@ -29,6 +29,7 @@ const PROVIDER_ALIASES=Object.freeze({
   datacite:["datacite"],
   hdx:["hdx"],
   openml:["openml"],
+  sciencedb_portal:["sciencedb"],
   pangaea:["pangaea"],
   earth_engine_catalog:["earthengine"],
   bigquery_public:["bigquery"],

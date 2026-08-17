@@ -3,7 +3,7 @@ import {GLOBAL_HIGH_VALUE_CATALOG} from "./catalog-global-highvalue.js";
 import {SPLUS_CATALOG} from "./catalog-splus.js";
 import {AIFIN_CATALOG} from "./catalog-aifin.js";
 import {FREE_COMMERCIAL_SPATIAL_CATALOG} from "./catalog-free-commercial-spatial.js";
-export const CATALOG_VERSION="2026-08-17.01";
+export const CATALOG_VERSION="2026-08-17.02";
 export const EXCLUDED_PROVIDERS=EXISTING_EXCLUDED;
 export const CATALOG={
   ...EXISTING_CATALOG,
@@ -21,6 +21,7 @@ export const CATALOG={
   dryad:{category:"research-dataset-repository",access:"public",adapter:"dryad.search",integration:"official-rest-v2",scope:"bounded-public-research-dataset-search",endpoint:"https://datadryad.org/api/v2/search",arbitrary_url:false},
   hdx:{category:"humanitarian-open-data-catalog",access:"public",adapter:"hdx.ckan-search",integration:"official-hdx-ckan-api",scope:"bounded-public-humanitarian-dataset-metadata-search",endpoint:"https://data.humdata.org/api/3/action/package_search",arbitrary_url:false},
   openml:{category:"ml-dataset-benchmark-hub",access:"public",adapter:"openml.datasets-search",integration:"official-rest",scope:"bounded-active-dataset-discovery",endpoint:"https://www.openml.org/api/v1/json/data/list",arbitrary_url:false},
+  sciencedb:{category:"china-scientific-data-repository",access:"public",adapter:"sciencedb.oai-pmh",integration:"official-oai-pmh",scope:"bounded-public-scientific-dataset-metadata-identify-records-sets",endpoint:"https://www.scidb.cn/oai",terms_url:"https://www.scidb.cn/about/terms",arbitrary_url:false},
   worldbank:{...EXISTING_CATALOG.worldbank,adapter:"worldbank.indicator+metadata+topic+multi-indicator",integration:"official-indicators-api-v2",scope:"countries-indicators-topics-single-and-bounded-multi-indicator",arbitrary_url:false},
   imf:{...EXISTING_CATALOG.imf,adapter:"imf.datamapper-v2",integration:"official-datamapper-v2",scope:"indicators-countries-regions-groups-bounded-timeseries",endpoint:"https://www.imf.org/external/datamapper/api/v2",arbitrary_url:false},
   bis:{...EXISTING_CATALOG.bis,adapter:"bis.sdmx-v2",integration:"official-sdmx-rest-v2",scope:"structures-and-bounded-data-queries",endpoint:"https://stats.bis.org/api/v2",arbitrary_url:false},
