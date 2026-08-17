@@ -17,7 +17,9 @@ assert.equal(new Set(empty.sources.map(x=>x.id)).size,registryIds.length,"datase
 assert.deepEqual(Object.keys(empty.counts).sort(),["DISCOVERY","LIVE","NOT_CONNECTED","TASK_ONLY"].sort());
 
 const by=(matrix,id)=>matrix.sources.find(x=>x.id===id);
-assert.equal(by(empty,"sciencedb_portal")?.status,"DISCOVERY");
+assert.equal(by(empty,"sciencedb_portal")?.status,"LIVE","ScienceDB fixed-domain source must be promoted by its public OAI provider");
+assert.equal(by(empty,"sciencedb_portal")?.surface,"provider");
+assert.equal(by(empty,"sciencedb_portal")?.provider,"sciencedb");
 assert.equal(by(empty,"icpsr")?.status,"TASK_ONLY");
 assert.equal(by(empty,"ncmiphda")?.status,"NOT_CONNECTED");
 assert.equal(by(empty,"pangaea")?.status,"LIVE","public PANGAEA provider must override portal-only mode");
