@@ -25,19 +25,26 @@ try{
   assert.equal(new URL(calls.at(-1).url).searchParams.get("page_size"),"1");
 
   calls.length=0;
-  const xls=await runAdapter("llamaparse","parse_government_url",{source_url:XLS,tier:"fast",max_pages:5},{LLAMA_CLOUD_API_KEY:"TEST_LLAMA_KEY"});
+  const xls=await runAdapter("llamaparse","parse_government_url",{source_url:XLS,tier:"fast"},{LLAMA_CLOUD_API_KEY:"TEST_LLAMA_KEY"});
   assert.equal(xls.government_public_source,true);
   assert.equal(xls.source_url,XLS);
+  assert.equal(xls.spreadsheet,true);
+  assert.equal(xls.billing_unit,"sheet");
+  assert.equal(xls.max_pages,null);
   const xlsBody=JSON.parse(calls[0].init.body);
   assert.equal(xlsBody.source_url,XLS);
   assert.equal(xlsBody.tier,"fast");
   assert.equal(xlsBody.version,"latest");
-  assert.equal(xlsBody.page_ranges.max_pages,5);
+  assert.equal(xlsBody.page_ranges,undefined);
 
   calls.length=0;
   const jpg=await runAdapter("llamaparse","parse_government_url",{source_url:JPG,tier:"agentic",max_pages:1},{LLAMA_CLOUD_API_KEY:"TEST_LLAMA_KEY"});
   assert.equal(jpg.tier,"agentic");
-  assert.equal(JSON.parse(calls[0].init.body).source_url,JPG);
+  assert.equal(jpg.spreadsheet,false);
+  assert.equal(jpg.billing_unit,"page");
+  const jpgBody=JSON.parse(calls[0].init.body);
+  assert.equal(jpgBody.source_url,JPG);
+  assert.equal(jpgBody.page_ranges.max_pages,1);
 
   calls.length=0;
   const result=await runAdapter("llamaparse","job_get",{job_id:"pjb-test-1"},{LLAMA_CLOUD_API_KEY:"TEST_LLAMA_KEY"});
@@ -49,4 +56,4 @@ try{
   await assert.rejects(()=>runAdapter("llamaparse","auth_smoke",{},{}),/UPSTREAM_AUTH_FAILED/);
 }finally{globalThis.fetch=originalFetch}
 
-console.log(JSON.stringify({ok:true,suite:"llamaparse-v2",auth_smoke:true,fuzhou_xls_contract:true,fuzhou_jpg_contract:true,government_https_gov_cn_only:true,secret_name:"LLAMA_CLOUD_API_KEY",live_secret_tested:false}));
+console.log(JSON.stringify({ok:true,suite:"llamaparse-v2",auth_smoke:true,fuzhou_xls_contract:true,fuzhou_jpg_contract:true,spreadsheet_billing_unit:"sheet",government_https_gov_cn_only:true,secret_name:"LLAMA_CLOUD_API_KEY",live_secret_tested:false}));
