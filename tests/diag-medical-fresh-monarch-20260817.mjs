@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+const BASE="https://intelligence-worker.a15280020511.workers.dev";
+const task_id=`fresh-monarch-20260817-${Date.now()}`;
+const r=await fetch(`${BASE}/v1/run`,{method:"POST",headers:{"content-type":"application/json",accept:"application/json"},body:JSON.stringify({task_id,provider:"monarch_api",operation:"search",args:{query:"Marfan syndrome",limit:3},timeout_seconds:90})});
+const b=await r.json().catch(()=>null);
+assert.equal(r.status,200,`HTTP_${r.status}:${JSON.stringify(b)}`);
+assert.equal(b?.ok,true,`NOT_OK:${JSON.stringify(b)}`);
+assert.match(String(b?.result_digest||""),/^[a-f0-9]{64}$/);
+if(Array.isArray(b?.result?.items))assert.ok(b.result.items.length>0,"EMPTY_ITEMS");
+console.log(JSON.stringify({ok:true,suite:"fresh-monarch",provider:"monarch_api",real_upstream:true,patient_data:false}));
