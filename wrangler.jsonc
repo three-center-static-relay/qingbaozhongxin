@@ -12,5 +12,8 @@
   "triggers": {"crons": ["23 18 * * *"]},
   "durable_objects": {"bindings": [{"name": "CENTER_GATE", "class_name": "CenterGate"}]},
   "exports": {"CenterGate": {"type":"durable-object","storage":"sqlite"}},
-  "vars": {"RATE_LIMIT_PER_MIN": "60"}
+  "vars": {
+    "RATE_LIMIT_PER_MIN": "60",
+    "NETWORK_INTELLIGENCE_BROWSER_ALLOWLIST": "gov.cn,fuzhou.gov.cn,copernicus.eu,dataspace.copernicus.eu,europa.eu,developers.cloudflare.com"
+  }
 }
