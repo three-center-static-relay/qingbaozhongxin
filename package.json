@@ -8,6 +8,7 @@
     "test:dataset-source-status": "node tests/dataset-source-status.mjs",
     "test:public-dataset-wave2": "node tests/public-dataset-wave2.mjs",
     "test:sciencedb-oai": "node tests/sciencedb-oai.mjs",
+    "test:production-sciencedb-e2e": "node tests/sciencedb-production-e2e.mjs",
     "test:build-gate": "node tests/sciencedb-oai.mjs && node tests/public-dataset-wave2.mjs && node tests/dataset-source-status.mjs && node tests/dataset-exposure.mjs && node tests/geonames-mobility-auth-contract.mjs && node tests/llamaparse-v2.mjs && node tests/medical-wave5-aggregate-smoke.mjs && node tests/geospatial-commercial-domain.mjs && node tests/geospatial-commercial-point-context.mjs && node tests/catalog-version-gate-hygiene.mjs",
     "test:production-zenodo-e2e": "node tests/zenodo-oai-production-e2e.mjs",
     "test:production-geonames-mobility-e2e": "node tests/geonames-mobility-production-e2e.mjs",

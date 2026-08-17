@@ -1,3 +1,4 @@
+// Fixed-host, metadata-only ScienceDB OAI-PMH provider; fresh production E2E is retained in tests/sciencedb-production-e2e.mjs.
 const ENDPOINT="https://www.scidb.cn/oai";
 const MAX_UPSTREAM_BYTES=1800000;
 const DEFAULT_TIMEOUT_MS=18000;
