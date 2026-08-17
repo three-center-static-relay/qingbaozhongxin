@@ -4,6 +4,7 @@ const JOB_ID=/^[A-Za-z0-9._:-]{1,180}$/;
 const TIERS=new Set(["fast","cost_effective","agentic","agentic_plus"]);
 const STATUSES=new Set(["PENDING","RUNNING","COMPLETED","FAILED","CANCELLED"]);
 const GOV_FILE_EXT=new Set(["pdf","xls","xlsx","xlsm","xlsb","csv","tsv","jpg","jpeg","png","gif","bmp","tif","tiff","webp","doc","docx","ppt","pptx","rtf","txt"]);
+const SHEET_EXT=new Set(["xls","xlsx","xlsm","xlsb","csv","tsv"]);
 
 function fail(message,status=400,details){throw Object.assign(new Error(message),{status,details})}
 function text(v,n=300){return String(v??"").trim().slice(0,n)}
@@ -15,7 +16,7 @@ function governmentUrl(v){
   const h=u.hostname.toLowerCase();if(!(h==="gov.cn"||h.endsWith(".gov.cn")))fail("SOURCE_NOT_APPROVED_GOVERNMENT_HOST",403,{host:h});
   const name=u.pathname.split("/").pop()||"",ext=(name.includes(".")?name.split(".").pop():"").toLowerCase();
   if(!GOV_FILE_EXT.has(ext))fail("UNSUPPORTED_GOVERNMENT_DOCUMENT_TYPE",400,{extension:ext||null});
-  u.hash="";return u.toString();
+  u.hash="";return{url:u.toString(),extension:ext};
 }
 async function readJson(r){
   const raw=await r.text();if(new TextEncoder().encode(raw).length>MAX_RESPONSE_BYTES)fail("UPSTREAM_RESPONSE_TOO_LARGE",502);
@@ -44,10 +45,11 @@ async function authSmoke(args,env){
   return{provider:"llamaparse",operation:"auth_smoke",authenticated:true,parse_job_created:false,credit_consuming_parse_requested:false,total_size:data?.total_size??null,items:Array.isArray(data?.items)?data.items.slice(0,size).map(compactJob):[]};
 }
 async function parseGovernmentUrl(args,env){
-  const source_url=governmentUrl(args?.source_url),tier=TIERS.has(String(args?.tier||""))?String(args.tier):"fast",version=text(args?.version,40)||"latest",maxPages=clamp(args?.max_pages,1,50,12);
-  const body={source_url,tier,version,page_ranges:{max_pages:maxPages}};
+  const source=governmentUrl(args?.source_url),tier=TIERS.has(String(args?.tier||""))?String(args.tier):"fast",version=text(args?.version,40)||"latest",spreadsheet=SHEET_EXT.has(source.extension);
+  const body={source_url:source.url,tier,version};let maxPages=null;
+  if(!spreadsheet){maxPages=clamp(args?.max_pages,1,50,12);body.page_ranges={max_pages:maxPages}}
   const data=await api("",env,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
-  return{provider:"llamaparse",operation:"parse_government_url",government_public_source:true,source_url,tier,version,max_pages:maxPages,job:compactJob(data),evidence_boundary:"LlamaParse parses a lawfully public official government document; it does not convert the source into an authenticated government API/MCP source."};
+  return{provider:"llamaparse",operation:"parse_government_url",government_public_source:true,source_url:source.url,document_extension:source.extension,spreadsheet,billing_unit:spreadsheet?"sheet":"page",tier,version,max_pages:maxPages,job:compactJob(data),evidence_boundary:"LlamaParse parses a lawfully public official government document; it does not convert the source into an authenticated government API/MCP source."};
 }
 async function jobGet(args,env){
   const id=text(args?.job_id,180);if(!JOB_ID.test(id))fail("INVALID_JOB_ID");
