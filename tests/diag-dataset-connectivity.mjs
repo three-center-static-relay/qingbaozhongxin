@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+// post-PR trigger only
 const BASE="https://intelligence-worker.a15280020511.workers.dev";
 const r=await fetch(`${BASE}/v1/dataset-sources/status`,{headers:{accept:"application/json"}});
 const b=await r.json().catch(()=>null);
