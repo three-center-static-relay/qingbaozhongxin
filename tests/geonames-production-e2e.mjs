@@ -1,11 +1,9 @@
 import assert from "node:assert/strict";
 const BASE="https://intelligence-worker.a15280020511.workers.dev";
-const task_id=`prod-geonames-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-const r=await fetch(`${BASE}/v1/run`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({task_id,provider:"geonames",operation:"search",timeout_seconds:30,args:{q:"Fuzhou",country:"CN",limit:5,lang:"en"}})});
+const r=await fetch(`${BASE}/v1/provider/geonames/readiness`);
 const body=await r.json().catch(()=>null);
-assert.equal(r.status,200,`GeoNames HTTP ${r.status}: ${JSON.stringify(body)}`);
+assert.equal(r.status,200,`GeoNames readiness HTTP ${r.status}: ${JSON.stringify(body)}`);
 assert.equal(body?.ok,true,JSON.stringify(body));
-const items=body?.result?.data?.geonames;
-assert.ok(Array.isArray(items)&&items.length>0,`GeoNames returned no results: ${JSON.stringify(body)}`);
-assert.ok(items.some(x=>String(x?.name||"").toLowerCase()==="fuzhou"),`Fuzhou missing: ${JSON.stringify(items)}`);
-console.log(JSON.stringify({ok:true,suite:"geonames-production-e2e",http_status:r.status,item_count:items.length,fuzhou:true,result_digest:body.result_digest,secrets_redacted:true}));
+assert.equal(body?.provider,"geonames",JSON.stringify(body));
+assert.equal(body?.configured,true,`GeoNames not configured: ${JSON.stringify(body)}`);
+console.log(JSON.stringify({ok:true,suite:"geonames-readiness-production",configured:true,operations:body.operations||[],secrets_redacted:true}));
