@@ -1,3 +1,4 @@
+// Cloudflare diagnostic trigger: isolated collaboration build gate; no runtime semantic change.
 import {latLngToCell} from "h3-js";
 import {runAdapter as runMap} from "../adapters-extra4.js";
 import {runAdapter as runGM} from "../adapters-geonames-mobility.js";
