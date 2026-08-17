@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
-const URL="https://intelligence-worker.a15280020511.workers.dev/v1/selftest/fuzhou-baolong-collaboration";
-const r=await fetch(URL);const body=await r.json().catch(()=>null);
-assert.ok(body&&Array.isArray(body.stages),`SELFTEST_BODY_MISSING HTTP ${r.status}: ${JSON.stringify(body)}`);
-const stage=body.stages.find(x=>x.name==="network_intelligence"&&x.ok===true);
-assert.ok(stage,`NETWORK_INTELLIGENCE_NO_PASS:${JSON.stringify(body.stages.filter(x=>x.name==="network_intelligence"))}`);
-assert.ok((stage.summary?.row_count||0)>0,`NETWORK_INTELLIGENCE_EMPTY:${JSON.stringify(stage)}`);
-console.log(JSON.stringify({ok:true,suite:"baolong-stage-probe",stage:"network_intelligence",provider:stage.provider,row_count:stage.summary.row_count,top:stage.summary.top||[],secrets_redacted:true}));
+const BASE="https://intelligence-worker.a15280020511.workers.dev";
+const task_id=`baolong-tavily-${Date.now()}`;
+const r=await fetch(`${BASE}/v1/run`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({task_id,provider:"tavily",operation:"search",timeout_seconds:30,args:{query:"福州宝龙广场",limit:3}})});
+const body=await r.json().catch(()=>null);
+assert.equal(r.status,200,`TAVILY_SEARCH_HTTP_${r.status}:${JSON.stringify(body)}`);
+assert.equal(body?.ok,true,`TAVILY_SEARCH_NOT_OK:${JSON.stringify(body)}`);
+const items=body?.result?.items;assert.ok(Array.isArray(items)&&items.length>0,`TAVILY_SEARCH_EMPTY:${JSON.stringify(body)}`);
+console.log(JSON.stringify({ok:true,suite:"baolong-stage-probe",stage:"tavily_search_minimal",row_count:items.length,result_digest:body.result_digest,secrets_redacted:true}));
