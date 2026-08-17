@@ -2,9 +2,13 @@ import assert from "node:assert/strict";
 
 const url="https://compute-worker.a15280020511.workers.dev/v1/selftest/modelscope-studio";
 const controller=new AbortController();
-const timer=setTimeout(()=>controller.abort(),30000);
+const hard=setTimeout(()=>{
+  console.error(JSON.stringify({ok:false,suite:"modelscope-studio-candidate-v3-diagnostic",error:"HARD_TIMEOUT",timeout_ms:20000,free_only:true,paid_fallback:false,secrets_redacted:true}));
+  process.exit(124);
+},20000);
+const abort=setTimeout(()=>controller.abort(),12000);
 try{
-  const r=await fetch(url,{headers:{accept:"application/json"},signal:controller.signal});
+  const r=await fetch(url,{headers:{accept:"application/json","cache-control":"no-cache"},signal:controller.signal});
   const body=await r.json().catch(()=>null);
   assert.equal(body?.selftest,"modelscope-studio-cpu",`Unexpected response HTTP ${r.status}: ${JSON.stringify(body)}`);
   assert.equal(body?.configured,true);
@@ -22,4 +26,7 @@ try{
   assert.ok(Number(h?.memory_gb)>=30,`Candidate memory below 30 GiB: ${JSON.stringify(h)}`);
   assert.ok(String(h?.name||"").length>0,"Candidate hardware name required for Studio settings");
   console.log(JSON.stringify({ok:true,suite:"modelscope-studio-candidate-v3-diagnostic",http_status:r.status,hardware_summary:{all_count:Number(s.all_count),free_count:Number(s.free_count),eligible_count:Number(s.eligible_count)},candidate:{name:h.name,label:h.label||null,cpu:h.cpu,memory_gb:h.memory_gb,free:true},studio_found:body?.studio_found===true,runtime_e2e_verified:body?.runtime_e2e_verified===true,error_class:body?.error_class||null,free_only:true,paid_fallback:false,secrets_redacted:true}));
-}finally{clearTimeout(timer)}
+}finally{
+  clearTimeout(abort);
+  clearTimeout(hard);
+}
