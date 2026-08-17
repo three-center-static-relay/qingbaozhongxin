@@ -8,19 +8,24 @@ assert.equal(GEOSPATIAL_COMMERCIAL_DOMAIN.id,"geospatial-commercial");
 assert.equal(GEOSPATIAL_COMMERCIAL_DOMAIN.free_only,true);
 assert.equal(GEOSPATIAL_COMMERCIAL_DOMAIN.evidence_policy.paid_fallback,false);
 assert.equal(GEOSPATIAL_COMMERCIAL_DOMAIN.evidence_policy.mobile_lbs_observed,false);
-for(const p of ["worldpop","ghsl","overture_maps","dlr_wsf","night_lights","worldmove","h3","baidu_maps","tencent_maps","amap","geonames","mobilitydatabase","openaq","esa_worldcover"]){
+for(const p of ["worldpop","ghsl","overture_maps","foursquare_os_places","dlr_wsf","night_lights","worldmove","h3","openrouteservice","baidu_maps","tencent_maps","amap","geonames","geoboundaries","mobilitydatabase","openaq","esa_worldcover"]){
   assert.ok(JSON.stringify(GEOSPATIAL_COMMERCIAL_DOMAIN.provider_groups).includes(p),`domain missing ${p}`);
 }
 for(const banned of ["tianditu","osm_overpass","tencent_location_big_data"]){assert.equal(JSON.stringify(GEOSPATIAL_COMMERCIAL_DOMAIN).includes(banned),false)}
 assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.geonames.billing_policy.includes("no premium"),true);
+assert.match(FREE_COMMERCIAL_SPATIAL_CATALOG.geonames.free_tier,/10000-credits-per-day/);
+assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.geoboundaries.license,"CC-BY-4.0");
 assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.mobilitydatabase.billing_policy.includes("no paid"),true);
 assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.openaq.billing_policy.includes("no custom-paid"),true);
 assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.esa_worldcover.license,"CC-BY-4.0");
 assert.deepEqual(OPERATIONS.geospatial_commercial,["capabilities"]);
 assert.ok(OPERATIONS.geonames.includes("search"));
 assert.ok(OPERATIONS.mobilitydatabase.includes("gtfs_search"));
+assert.ok(OPERATIONS.mobilitydatabase.includes("gtfs_rt_search"));
+assert.ok(OPERATIONS.mobilitydatabase.includes("gbfs_search"));
 assert.equal(OPERATIONS.mobilitydatabase.includes("download"),false);
 assert.equal(OPERATIONS.mobilitydatabase.includes("feed_get"),false);
+assert.deepEqual(OPERATIONS.geoboundaries,["boundary_metadata"]);
 assert.deepEqual(OPEN_DATA_OPERATIONS.openaq,["locations_nearby","location_latest"]);
 assert.deepEqual(OPEN_DATA_OPERATIONS.esa_worldcover,["tile_info","tile_probe"]);
 
@@ -33,6 +38,7 @@ try{
     if(u.hostname==="secure.geonames.org")return new Response(JSON.stringify({geonames:[{name:"Fuzhou",lat:"26.0745",lng:"119.2965"}]}),{status:200,headers:{"content-type":"application/json"}});
     if(u.hostname==="api.mobilitydatabase.org"&&u.pathname==="/v1/tokens")return new Response(JSON.stringify({access_token:"ACCESS_FROM_REFRESH"}),{status:200,headers:{"content-type":"application/json"}});
     if(u.hostname==="api.mobilitydatabase.org")return new Response(JSON.stringify({feeds:[],metadata:{ok:true}}),{status:200,headers:{"content-type":"application/json"}});
+    if(u.hostname==="www.geoboundaries.org")return new Response(JSON.stringify({boundaryID:"CHN-ADM1-test",boundaryISO:"CHN",boundaryType:"ADM1",gjDownloadURL:"https://github.com/wmgeolab/geoBoundaries/raw/test/CHN-ADM1.geojson"}),{status:200,headers:{"content-type":"application/json"}});
     if(u.hostname==="api.openaq.org")return new Response(JSON.stringify({meta:{found:1},results:[{id:1,name:"Fuzhou monitor"}]}),{status:200,headers:{"content-type":"application/json"}});
     if(u.hostname==="esa-worldcover.s3.eu-central-1.amazonaws.com")return new Response(new Uint8Array(32),{status:206,headers:{"content-type":"image/tiff","content-range":"bytes 0-31/123456","etag":"test-etag"}});
     throw new Error(`UNEXPECTED_URL:${u}`);
@@ -67,6 +73,13 @@ try{
   assert.equal(calls[1].init.headers.authorization,"Bearer ACCESS_FROM_REFRESH");
 
   calls=[];
+  const gb=await runAdapter("geoboundaries","boundary_metadata",{country_code3:"CHN",adm_level:"ADM1"},{});
+  assert.equal(gb.public_open_data,true);
+  assert.equal(gb.data.boundaryISO,"CHN");
+  const gbu=new URL(calls.at(-1).url);
+  assert.equal(gbu.pathname,"/api/current/gbOpen/CHN/ADM1/");
+
+  calls=[];
   const aq=await runOpenData("openaq","locations_nearby",{location:"26.0647,119.2868",radius_m:99999,limit:999,country:"cn"},{OPENAQ_API_KEY:"FREE_KEY"});
   assert.equal(aq.free_tier_only,true);
   const aqc=calls.at(-1),aqu=new URL(aqc.url);
@@ -95,4 +108,4 @@ try{
   await assert.rejects(()=>runOpenData("openaq","locations_nearby",{location:"26,119"},{}),e=>e?.status===503&&e?.message==="UPSTREAM_AUTH_FAILED");
 } finally {globalThis.fetch=originalFetch;}
 
-console.log(JSON.stringify({ok:true,suite:"geospatial-commercial-domain",domain:GEOSPATIAL_COMMERCIAL_DOMAIN.version,free_only:true,new_free_sources:["geonames","mobilitydatabase","openaq","esa_worldcover"],raw_feed_proxy:false,arbitrary_url:false}));
+console.log(JSON.stringify({ok:true,suite:"geospatial-commercial-domain",domain:GEOSPATIAL_COMMERCIAL_DOMAIN.version,free_only:true,new_free_sources:["geonames","geoboundaries","mobilitydatabase","openaq","esa_worldcover"],raw_feed_proxy:false,arbitrary_url:false}));
