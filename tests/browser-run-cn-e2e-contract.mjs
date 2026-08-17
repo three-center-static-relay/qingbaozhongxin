@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const wrangler=fs.readFileSync("wrangler.jsonc","utf8");
+const entry=fs.readFileSync("src/browser-run-cn-e2e-entry.js","utf8");
+assert.match(wrangler,/"main"\s*:\s*"src\/browser-run-cn-e2e-entry\.js"/);
+assert.match(wrangler,/"browser"\s*:\s*\{\s*"binding"\s*:\s*"BROWSER"\s*\}/);
+assert.match(wrangler,/"preview_urls"\s*:\s*true/);
+assert.doesNotMatch(wrangler,/"durable_objects"/);
+assert.match(entry,/https:\/\/www\.gov\.cn\//);
+assert.match(entry,/quickAction\("content"/);
+assert.match(entry,/arbitrary_target:false/);
+assert.doesNotMatch(entry,/searchParams\.get\(/);
+console.log(JSON.stringify({ok:true,suite:"browser-run-cn-e2e-contract",target:"https://www.gov.cn/",binding:"BROWSER",preview_urls:true,durable_object_binding:false,arbitrary_target:false}));
