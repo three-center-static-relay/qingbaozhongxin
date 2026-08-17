@@ -1,4 +1,4 @@
-// GeoNames runtime readiness trigger only; no runtime semantics.
+// GeoNames authorization diagnostic trigger only; no runtime semantics.
 export const GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION="geospatial-commercial-v2-20260817";
 
 export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
