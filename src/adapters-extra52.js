@@ -1,3 +1,4 @@
+// Production E2E trigger only; no runtime semantic change.
 const ENDPOINT="https://www.scidb.cn/oai";
 const MAX_UPSTREAM_BYTES=1800000;
 const DEFAULT_TIMEOUT_MS=18000;
