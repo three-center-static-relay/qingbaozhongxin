@@ -25,6 +25,10 @@ const PROVIDER_ALIASES=Object.freeze({
   zenodo:["zenodo"],
   figshare:["figshare"],
   dataverse:["harvard_dataverse"],
+  dryad:["dryad"],
+  datacite:["datacite"],
+  hdx:["hdx"],
+  openml:["openml"],
   pangaea:["pangaea"],
   earth_engine_catalog:["earthengine"],
   bigquery_public:["bigquery"],
@@ -61,7 +65,7 @@ export function datasetSourceStatus(env={}){
     if(provider?.configured){status="LIVE";surface="provider";reason="approved provider operation is configured"}
     else if(collector){status=collector.configured?"LIVE":"NOT_CONNECTED";surface="dataset-radar";reason=collector.configured?"active API collector configured":"active API collector requires configuration"}
     else if(mode==="existing-live-provider"){
-      status=provider?"NOT_CONNECTED":"NOT_CONNECTED";surface=provider?"provider":"none";reason=provider?"provider exists but runtime configuration is incomplete":"registry says existing live provider but no approved provider alias was found";
+      status="NOT_CONNECTED";surface=provider?"provider":"none";reason=provider?"provider exists but runtime configuration is incomplete":"registry says existing live provider but no approved provider alias was found";
     }else if(TASK_ONLY_MODES.has(mode)){
       status="TASK_ONLY";surface="task-retrieval";reason="retrieval is intentionally task-bound";
     }else if(DISCOVERY_MODES.has(mode)||isPortal){
