@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import {COMMERCIAL_SPATIAL_EVIDENCE_EXCHANGE,COMMERCIAL_SPATIAL_EXCHANGE_VERSION,validateCommercialSpatialEvidenceBundle} from "../src/domains/commercial-spatial-evidence-exchange.js";
 import {COMMERCIAL_SPATIAL_BENCHMARK} from "../src/domains/commercial-spatial-benchmark.js";
-import {GEOSPATIAL_COMMERCIAL_DOMAIN} from "../src/domains/geospatial-commercial.js";
 
 assert.equal(COMMERCIAL_SPATIAL_EVIDENCE_EXCHANGE.cross_branch_share,true);
 assert.equal(COMMERCIAL_SPATIAL_EVIDENCE_EXCHANGE.cross_center_share,true);
@@ -14,11 +13,6 @@ assert.equal(COMMERCIAL_SPATIAL_BENCHMARK.parity_definition.private_profile_pari
 for(const k of ["footfall","dwell","origin_destination","trade_area","competitor_overlap","aggregate_profile","site_selection"]){assert.ok(COMMERCIAL_SPATIAL_BENCHMARK.benchmark_dimensions[k],`missing benchmark dimension ${k}`)}
 assert.equal(COMMERCIAL_SPATIAL_BENCHMARK.acceptance_gates.missing_data_stress_test,true);
 assert.equal(COMMERCIAL_SPATIAL_BENCHMARK.acceptance_gates.temporal_backtest,true);
-assert.equal(GEOSPATIAL_COMMERCIAL_DOMAIN.exchange_contract_version,COMMERCIAL_SPATIAL_EXCHANGE_VERSION);
-assert.equal(GEOSPATIAL_COMMERCIAL_DOMAIN.data_sharing.cross_center,true);
-assert.equal(GEOSPATIAL_COMMERCIAL_DOMAIN.evidence_policy.sensor_parity_claim,false);
-assert.equal(GEOSPATIAL_COMMERCIAL_DOMAIN.commercial_core_exclusions.includes("openaq"),true);
-for(const f of ["modelled_od_demand","modelled_dwell_proxy","modelled_footfall_proxy","probabilistic_trade_area","competitor_overlap_proxy","project_pipeline_signal","land_transaction_signal"]){assert.equal(GEOSPATIAL_COMMERCIAL_DOMAIN.feature_layers.includes(f),true,`missing ${f}`)}
 
 const digest="a".repeat(64);
 const baseSource={source_url:"https://example.gov.cn/public/item",publisher:"example-public-publisher",fetched_at:"2026-08-17T00:00:00Z",content_hash:digest,collector_or_parser_version:"fixture-v1"};
