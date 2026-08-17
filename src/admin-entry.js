@@ -1,5 +1,6 @@
 import app,{CenterGate} from "./production-guard.js";
 import {runAdapter} from "./adapters.js";
+import {probeModelScopeIntelligence} from "./modelscope-intelligence.js";
 export {CenterGate};
 
 const ORIGIN="https://intelligence.internal";
@@ -51,6 +52,28 @@ async function providerRuntimeSelftest(provider,env){
   }
 }
 
+async function modelScopeRuntimeSelftest(env){
+  const p=await probeModelScopeIntelligence(env);
+  return json({
+    ok:p.ok===true,
+    selftest:"modelscope-intelligence-runtime",
+    secret_present:p.configured===true,
+    authenticated:p.authenticated===true,
+    models_ok:p.models_ok===true,
+    models_count:p.models_count??0,
+    datasets_ok:p.datasets_ok===true,
+    datasets_count:p.datasets_count??0,
+    skills_ok:p.skills_ok===true,
+    skills_count:p.skills_count??0,
+    studios_ok:p.studios_ok===true,
+    studios_count:p.studios_count??0,
+    acceptance_state:p.acceptance_state||null,
+    upstream_http_status:p.http_status||200,
+    error_class:p.error_class||null,
+    secrets_redacted:true
+  },p.ok===true?200:503);
+}
+
 async function adminContext(env,ctx){
   const health=await readApp("/health",env,ctx);
   const source=await readApp("/source",env,ctx);
@@ -66,6 +89,7 @@ export default{
     const url=new URL(req.url);
     if(req.method==="GET"&&url.pathname==="/v1/selftest/zenodo-runtime")return providerRuntimeSelftest("zenodo",env);
     if(req.method==="GET"&&url.pathname==="/v1/selftest/kaggle-runtime")return providerRuntimeSelftest("kaggle",env);
+    if(req.method==="GET"&&url.pathname==="/v1/selftest/modelscope-runtime")return modelScopeRuntimeSelftest(env);
     if(req.method==="GET"&&url.pathname==="/v1/admin/context"){
       if(url.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"admin context is service-binding internal only"},403);
       return adminContext(env,ctx);
