@@ -1,5 +1,4 @@
-// Cloudflare diagnostic trigger: isolated collaboration build gate; no runtime semantic change.
-import {latLngToCell} from "h3-js";
+// Collaboration runtime keeps heavy spatial transforms deferred to Compute Center for Worker-size stability.
 import {runAdapter as runMap} from "../adapters-extra4.js";
 import {runAdapter as runGM} from "../adapters-geonames-mobility.js";
 import {runAdapter as runOpenData} from "./geospatial-commercial-open-data.js";
@@ -23,7 +22,7 @@ export async function runAdapter(provider,operation,args={},env={}){
   const placeName=text(args.place_name,120),city=text(args.city,80),province=text(args.province,80),municipality=text(args.municipality||args.city,100),cc=country(args.country_code||"CN"),p=point(args.location),h3Resolution=clamp(args.h3_resolution,6,12,9);
   if(!placeName)fail("ARG_REQUIRED:place_name");if(!city)fail("ARG_REQUIRED:city");
   const layers=[];
-  layers.push(await layer("h3","derived-spatial-index",async()=>({cell:latLngToCell(p.lat,p.lng,h3Resolution),resolution:h3Resolution,location:p.s})));
+  layers.push(await layer("h3","derived-deferred-to-compute",async()=>({location:p.s,resolution:h3Resolution,cell:null,status:"deferred-to-compute-center"})));
   layers.push(await layer("esa_worldcover","observed-open-raster-index",async()=>runOpenData("esa_worldcover","tile_info",{location:p.s,year:2021},env)));
   if(has(env,"BAIDU_MAP_AK","BAIDU_MAP_API_KEY"))layers.push(await layer("baidu_traffic","observed-road-traffic",async()=>runMap("baidu_maps","traffic_around",{center:p.s,radius:clamp(args.traffic_radius_m,100,1000,500),coord_type_input:"wgs84",coord_type_output:"bd09ll"},env)));else layers.push({name:"baidu_traffic",ok:false,skipped:true,evidence_kind:"observed-road-traffic",error:"NOT_CONFIGURED"});
   if(has(env,"TENCENT_LBS_API_KEY","TENCENT_MAP_API_KEY")){
@@ -50,7 +49,7 @@ export async function runAdapter(provider,operation,args={},env={}){
     network_assisted:Boolean(web),successful_layers:successful.length,layer_count:layers.length,layers,source_receipts:receipts,
     spatial_signals:{nearby_mall_count:malls.length,nearest_other_mall:nearest(malls.filter(x=>!String(x?.title||"").includes(placeName))),nearby_metro_count:metros.length,nearest_metro:nearest(metros),nearby_bus_count:buses.length,nearest_bus:nearest(buses)},
     web_signals:web?{unique_item_count:web.unique_item_count,domain_diversity:web.domain_diversity,family_item_counts:web.family_item_counts,configured_providers:web.configured_providers}:null,
-    compute_handoff:{recommended_models:["location_intelligence.commercial_spatial_fusion","location_intelligence.site_ranking","location_intelligence.white_space","location_intelligence.competitor_diversion"],normalization_required:true,network_used_by_compute:false,source_receipts:receipts},
+    compute_handoff:{recommended_models:["location_intelligence.commercial_spatial_fusion","location_intelligence.site_ranking","location_intelligence.white_space","location_intelligence.competitor_diversion"],normalization_required:true,network_used_by_compute:false,deferred_transforms:["h3"],source_receipts:receipts},
     limitations:["public-web-signals-are-proxy-only","map-poi-and-road-traffic-do-not-equal-person-footfall","no-observed-phone-footfall","no-observed-dwell-time","no-observed-mobile-od","no-cross-mall-audience-overlap","no-private-consumer-profile-or-payment-spend","do-not-claim-baidu-huiyan-or-tencent-location-big-data-equivalence"]
   };
 }
