@@ -20,6 +20,12 @@ for(const path of [
   "/v1/dataset-radar/meta",
   "/v1/dataset-radar/latest"
 ])assert.ok(openapi.body?.paths?.[path],`OpenAPI must expose ${path}`);
+for(const path of ["/v1/provider/{provider}/readiness","/v1/provider/{provider}/operations"]){
+  const parameter=openapi.body.paths[path]?.get?.parameters?.find(x=>x.name==="provider");
+  assert.equal(parameter?.in,"path",`${path} provider parameter must be a path parameter`);
+  assert.equal(parameter?.required,true,`${path} provider parameter must be required`);
+  assert.equal(parameter?.schema?.type,"string");
+}
 
 const meta=await get("/v1/dataset-radar/meta");
 assert.equal(meta.response.status,200);
