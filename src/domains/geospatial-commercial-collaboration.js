@@ -1,4 +1,4 @@
-// Diagnostic trigger: network intelligence readiness probe; no runtime semantic change.
+// Diagnostic trigger: Tencent Baolong alias probe; no runtime semantic change.
 const text=(v,n=160)=>String(v??"").trim().slice(0,n),arr=v=>(Array.isArray(v)?v:[]).map(x=>text(x,80)).filter(Boolean).slice(0,6);
 function fail(m,s=400){throw Object.assign(new Error(m),{status:s})}
 function point(v){const s=text(v,48);if(!/^-?\d{1,2}(?:\.\d{1,8})?,-?\d{1,3}(?:\.\d{1,8})?$/.test(s))fail("INVALID_COORDINATE");const[lat,lng]=s.split(",").map(Number);if(lat<-90||lat>90||lng<-180||lng>180)fail("INVALID_COORDINATE");return{lat,lng,s}}
