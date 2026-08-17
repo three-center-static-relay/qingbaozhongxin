@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+const BASE="https://intelligence-worker.a15280020511.workers.dev";
+const task_id=`diag-wind-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+const r=await fetch(`${BASE}/v1/run`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({task_id,provider:"aifin_market",operation:"get_stock_price_indicators",timeout_seconds:60,args:{windcode:"600519.SH"}})});
+const b=await r.json().catch(()=>null);
+assert.equal(r.status,200,`WIND_HTTP_${r.status}:${JSON.stringify(b)}`);
+assert.equal(b?.ok,true,`WIND_NOT_OK:${JSON.stringify(b)}`);
+assert.equal(b?.result?.source,"Wind AIFin Market",`WIND_SOURCE:${JSON.stringify(b)}`);
+assert.equal(b?.result?.server_type,"stock_data",`WIND_SERVER:${JSON.stringify(b)}`);
+assert.ok(b?.result?.result!==undefined&&b?.result?.result!==null,`WIND_EMPTY:${JSON.stringify(b)}`);
+assert.match(String(b?.result_digest||""),/^[a-f0-9]{64}$/);
+console.log(JSON.stringify({ok:true,suite:"diag-wind-production-e2e",provider:"aifin_market",tool:"get_stock_price_indicators",windcode:"600519.SH",secrets_redacted:true}));
