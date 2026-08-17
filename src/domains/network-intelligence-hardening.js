@@ -1,4 +1,4 @@
-export const NETWORK_INTELLIGENCE_HARDENING_VERSION="network-intelligence-hardening-v3-20260817";
+export const NETWORK_INTELLIGENCE_HARDENING_VERSION="network-intelligence-hardening-v4-20260817";
 
 export const NETWORK_INTELLIGENCE_HARDENING=Object.freeze({
   version:NETWORK_INTELLIGENCE_HARDENING_VERSION,
@@ -18,14 +18,14 @@ export const NETWORK_INTELLIGENCE_HARDENING=Object.freeze({
   },
   added_tools:{
     common_crawl:{role:"historical-public-web-snapshot-index",execution:"cloudflare-worker-bounded-index-only",access:"public",raw_warc_proxy:false,arbitrary_target_fetch:false},
-    cloudflare_browser_run:{role:"javascript-rendered-public-page-collector",execution:"cloudflare-browser-binding-quick-action-content",access:"workers-binding-no-api-token",production_status:"configured-on-branch",free_plan_included_usage_note:"10-browser-minutes-per-day-as-of-2026-08",automatic_fallback:false,arbitrary_target_fetch:false,notes:"Use only fixed allowlisted public-source URLs when static fetch is insufficient; preserve X-Browser-Ms-Used for usage accounting."},
-    scrapy:{role:"fixed-source-static-crawler",execution:"external-runtime",license:"BSD-3-Clause",production_status:"accepted-runtime-tool",notes:"Use only allowlisted public sources with bounded depth/rate/cache."},
-    playwright:{role:"javascript-rendered-public-page-collector",execution:"external-runtime",license:"Apache-2.0",production_status:"accepted-runtime-tool",notes:"Rendering only; no login/CAPTCHA/access-control bypass."},
+    cloudflare_browser_run:{role:"javascript-rendered-public-page-collector",execution:"cloudflare-browser-binding-quick-action-content",access:"workers-binding-no-api-token",production_status:"configured-on-network-intelligence-branch",automatic_fallback:false,arbitrary_target_fetch:false,notes:"Sole browser runtime for network-intelligence. Use only fixed allowlisted public-source URLs when static fetch is insufficient; preserve X-Browser-Ms-Used for usage accounting."},
+    scrapy:{role:"fixed-source-static-crawler",execution:"external-runtime",license:"BSD-3-Clause",production_status:"accepted-static-collection-tool",notes:"Static collection only; it is not an alternate browser runtime. Use allowlisted public sources with bounded depth/rate/cache."},
     warcio:{role:"WARC-evidence-read-write",execution:"external-runtime",license:"Apache-2.0",production_status:"accepted-runtime-tool",notes:"Preserve public evidence snapshots and replay metadata."},
     selectolax:{role:"fast-html-css-parser",execution:"external-runtime",license:"MIT-wrapper; use Lexbor backend",production_status:"accepted-runtime-tool",notes:"Prefer Lexbor backend for bounded static HTML extraction."}
   },
   browser_run_policy:{
     binding:"BROWSER",quick_action:"content",compatibility_date_minimum:"2026-03-24",configured_compatibility_date:"2026-08-15",api_token_required:false,
+    sole_browser_runtime:true,ephemeral_execution_only:true,session_or_page_state_persisted:false,cookies_persisted:false,
     fixed_allowlisted_sources_only:true,static_fetch_first:true,automatic_browser_fallback:false,usage_receipt_header:"X-Browser-Ms-Used",browser_time_budget_observable:true,
     login_or_cookie_injection:false,http_auth_injection:false,captcha_bypass:false,anti_bot_evasion:false,arbitrary_url_proxy:false,paid_overage_auto_opt_in:false
   },

@@ -1,5 +1,5 @@
 {
-  "schema_version":"1.4",
+  "schema_version":"1.5",
   "center":"intelligence-center",
   "root_identity":"general-purpose evidence, data, information and public-intelligence acquisition center",
   "architecture_rule":"All domain branches are additive subdomains. No branch may rename, replace, narrow or become the Intelligence Center root service.",
@@ -10,6 +10,7 @@
     {"id":"finance-markets","type":"intelligence-subdomain","scope":"financial markets, securities, macro, company filings and investment research","replaces_center":false},
     {"id":"law-policy","type":"intelligence-subdomain","scope":"law, regulation, policy and public administration","replaces_center":false},
     {"id":"geospatial-location","type":"intelligence-subdomain","scope":"maps, population, mobility proxies, remote sensing and location intelligence","replaces_center":false},
+    {"id":"network-intelligence","label_zh":"网络情报收集","type":"intelligence-subdomain","scope":"public-web discovery, JavaScript-rendered public-page collection, historical snapshot discovery, document/table extraction and provenance capture","browser_runtime":"cloudflare-browser-run","browser_runtime_exclusive":true,"replaces_center":false},
     {"id":"global-advisory","type":"intelligence-subdomain","scope":"think tanks, universities, strategy research, declassified archives, consulting and institutional research","replaces_center":false},
     {"id":"industry-sector","type":"intelligence-subdomain","scope":"industry, trade, energy, transport, manufacturing, agriculture, technology, healthcare and other sector intelligence","replaces_center":false},
     {"id":"knowledge-graph-knowledgebase-archives","label_zh":"知识图谱、知识库、档案库","type":"intelligence-subdomain","scope":"federated global knowledge graphs, scholarly and research metadata, libraries, archives, museums, cultural heritage, government data catalogs and public knowledge systems across countries, regions and industries","replaces_center":false}
@@ -18,6 +19,7 @@
     "src/index.js remains the generic intelligence-worker entry point",
     "provider catalog remains cross-domain",
     "domain registries add domain capabilities and source metadata without redefining center identity",
+    "network-intelligence uses Cloudflare Browser Run as its sole browser runtime; other tools may parse or statically collect but may not introduce a second browser runtime",
     "top-hospital-medical remains capability-only and may expand specialty breadth, tools and authoritative sources without adding a medical workflow or orchestration runtime"
   ]
 }

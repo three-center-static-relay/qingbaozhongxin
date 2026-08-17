@@ -14,11 +14,17 @@ assert.equal(manifest.government_public_data_policy.mainland_china_public_collec
 assert.equal(manifest.government_public_data_policy.anonymity_claim,false);
 assert.equal(manifest.browser_run_policy.binding,"BROWSER");
 assert.equal(manifest.browser_run_policy.api_token_required,false);
+assert.equal(manifest.browser_run_policy.sole_browser_runtime,true);
+assert.equal(manifest.browser_run_policy.ephemeral_execution_only,true);
+assert.equal(manifest.browser_run_policy.session_or_page_state_persisted,false);
+assert.equal(manifest.browser_run_policy.cookies_persisted,false);
 assert.equal(manifest.browser_run_policy.fixed_allowlisted_sources_only,true);
 assert.equal(manifest.browser_run_policy.automatic_browser_fallback,false);
 assert.equal(manifest.browser_run_policy.login_or_cookie_injection,false);
 for(const deny of ["login-bypass","captcha-bypass","rate-limit-bypass","proxy-rotation-for-evasion","anti-bot-evasion","stealth-or-untraceability-claims"])assert.ok(manifest.hard_denies.includes(deny));
-for(const tool of ["common_crawl","cloudflare_browser_run","scrapy","playwright","warcio","selectolax"])assert.ok(manifest.added_tools[tool]);
+for(const tool of ["common_crawl","cloudflare_browser_run","scrapy","warcio","selectolax"])assert.ok(manifest.added_tools[tool]);
+assert.equal(manifest.added_tools.playwright,undefined);
+assert.equal(manifest.added_tools.puppeteer,undefined);
 for(const label of ["observed","derived","inferred","hypothesis"])assert.ok(manifest.evidence_contract.inference_labels.includes(label));
 
 const originalFetch=globalThis.fetch;
@@ -64,4 +70,4 @@ assert.equal(rendered.source_receipt.digest_sha256.length,64);
 await assert.rejects(()=>runAdapter("geospatial_commercial","public_anchor_browser_render",{source_id:"fuzhou_project_pipeline",url:"https://example.com/"},browserEnv),/PUBLIC_ANCHOR_HOST_DENIED/);
 await assert.rejects(()=>runAdapter("geospatial_commercial","public_anchor_browser_render",{source_id:"fuzhou_project_pipeline",url:"https://fgw.fuzhou.gov.cn/fgwzwgk/fzgh/test.htm"},{}),/CLOUDFLARE_BROWSER_BINDING_NOT_CONFIGURED/);
 
-console.log(JSON.stringify({ok:true,suite:"network-intelligence-hardening",common_crawl:true,cloudflare_browser_run_contract:true,browser_binding:"BROWSER",browser_auto_fallback:false,mainland_government_public_collection_priority:true,no_evasion:true,inference_labels:manifest.evidence_contract.inference_labels}));
+console.log(JSON.stringify({ok:true,suite:"network-intelligence-hardening",common_crawl:true,cloudflare_browser_run_contract:true,browser_binding:"BROWSER",sole_browser_runtime:true,browser_ephemeral:true,browser_auto_fallback:false,mainland_government_public_collection_priority:true,no_evasion:true,inference_labels:manifest.evidence_contract.inference_labels}));
