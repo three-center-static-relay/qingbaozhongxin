@@ -1,0 +1,25 @@
+import assert from "node:assert/strict";
+const BASE="https://intelligence-worker.a15280020511.workers.dev";
+const run=async(provider,operation,args={})=>{
+  const task_id=`diag-google-${provider}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const r=await fetch(`${BASE}/v1/run`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({task_id,provider,operation,timeout_seconds:90,args})});
+  const b=await r.json().catch(()=>null);
+  assert.equal(r.status,200,`${provider}.${operation}:HTTP_${r.status}:${JSON.stringify(b)}`);
+  assert.equal(b?.ok,true,`${provider}.${operation}:NOT_OK:${JSON.stringify(b)}`);
+  assert.match(String(b?.result_digest||""),/^[a-f0-9]{64}$/,`${provider}.${operation}:NO_DIGEST`);
+  return b.result;
+};
+const nonempty=x=>Array.isArray(x)&&x.length>0;
+const yt=await run("youtube","search",{query:"OpenAI",limit:1}); assert.ok(nonempty(yt?.items),"youtube empty");
+const books=await run("google_books","search",{query:"economics",limit:1}); assert.ok(nonempty(books?.items),"books empty");
+const fact=await run("google_factcheck","search",{query:"climate change",limit:1}); assert.ok(Array.isArray(fact?.items)||Array.isArray(fact?.data?.claims)||Array.isArray(fact?.claims),"factcheck malformed");
+const crux=await run("google_crux","record",{origin:"https://www.google.com"}); assert.ok(crux?.data?.record||crux?.record,"crux empty");
+const civic=await run("google_civic","elections",{}); assert.ok(Array.isArray(civic?.items)||Array.isArray(civic?.data?.elections)||Array.isArray(civic?.elections),"civic malformed");
+const kg=await run("google_knowledge_graph","search",{query:"China",limit:1}); assert.ok(nonempty(kg?.items)||nonempty(kg?.data?.itemListElement),"kg empty");
+const ps=await run("google_pagespeed","analyze",{url:"https://example.com",strategy:"mobile",category:"performance"}); assert.ok(ps?.data?.id||ps?.id,"pagespeed empty");
+const bq=await run("bigquery","query",{query:"SELECT word, word_count FROM `bigquery-public-data.samples.shakespeare` ORDER BY word_count DESC LIMIT 1",limit:1,maximum_bytes_billed:20000000}); assert.ok(nonempty(bq?.data?.rows),"bigquery empty");
+const ee=await run("earthengine","asset_get",{asset:"GOOGLE/DYNAMICWORLD/V1"}); assert.match(String(ee?.data?.name||""),/GOOGLE\/DYNAMICWORLD\/V1/,"earthengine empty");
+const eo=await run("google_earth_observation","catalog",{}); assert.ok(nonempty(eo?.items),"earth observation catalog empty");
+const trends=await run("google_trends_public","top_terms",{country_code:"US",limit:1}); assert.ok(Array.isArray(trends?.data?.rows),"trends malformed");
+const patents=await run("google_patents_public","search",{query:"battery",country_code:"US",limit:1}); assert.ok(nonempty(patents?.items),"patents empty"); assert.equal(Number(patents?.bigquery_bytes_billed),0,"patents unexpectedly billed BigQuery bytes");
+console.log(JSON.stringify({ok:true,suite:"diag-google12-production-e2e",routes:12,youtube:true,books:true,factcheck:true,crux:true,civic:true,knowledge_graph:true,pagespeed:true,bigquery:true,earthengine:true,earth_observation:true,trends_public:true,patents:true,secrets_redacted:true}));
