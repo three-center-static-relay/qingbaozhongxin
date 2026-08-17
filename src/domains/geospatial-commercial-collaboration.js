@@ -1,3 +1,4 @@
+export const GEOSPATIAL_NETWORK_COLLAB_VERSION="geospatial-network-collab-v1-20260817";
 const text=(v,n=160)=>String(v??"").trim().slice(0,n),arr=v=>(Array.isArray(v)?v:[]).map(x=>text(x,80)).filter(Boolean).slice(0,6);
 function fail(m,s=400){throw Object.assign(new Error(m),{status:s})}
 function point(v){const s=text(v,48);if(!/^-?\d{1,2}(?:\.\d{1,8})?,-?\d{1,3}(?:\.\d{1,8})?$/.test(s))fail("INVALID_COORDINATE");const[lat,lng]=s.split(",").map(Number);if(lat<-90||lat>90||lng<-180||lng>180)fail("INVALID_COORDINATE");return{lat,lng,s}}
@@ -11,7 +12,7 @@ export async function runAdapter(provider,operation,args={}){
     {family:"access_transport",query:`${geo} ${place} 地铁 公交 停车 交通 可达性`},
     {family:"competition_context",query:`${geo} ${place} ${competitors.join(" ")} 商圈 竞争 商业体`}
   ];
-  return{provider,operation,mode:"serial-controller-plan",collaboration:{network_intelligence_branch:"network-intelligence-collection",geospatial_branch:"geospatial-commercial",compute_center:"compute-center",fanout_inside_worker:false,compute_handoff:true},place:{name:place,city,province:province||null,country_code:country,municipality,location:p.s,aliases},plan:[
+  return{provider,operation,version:GEOSPATIAL_NETWORK_COLLAB_VERSION,mode:"serial-controller-plan",collaboration:{network_intelligence_branch:"network-intelligence-collection",geospatial_branch:"geospatial-commercial",compute_center:"compute-center",fanout_inside_worker:false,compute_handoff:true},place:{name:place,city,province:province||null,country_code:country,municipality,location:p.s,aliases},plan:[
     {stage:1,provider:"tencent_maps",operation:"place_text",args:{keywords:aliases,region:city,limit:8},controller_policy:"try-aliases-serially-first-nonempty-else-use-requested-coordinates",required:false,evidence_kind:"observed-map-poi"},
     {stage:2,provider:"tencent_maps",operation:"place_nearby",args:{keyword:"购物中心",location:p.s,radius:3000,limit:20},required:false,evidence_kind:"observed-map-poi"},
     {stage:3,provider:"tencent_maps",operation:"place_nearby",args:{keyword:"地铁站",location:p.s,radius:1500,limit:20},required:false,evidence_kind:"observed-map-poi"},
