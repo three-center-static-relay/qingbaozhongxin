@@ -9,17 +9,21 @@ assert.equal(c.access,"local");
 assert.equal(c.write,false);
 assert.equal(c.arbitrary_url,false);
 for(const op of ["bmi","egfr_2021_creatinine","egfr_2021_creatinine_cystatin_c","crb65","curb65","qsofa"])assert.ok(OPERATIONS[p]?.includes(op),`aggregate operation missing: ${op}`);
-const out=await runAdapter(p,"bmi",{weight_kg:70,height_m:1.75},{});
-assert.equal(out.bmi,22.9);
+const out=await runAdapter(p,"bmi",{weight_kg:70,height_m:1.75,age_years:40},{});
+assert.equal(out.bmi,22.9);assert.equal(out.classification_applicable,true);
+const child=await runAdapter(p,"bmi",{weight_kg:35,height_m:1.4,age_years:10},{});assert.equal(child.adult_who_category,null);assert.equal(child.classification_applicable,false);
 const egfrMg=await runAdapter(p,"egfr_2021_creatinine",{age_years:50,sex:"male",serum_creatinine:1,creatinine_unit:"mg/dL"},{});
 const egfrSi=await runAdapter(p,"egfr_2021_creatinine",{age_years:50,sex:"male",serum_creatinine:88.4,creatinine_unit:"umol/L"},{});
 assert.equal(egfrSi.egfr_ml_min_1_73m2,egfrMg.egfr_ml_min_1_73m2);
 assert.equal(egfrSi.serum_creatinine_mg_dl,1);
+const egfr20=await runAdapter(p,"egfr_2021_creatinine",{age_years:20,sex:"male",serum_creatinine:1,creatinine_unit:"mg/dL"},{});assert.match(egfr20.transition_age_note,/CKiD U25/);
 await assert.rejects(()=>runAdapter(p,"egfr_2021_creatinine",{age_years:50,sex:"male",serum_creatinine:3000,creatinine_unit:"umol/L"},{}),/INVALID_SERUM_CREATININE/);
 for(const bad of [null,"",false,[],{}]){
   await assert.rejects(()=>runAdapter(p,"curb65",{confusion:false,urea_mmol_l:bad,respiratory_rate:20,systolic_bp:120,diastolic_bp:80,age_years:50},{}),/INVALID_UREA_MMOL_L/);
   await assert.rejects(()=>runAdapter(p,"crb65",{confusion:false,respiratory_rate:bad,systolic_bp:120,diastolic_bp:80,age_years:50},{}),/INVALID_RESPIRATORY_RATE/);
 }
+await assert.rejects(()=>runAdapter(p,"crb65",{confusion:false,respiratory_rate:20,systolic_bp:120,diastolic_bp:80,age_years:17},{}),/INVALID_AGE_YEARS/);
+await assert.rejects(()=>runAdapter(p,"curb65",{confusion:false,urea_mmol_l:5,respiratory_rate:20,systolic_bp:120,diastolic_bp:80,age_years:17},{}),/INVALID_AGE_YEARS/);
 const rr29=await runAdapter(p,"crb65",{confusion:false,respiratory_rate:29,systolic_bp:120,diastolic_bp:80,age_years:64},{});assert.equal(rr29.score,0);
 const rr30=await runAdapter(p,"crb65",{confusion:false,respiratory_rate:30,systolic_bp:120,diastolic_bp:80,age_years:64},{});assert.equal(rr30.score,1);
 const dbp60=await runAdapter(p,"crb65",{confusion:false,respiratory_rate:20,systolic_bp:120,diastolic_bp:60,age_years:64},{});assert.equal(dbp60.score,1);
@@ -28,4 +32,5 @@ const sbp89=await runAdapter(p,"crb65",{confusion:false,respiratory_rate:20,syst
 const age65=await runAdapter(p,"crb65",{confusion:false,respiratory_rate:20,systolic_bp:120,diastolic_bp:80,age_years:65},{});assert.equal(age65.score,1);
 const urea7=await runAdapter(p,"curb65",{confusion:false,urea_mmol_l:7,respiratory_rate:20,systolic_bp:120,diastolic_bp:80,age_years:50},{});assert.equal(urea7.score,0);
 const urea71=await runAdapter(p,"curb65",{confusion:false,urea_mmol_l:7.1,respiratory_rate:20,systolic_bp:120,diastolic_bp:80,age_years:50},{});assert.equal(urea71.score,1);
-console.log(JSON.stringify({ok:true,suite:"medical-wave5-aggregate-smoke",catalog:true,aggregate_operations:true,aggregate_dispatch:true,si_creatinine_conversion:true,si_range_guard:true,strict_numeric_inputs:true,crb65_boundaries:true,curb65_boundaries:true}));
+const q=await runAdapter(p,"qsofa",{respiratory_rate:22,systolic_bp:100,altered_mentation:false},{});assert.match(q.screening_warning,/single sepsis screening/i);
+console.log(JSON.stringify({ok:true,suite:"medical-wave5-aggregate-smoke",catalog:true,aggregate_operations:true,aggregate_dispatch:true,si_creatinine_conversion:true,si_range_guard:true,strict_numeric_inputs:true,pediatric_bmi_guard:true,young_adult_egfr_note:true,adult_pneumonia_scope:true,crb65_boundaries:true,curb65_boundaries:true,qsofa_screening_warning:true}));
