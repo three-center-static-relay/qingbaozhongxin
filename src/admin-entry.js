@@ -4,7 +4,7 @@ export {CenterGate};
 
 const ORIGIN="https://intelligence.internal";
 const SERVICE="intelligence-worker";
-const DEPLOYMENT_ATTESTATION="required-secrets-zenodo-kaggle-v1";
+const DEPLOYMENT_ATTESTATION="required-secrets-zenodo-kaggle-v1-geonames-e2e";
 const json=(body,status=200)=>Response.json(body,{status,headers:{"cache-control":"no-store"}});
 
 async function readApp(path,env,ctx){
