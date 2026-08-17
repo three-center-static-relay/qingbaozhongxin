@@ -9,4 +9,4 @@ assert.equal(b?.result?.source,"Wind AIFin Market",`WIND_SOURCE:${JSON.stringify
 assert.equal(b?.result?.server_type,"stock_data",`WIND_SERVER:${JSON.stringify(b)}`);
 assert.ok(b?.result?.result!==undefined&&b?.result?.result!==null,`WIND_EMPTY:${JSON.stringify(b)}`);
 assert.match(String(b?.result_digest||""),/^[a-f0-9]{64}$/);
-console.log(JSON.stringify({ok:true,suite:"diag-wind-production-e2e",provider:"aifin_market",tool:"get_stock_price_indicators",windcode:"600519.SH",secrets_redacted:true}));
+console.log(JSON.stringify({ok:true,suite:"diag-wind-production-e2e",provider:"aifin_market",tool:"get_stock_price_indicators",windcode:"600519.SH",secrets_redacted:true,trigger:"post-pr"}));
