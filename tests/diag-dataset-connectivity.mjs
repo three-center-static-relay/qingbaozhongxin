@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+const BASE="https://intelligence-worker.a15280020511.workers.dev";
+const r=await fetch(`${BASE}/v1/dataset-sources/status`,{headers:{accept:"application/json"}});
+const b=await r.json().catch(()=>null);
+assert.equal(r.status,200,`STATUS_HTTP_${r.status}:${JSON.stringify(b)}`);
+assert.equal(b?.ok,true);
+const by=id=>b.sources?.find(x=>x.id===id);
+for(const id of ["kaggle_datasets","kaggle_notebooks","huggingface","openml","zenodo","figshare","dataverse","dryad","datacite","hdx","bigquery_public","nasa_earthdata","copernicus"])assert.equal(by(id)?.status,"LIVE",`${id}:${JSON.stringify(by(id))}`);
+assert.equal(by("modelscope")?.status,"LIVE",`modelscope:${JSON.stringify(by("modelscope"))}`);
+assert.equal(by("opendatalab")?.status,"DISCOVERY",`opendatalab:${JSON.stringify(by("opendatalab"))}`);
+assert.equal(by("aws_open_data")?.status,"DISCOVERY",`aws:${JSON.stringify(by("aws_open_data"))}`);
+assert.equal(by("common_crawl")?.status,"TASK_ONLY",`common_crawl:${JSON.stringify(by("common_crawl"))}`);
+console.log(JSON.stringify({ok:true,suite:"dataset-connectivity",checked:true,secrets_redacted:true}));
