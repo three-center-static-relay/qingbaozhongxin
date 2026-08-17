@@ -1,6 +1,7 @@
 import base,{CenterGate as BaseCenterGate} from "./index.js";
 import {runDatasetRadar,latestRadar,radarMeta} from "./dataset-radar.js";
 import {runPortalRadar,portalRadarMeta} from "./dataset-radar-portals.js";
+import {datasetSourceStatus} from "./dataset-source-status.js";
 const json=(x,s=200)=>Response.json(x,{status:s,headers:{"cache-control":"no-store"}});
 const MAX_RADAR_BYTES=110000;
 
@@ -41,6 +42,7 @@ async function radarRoute(req,env){
   const u=new URL(req.url);
   if(req.method==="GET"&&u.pathname==="/v1/dataset-radar/meta")return json({ok:true,...radarMeta(env),portal_radar:portalRadarMeta()});
   if(req.method==="GET"&&u.pathname==="/v1/dataset-radar/latest"){const r=await latestRadar(env);return json({ok:true,snapshot:r?.snapshot||null})}
+  if(req.method==="GET"&&u.pathname==="/v1/dataset-sources/status")return json({ok:true,...datasetSourceStatus(env)});
   if(req.method==="POST"&&u.pathname==="/v1/dataset-radar/run"){
     if(u.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"dataset radar execution is service-binding internal only"},403);
     const core=await runDatasetRadar(env,{trigger:"internal-manual"}).catch(e=>({ok:false,error:e?.message||"CORE_RADAR_FAILED"}));
@@ -58,6 +60,7 @@ async function openapiWithDatasetExposure(req,env,ctx){
   body.paths["/v1/provider/{provider}/operations"]={get:{summary:"List approved live operations for one provider",parameters:[providerParameter]}};
   body.paths["/v1/dataset-radar/meta"]={get:{summary:"List active dataset collectors and fixed-domain dataset portals; metadata only"}};
   body.paths["/v1/dataset-radar/latest"]={get:{summary:"Read the latest bounded dataset/notebook candidate metadata snapshot"}};
+  body.paths["/v1/dataset-sources/status"]={get:{summary:"Classify every registered dataset source as LIVE, DISCOVERY, TASK_ONLY or NOT_CONNECTED"}};
   return json(body,response.status);
 }
 export default{
