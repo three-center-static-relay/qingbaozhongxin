@@ -1,0 +1,4 @@
+import assert from "node:assert/strict";
+const BASE="https://intelligence-worker.a15280020511.workers.dev";
+const cases=[["medical_clinical_calculators","bmi",{weight_kg:70,height_m:1.75}],["medical_top_tier_search","search",{query:"acute chest pain differential diagnosis guideline",specialty:"cardiology",mode:"differential diagnosis",limit_per_engine:3}]];
+let i=0;for(const [provider,operation,args] of cases){const r=await fetch(`${BASE}/v1/run`,{method:"POST",headers:{"content-type":"application/json",accept:"application/json"},body:JSON.stringify({task_id:`med-c-${Date.now()}-${++i}`,provider,operation,args,timeout_seconds:120})});const b=await r.json().catch(()=>null);assert.equal(r.status,200,`${provider}:${r.status}:${JSON.stringify(b)}`);assert.equal(b?.ok,true);assert.match(String(b?.result_digest||""),/^[a-f0-9]{64}$/);}console.log(JSON.stringify({ok:true,suite:"medical-fresh-c",providers:cases.map(x=>x[0])}));
