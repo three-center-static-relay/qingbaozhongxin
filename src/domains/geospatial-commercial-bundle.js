@@ -1,31 +1,50 @@
 import {GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION} from "./geospatial-commercial.js";
 
-async function sha256(value){
-  const raw=JSON.stringify(value),h=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(raw));
-  return[...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,"0")).join("");
-}
+const text=(v,n=200)=>String(v??"").trim().slice(0,n);
+const clamp=(v,min,max,d)=>{const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,Math.trunc(n))):d};
+function fail(message,status=400,details){throw Object.assign(new Error(message),{status,details})}
+function point(v){const s=text(v,48);if(!/^-?\d{1,2}(?:\.\d{1,8})?,-?\d{1,3}(?:\.\d{1,8})?$/.test(s))fail("INVALID_COORDINATE");const[lat,lng]=s.split(",").map(Number);if(lat<-90||lat>90||lng<-180||lng>180)fail("INVALID_COORDINATE");return{lat,lng,s:`${lat},${lng}`}}
+function iso2(v){if(v===undefined||v===null||v==="")return"";const s=String(v).trim().toUpperCase();if(!/^[A-Z]{2}$/.test(s))fail("INVALID_COUNTRY_CODE");return s}
+async function sha256(value){const raw=JSON.stringify(value),h=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(raw));return[...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+function configured(env,provider){if(provider==="baidu_maps")return Boolean(env.BAIDU_MAP_AK||env.BAIDU_MAP_API_KEY);if(provider==="openaq")return Boolean(env.OPENAQ_API_KEY);if(provider==="geonames")return Boolean(env.GEONAMES_USERNAME);if(provider==="mobilitydatabase")return Boolean(env.MOBILITYDATABASE_ACCESS_TOKEN||env.MOBILITYDATABASE_REFRESH_TOKEN);return true}
+async function layer(name,kind,fn){const started=Date.now();try{const data=await fn(),digest_sha256=await sha256(data);return{name,ok:true,evidence_kind:kind,digest_sha256,elapsed_ms:Date.now()-started,data}}catch(e){return{name,ok:false,evidence_kind:kind,error:String(e?.message||"LAYER_FAILED").slice(0,120),http_status:e?.status||null,elapsed_ms:Date.now()-started}}
 
 export const OPERATIONS={geospatial_commercial:["point_context"]};
 
 export async function buildPointContext(args={},env={},dispatch){
-  const location=String(args.location||"").trim();
-  if(!location)throw Object.assign(new Error("INVALID_COORDINATE"),{status:400});
-  const anchor={location,domain_version:GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION};
+  if(typeof dispatch!=="function")fail("DISPATCH_REQUIRED",500);
+  const p=point(args.location),resolution=clamp(args.h3_resolution,6,12,9),country=iso2(args.country_code),municipality=text(args.municipality,100),trafficRadius=clamp(args.traffic_radius_m,100,1000,500),airRadius=clamp(args.air_radius_m,100,25000,3000);
+  const layers=[];
+  layers.push(await layer("h3","derived-deferred",async()=>({resolution,cell:null,location:p.s,status:"deferred-to-compute"})));
+  layers.push(await layer("esa_worldcover","observed-open-raster-index",async()=>dispatch("esa_worldcover","tile_info",{location:p.s,year:2021},env)));
+  if(configured(env,"baidu_maps"))layers.push(await layer("baidu_traffic","observed-road-traffic",async()=>dispatch("baidu_maps","traffic_around",{center:p.s,radius:trafficRadius,coord_type_input:"wgs84",coord_type_output:"bd09ll"},env)));else layers.push({name:"baidu_traffic",ok:false,skipped:true,error:"NOT_CONFIGURED",evidence_kind:"observed-road-traffic"});
+  if(configured(env,"openaq"))layers.push(await layer("openaq","observed-environmental-monitoring",async()=>dispatch("openaq","locations_nearby",{location:p.s,radius_m:airRadius,limit:20,country},env)));else layers.push({name:"openaq",ok:false,skipped:true,error:"NOT_CONFIGURED",evidence_kind:"observed-environmental-monitoring"});
+  if(configured(env,"geonames"))layers.push(await layer("geonames","reference-place-admin",async()=>dispatch("geonames","nearby",{location:p.s,radius_km:10,limit:20},env)));else layers.push({name:"geonames",ok:false,skipped:true,error:"NOT_CONFIGURED",evidence_kind:"reference-place-admin"});
+  if(configured(env,"mobilitydatabase")&&country&&municipality)layers.push(await layer("mobilitydatabase","transit-feed-metadata",async()=>dispatch("mobilitydatabase","gtfs_search",{country_code:country,municipality,limit:20},env)));else layers.push({name:"mobilitydatabase",ok:false,skipped:true,error:configured(env,"mobilitydatabase")?"COUNTRY_AND_MUNICIPALITY_REQUIRED":"NOT_CONFIGURED",evidence_kind:"transit-feed-metadata"});
+  const successful=layers.filter(x=>x.ok),receipts=successful.map(x=>({source:x.name,digest_sha256:x.digest_sha256,evidence_kind:x.evidence_kind}));
   return{
     provider:"geospatial_commercial",
     operation:"point_context",
     domain_version:GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION,
     free_only:true,
-    location,
+    location:p.s,
+    h3_resolution:resolution,
     observed_mobile_lbs:false,
     real_footfall:false,
     paid_fallback:false,
     arbitrary_url:false,
-    layer_count:0,
-    successful_layers:0,
-    layers:[],
-    source_receipts:[{source:"diagnostic-anchor",digest_sha256:await sha256(anchor),evidence_kind:"derived"}],
+    direct_upstream_fetch:false,
+    layer_count:layers.length,
+    successful_layers:successful.length,
+    layers,
+    source_receipts:receipts,
+    feature_candidates:{spatial_index:"h3-deferred-to-compute",land_cover:"esa_worldcover",climate:"nasa_power-deferred",road_traffic:"baidu_traffic",air_quality_exposure:"openaq",place_admin:"geonames",admin_boundary:"geoboundaries",transit_availability:"mobilitydatabase",routing_accessibility:"openrouteservice-deferred",commercial_poi:"overture_maps+foursquare_os_places"},
     normalization_required_for_compute:true,
-    diagnostic_stub:true
+    async_area_layers:["worldpop_population","worldpop_age_sex"],
+    deferred_compute_layers:["h3"],
+    deferred_on_demand_layers:["nasa_power_climatology","openrouteservice"],
+    deferred_bulk_layers:["overture_maps","foursquare_os_places","ghsl","night_lights","dlr_wsf","copernicus_lcfm"],
+    on_demand_layers:["geoboundaries","mobilitydatabase_gtfs_rt","mobilitydatabase_gbfs"],
+    limitations:["point-context-not-a-substitute-for-observed-mobile-footfall","worldpop-area-population-remains-an-asynchronous-polygon-job","h3-and-climate-routing-heavy-layers-are-deferred-to-keep-the-intelligence-worker-stable","bulk-geoparquet-and-large-raster-sources-are-not-scanned-online-by-the-worker"]
   };
 }
