@@ -1,6 +1,6 @@
 export const FREE_COMMERCIAL_SPATIAL_CATALOG={
   geospatial_commercial:{
-    stack_version:"free-commercial-spatial-v3-20260816",
+    stack_version:"free-commercial-spatial-v4-20260817",
     category:"domain-branch-geospatial-commercial",
     access:"public",
     adapter:"geospatial_commercial.domain",
@@ -60,7 +60,7 @@ export const FREE_COMMERCIAL_SPATIAL_CATALOG={
     arbitrary_url:false
   },
   geonames:{
-    stack_version:"free-commercial-spatial-v3-20260816",
+    stack_version:"free-commercial-spatial-v4-20260817",
     category:"global-place-admin-elevation-free-tier",
     access:"key",
     secrets:["GEONAMES_USERNAME"],
@@ -69,13 +69,27 @@ export const FREE_COMMERCIAL_SPATIAL_CATALOG={
     scope:"place-search-nearby-admin-postal-elevation-timezone-country-info",
     endpoint:"https://secure.geonames.org",
     registration_url:"https://www.geonames.org/login",
-    free_tier:"30000-credits-per-day-per-application;2000-credits-per-hour;commercial-use-allowed-with-attribution-as-of-2026-08",
+    free_tier:"10000-credits-per-day-per-application;1000-credits-per-hour;commercial-use-allowed-with-attribution-as-of-2026-08",
     billing_policy:"free-server-only; no premium automatic fallback",
     license:"CC-BY",
     arbitrary_url:false
   },
+  geoboundaries:{
+    stack_version:"free-commercial-spatial-v4-20260817",
+    category:"global-administrative-boundary-open-data",
+    access:"public",
+    adapter:"geoboundaries.gbOpen-metadata",
+    integration:"William-and-Mary-geoLab-official-api",
+    scope:"gbOpen-country-adm0-adm5-boundary-metadata-and-fixed-geometry-links",
+    endpoint:"https://www.geoboundaries.org/api/current/gbOpen",
+    free_tier:"public-programmatic-api-no-account-required",
+    billing_policy:"open-data-only; gbOpen only; no gbAuthoritative commercial-restricted fallback",
+    license:"CC-BY-4.0",
+    evidence_policy:"administrative-boundary-reference; attribution required; source metadata retained",
+    arbitrary_url:false
+  },
   mobilitydatabase:{
-    stack_version:"free-commercial-spatial-v3-20260816",
+    stack_version:"free-commercial-spatial-v4-20260817",
     category:"global-transit-mobility-feed-catalog",
     access:"key",
     secret_groups:[["MOBILITYDATABASE_ACCESS_TOKEN"],["MOBILITYDATABASE_REFRESH_TOKEN"]],
@@ -84,7 +98,8 @@ export const FREE_COMMERCIAL_SPATIAL_CATALOG={
     scope:"metadata-gtfs-gtfs-rt-gbfs-feed-discovery-only",
     endpoint:"https://api.mobilitydatabase.org",
     registration_url:"https://mobilitydatabase.org/sign-up",
-    free_tier:"free-account-required-for-api;catalog-access-free",
+    free_tier:"free-account-required-for-api; official full feed catalog also published as public CSV",
+    public_catalog:"https://files.mobilitydatabase.org/feeds_v2.csv",
     billing_policy:"free-account-only; no paid fallback",
     evidence_policy:"feed-catalog-metadata-only; individual-feed-license-and-authentication-must-be-respected",
     arbitrary_url:false
