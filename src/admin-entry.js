@@ -1,6 +1,7 @@
 import app,{CenterGate} from "./production-guard.js";
 import {runAdapter} from "./adapters.js";
 import {probeModelScopeIntelligence} from "./modelscope-intelligence.js";
+import {browserRunCnSelftest} from "./browser-run-cn-selftest.js";
 export {CenterGate};
 
 const ORIGIN="https://intelligence.internal";
@@ -98,6 +99,7 @@ export default{
     if(req.method==="GET"&&url.pathname==="/v1/selftest/zenodo-runtime")return providerRuntimeSelftest("zenodo",env);
     if(req.method==="GET"&&url.pathname==="/v1/selftest/kaggle-runtime")return providerRuntimeSelftest("kaggle",env);
     if(req.method==="GET"&&url.pathname==="/v1/selftest/modelscope-runtime")return modelScopeRuntimeSelftest(env);
+    if(req.method==="GET"&&url.pathname==="/v1/selftest/browser-run-cn"){const p=await browserRunCnSelftest(env);return json(p,p.ok===true?200:503)}
     if(req.method==="GET"&&url.pathname==="/v1/admin/context"){
       if(url.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"admin context is service-binding internal only"},403);
       return adminContext(env,ctx);
