@@ -1,0 +1,15 @@
+import assert from "node:assert/strict";
+const BASE="https://intelligence-worker.a15280020511.workers.dev";
+const task_id=`diag-pkulaw-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+const r=await fetch(`${BASE}/v1/run`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({task_id,provider:"pkulaw",operation:"health_check",timeout_seconds:90,args:{}})});
+const b=await r.json().catch(()=>null);
+assert.equal(r.status,200,`PKULAW_HTTP_${r.status}:${JSON.stringify(b)}`);
+assert.equal(b?.ok,true,`PKULAW_NOT_OK:${JSON.stringify(b)}`);
+const x=b?.result||{};
+assert.equal(x.auth_ok,true,`PKULAW_AUTH:${JSON.stringify(x)}`);
+assert.equal(x.transport_ok,true,`PKULAW_TRANSPORT:${JSON.stringify(x)}`);
+assert.equal(x.law_data_ok,true,`PKULAW_LAW:${JSON.stringify(x)}`);
+assert.equal(x.case_data_ok,true,`PKULAW_CASE:${JSON.stringify(x)}`);
+assert.equal(x.status,"healthy",`PKULAW_STATUS:${JSON.stringify(x)}`);
+assert.match(String(b?.result_digest||""),/^[a-f0-9]{64}$/);
+console.log(JSON.stringify({ok:true,suite:"diag-pkulaw-production-e2e",auth:true,transport:true,law:true,case:true,status:"healthy",secrets_redacted:true}));
