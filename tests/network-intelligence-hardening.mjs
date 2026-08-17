@@ -7,6 +7,7 @@ assert.equal(CATALOG.common_crawl.access,"public");
 assert.equal(CATALOG.common_crawl.arbitrary_url,false);
 assert.equal(statusFor({},"common_crawl").configured,true);
 assert.deepEqual(OPERATIONS.common_crawl,["latest_index","index_lookup"]);
+assert.deepEqual(OPERATIONS.cloudflare_browser_run,["source_info","content","markdown","links","scrape","snapshot"]);
 assert.ok(OPERATIONS.geospatial_commercial.includes("public_anchor_browser_render"));
 
 const manifest=networkIntelligenceHardeningManifest();
@@ -70,4 +71,28 @@ assert.equal(rendered.source_receipt.digest_sha256.length,64);
 await assert.rejects(()=>runAdapter("geospatial_commercial","public_anchor_browser_render",{source_id:"fuzhou_project_pipeline",url:"https://example.com/"},browserEnv),/PUBLIC_ANCHOR_HOST_DENIED/);
 await assert.rejects(()=>runAdapter("geospatial_commercial","public_anchor_browser_render",{source_id:"fuzhou_project_pipeline",url:"https://fgw.fuzhou.gov.cn/fgwzwgk/fzgh/test.htm"},{}),/CLOUDFLARE_BROWSER_BINDING_NOT_CONFIGURED/);
 
-console.log(JSON.stringify({ok:true,suite:"network-intelligence-hardening",common_crawl:true,cloudflare_browser_run_contract:true,browser_binding:"BROWSER",sole_browser_runtime:true,browser_ephemeral:true,browser_auto_fallback:false,mainland_government_public_collection_priority:true,no_evasion:true,inference_labels:manifest.evidence_contract.inference_labels}));
+const quickCalls=[];
+const networkBrowserEnv={
+  NETWORK_INTELLIGENCE_BROWSER_ALLOWLIST:"fuzhou.gov.cn,copernicus.eu",
+  BROWSER:{quickAction:async(action,payload)=>{
+    quickCalls.push({action,payload});
+    assert.equal(new URL(payload.url).hostname,"www.fuzhou.gov.cn");
+    assert.equal(payload.gotoOptions.waitUntil,"networkidle2");
+    const result=action==="content"?"<html><body><h1>福州公开信息</h1></body></html>":action==="markdown"?"# 福州公开信息":action==="links"?["https://www.fuzhou.gov.cn/a","mailto:test@example.com"]:action==="scrape"?[{selector:"h1",results:[{text:"福州公开信息",html:"福州公开信息",attributes:[],height:20,width:100,top:10,left:10}]}]:action==="snapshot"?{content:"<html><body>snapshot</body></html>",markdown:"# snapshot",accessibilityTree:{role:"RootWebArea",name:"snapshot"}}:null;
+    return new Response(JSON.stringify({success:true,result}),{status:200,headers:{"content-type":"application/json","x-browser-ms-used":"77"}});
+  }}
+};
+const target="https://www.fuzhou.gov.cn/zwgk/";
+const info=await runAdapter("cloudflare_browser_run","source_info",{},networkBrowserEnv);
+assert.equal(info.worker_binding_no_api_token,true);
+assert.ok(info.allowlisted_host_suffixes.includes("fuzhou.gov.cn"));
+const content=await runAdapter("cloudflare_browser_run","content",{url:target},networkBrowserEnv);assert.match(content.result,/福州公开信息/);assert.equal(content.browser_ms_used,77);assert.equal(content.source_receipt.digest_sha256.length,64);
+const markdown=await runAdapter("cloudflare_browser_run","markdown",{url:target},networkBrowserEnv);assert.equal(markdown.result,"# 福州公开信息");
+const links=await runAdapter("cloudflare_browser_run","links",{url:target},networkBrowserEnv);assert.deepEqual(links.result,["https://www.fuzhou.gov.cn/a"]);assert.equal(quickCalls.find(x=>x.action==="links").payload.visibleLinksOnly,true);
+const scrape=await runAdapter("cloudflare_browser_run","scrape",{url:target,selectors:["h1"]},networkBrowserEnv);assert.equal(scrape.result[0].results[0].text,"福州公开信息");assert.deepEqual(quickCalls.find(x=>x.action==="scrape").payload.elements,[{selector:"h1"}]);
+const snapshot=await runAdapter("cloudflare_browser_run","snapshot",{url:target,formats:["content","markdown","accessibilityTree","screenshot"]},networkBrowserEnv);assert.equal(snapshot.result.markdown,"# snapshot");assert.deepEqual(quickCalls.find(x=>x.action==="snapshot").payload.formats,["content","markdown","accessibilityTree"]);assert.equal(snapshot.policy.screenshot_binary_disabled,true);
+await assert.rejects(()=>runAdapter("cloudflare_browser_run","content",{url:"https://example.com/"},networkBrowserEnv),/BROWSER_HOST_NOT_ALLOWLISTED/);
+await assert.rejects(()=>runAdapter("cloudflare_browser_run","content",{url:"http://www.fuzhou.gov.cn/"},networkBrowserEnv),/BROWSER_HTTPS_REQUIRED/);
+await assert.rejects(()=>runAdapter("cloudflare_browser_run","content",{url:"https://127.0.0.1/"},networkBrowserEnv),/PRIVATE_OR_LOCAL_URL_DENIED/);
+
+console.log(JSON.stringify({ok:true,suite:"network-intelligence-hardening",common_crawl:true,cloudflare_browser_run_contract:true,browser_quick_actions:["content","markdown","links","scrape","snapshot"],browser_binding:"BROWSER",sole_browser_runtime:true,browser_ephemeral:true,browser_auto_fallback:false,mainland_government_public_collection_priority:true,no_evasion:true,inference_labels:manifest.evidence_contract.inference_labels}));
