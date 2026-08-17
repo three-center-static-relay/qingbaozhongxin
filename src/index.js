@@ -1,5 +1,6 @@
 import {CATALOG,CATALOG_VERSION,EXCLUDED_PROVIDERS,statusFor,allStatuses} from "./catalog.js";
 import {OPERATIONS,runAdapter} from "./adapters.js";
+import {CAPABILITY_ABI_VERSION,intelligenceCapabilityManifest} from "./capability-manifest.js";
 
 const API_VERSION="2026-08-15";
 const MAX_BODY_BYTES=65536,DEFAULT_LEASE_SECONDS=1800,MAX_LEASE_SECONDS=7200,DEFAULT_RATE_PER_MIN=60;
@@ -58,7 +59,7 @@ async function run(req,env){
 async function handle(req,env){const u=new URL(req.url);
   if(req.method==="GET"&&u.pathname==="/health"){const s=allStatuses(env);return json({ok:true,status:"ready",service:SERVICE,api_version:API_VERSION,catalog_version:CATALOG_VERSION,providers_total:Object.keys(s).length,providers_configured:Object.values(s).filter(x=>x.configured).length,live_adapters:Object.values(s).filter(x=>x.live_adapter).length})}
   if(req.method==="GET"&&(u.pathname==="/v1/policy"||u.pathname==="/policy"))return json({ok:true,service:SERVICE,policy:POLICY});
-  if(req.method==="GET"&&(u.pathname==="/v1/capabilities"||u.pathname==="/capabilities"))return json({ok:true,service:SERVICE,capabilities:{...CAPABILITIES,providers:Object.keys(CATALOG)},providers:allStatuses(env)});
+  if(req.method==="GET"&&(u.pathname==="/v1/capabilities"||u.pathname==="/capabilities")){const providers=allStatuses(env);return json({ok:true,service:SERVICE,capabilities:{...CAPABILITIES,providers:Object.keys(CATALOG)},providers,capability_abi_version:CAPABILITY_ABI_VERSION,capability_manifest:intelligenceCapabilityManifest({catalogVersion:CATALOG_VERSION,providerStatuses:providers})})}
   if(req.method==="GET"&&u.pathname==="/v1/catalog")return json({ok:true,catalog_version:CATALOG_VERSION,excluded:EXCLUDED_PROVIDERS,providers:catalogView(env)});
   if(req.method==="GET"&&(u.pathname==="/quota"||u.pathname==="/v1/quota"))return json({ok:true,rate_limit_per_min:int(env.RATE_LIMIT_PER_MIN,60),single_active_task:true,max_body_bytes:MAX_BODY_BYTES,max_retries:0});
   if(req.method==="GET"&&u.pathname==="/source")return json({ok:true,service:SERVICE,api_version:API_VERSION,catalog_version:CATALOG_VERSION,source_digest:await sourceDigest(),secrets_redacted:true});
