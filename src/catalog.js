@@ -3,7 +3,7 @@ import {GLOBAL_HIGH_VALUE_CATALOG} from "./catalog-global-highvalue.js";
 import {SPLUS_CATALOG} from "./catalog-splus.js";
 import {AIFIN_CATALOG} from "./catalog-aifin.js";
 import {FREE_COMMERCIAL_SPATIAL_CATALOG} from "./catalog-free-commercial-spatial.js";
-export const CATALOG_VERSION="2026-08-16.37";
+export const CATALOG_VERSION="2026-08-17.01";
 export const EXCLUDED_PROVIDERS=EXISTING_EXCLUDED;
 export const CATALOG={
   ...EXISTING_CATALOG,
@@ -17,6 +17,7 @@ export const CATALOG={
   harvard_dataverse:{...EXISTING_CATALOG.harvard_dataverse,access:"public",optional_secrets:["HARVARD_DATAVERSE_API_TOKEN","DATAVERSE_API_TOKEN"],adapter:"harvard_dataverse.search",integration:"official-dataverse-search-api",scope:"public-datasets-files-dataverses; token optional for unpublished authorized content",endpoint:"https://dataverse.harvard.edu/api/search",arbitrary_url:false},
   pangaea:{...EXISTING_CATALOG.pangaea,access:"public",adapter:"pangaea.oai-pmh",integration:"official-oai-pmh",scope:"bounded-citable-earth-environment-metadata-harvest",endpoint:"https://ws.pangaea.de/oai/provider",arbitrary_url:false},
   figshare:{...EXISTING_CATALOG.figshare,access:"public",optional_secrets:["FIGSHARE_TOKEN"],adapter:"figshare.search",integration:"official-rest-v2",scope:"public-article-and-dataset-discovery; token optional for account/private access",endpoint:"https://api.figshare.com/v2/articles/search",registration_url:"https://figshare.com/account/applications",arbitrary_url:false},
+  common_crawl:{category:"public-web-historical-archive-index",access:"public",adapter:"common_crawl.index",integration:"official-index-server",scope:"bounded-exact-public-url-capture-metadata-only-no-raw-warc-proxy-no-live-target-fetch",endpoint:"https://index.commoncrawl.org",billing:"public-free",arbitrary_url:false,write:false},
   worldbank:{...EXISTING_CATALOG.worldbank,adapter:"worldbank.indicator+metadata+topic+multi-indicator",integration:"official-indicators-api-v2",scope:"countries-indicators-topics-single-and-bounded-multi-indicator",arbitrary_url:false},
   imf:{...EXISTING_CATALOG.imf,adapter:"imf.datamapper-v2",integration:"official-datamapper-v2",scope:"indicators-countries-regions-groups-bounded-timeseries",endpoint:"https://www.imf.org/external/datamapper/api/v2",arbitrary_url:false},
   bis:{...EXISTING_CATALOG.bis,adapter:"bis.sdmx-v2",integration:"official-sdmx-rest-v2",scope:"structures-and-bounded-data-queries",endpoint:"https://stats.bis.org/api/v2",arbitrary_url:false},
