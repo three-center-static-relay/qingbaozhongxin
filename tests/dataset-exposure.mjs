@@ -45,9 +45,9 @@ for(const [provider,operation] of [
   ["pangaea","oai_list_records"],
   ["figshare","search"],
   ["worldbank","indicator"],
-  ["nasa_cmr","collections"],
-  ["worldpop","population"],
-  ["fred","series_search"]
+  ["nasa_cmr","preset"],
+  ["worldpop","population_submit"],
+  ["fred","search"]
 ]){
   assert.ok(catalog.body?.providers?.[provider],`${provider} must be visible in /v1/catalog`);
   assert.ok(catalog.body.providers[provider].operations?.includes(operation),`${provider}.${operation} must be exposed as an approved live operation`);
