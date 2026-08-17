@@ -51,6 +51,38 @@ async function providerRuntimeSelftest(provider,env){
   }
 }
 
+async function geonamesRuntimeSelftest(env){
+  const secretPresent=Boolean(String(env.GEONAMES_USERNAME||"").trim());
+  try{
+    const result=await runAdapter("geonames","search",{q:"Fuzhou",country:"CN",limit:5,lang:"en"},env);
+    const items=Array.isArray(result?.data?.geonames)?result.data.geonames:[];
+    const fuzhou=items.find(x=>String(x?.name||"").toLowerCase()==="fuzhou")||items[0]||null;
+    return json({ok:items.length>0,selftest:"geonames-runtime",secret_present:secretPresent,upstream_http_status:200,item_count:items.length,first_match:fuzhou?{name:fuzhou.name||null,country_code:fuzhou.countryCode||null,admin1:fuzhou.adminName1||null,lat:fuzhou.lat||null,lng:fuzhou.lng||null,geoname_id:fuzhou.geonameId||null}:null,error:null,secrets_redacted:true});
+  }catch(error){
+    return json({ok:false,selftest:"geonames-runtime",secret_present:secretPresent,upstream_http_status:Number(error?.details?.http_status)||null,error:String(error?.message||"GEONAMES_SELFTEST_FAILED"),adapter_status:Number(error?.status)||500,secrets_redacted:true});
+  }
+}
+
+function mobilityCount(data){
+  if(Array.isArray(data))return data.length;
+  for(const k of ["feeds","results","items","data"])if(Array.isArray(data?.[k]))return data[k].length;
+  return 0;
+}
+
+async function mobilityRuntimeSelftest(env){
+  const direct=Boolean(String(env.MOBILITYDATABASE_ACCESS_TOKEN||"").trim());
+  const refresh=Boolean(String(env.MOBILITYDATABASE_REFRESH_TOKEN||"").trim());
+  const secretPresent=direct||refresh;
+  try{
+    const metadata=await runAdapter("mobilitydatabase","metadata",{},env);
+    const fuzhou=await runAdapter("mobilitydatabase","gtfs_search",{country_code:"CN",municipality:"Fuzhou",limit:20},env);
+    const china=await runAdapter("mobilitydatabase","gtfs_search",{country_code:"CN",limit:20},env);
+    return json({ok:true,selftest:"mobilitydatabase-runtime",secret_present:secretPresent,auth_mode:direct?"access-token":"refresh-token",upstream_http_status:200,metadata_received:Boolean(metadata?.data),fuzhou_gtfs_feed_count:mobilityCount(fuzhou?.data),china_gtfs_sample_count:mobilityCount(china?.data),error:null,secrets_redacted:true});
+  }catch(error){
+    return json({ok:false,selftest:"mobilitydatabase-runtime",secret_present:secretPresent,auth_mode:direct?"access-token":refresh?"refresh-token":null,upstream_http_status:Number(error?.details?.http_status)||null,error:String(error?.message||"MOBILITYDATABASE_SELFTEST_FAILED"),adapter_status:Number(error?.status)||500,secrets_redacted:true});
+  }
+}
+
 async function adminContext(env,ctx){
   const health=await readApp("/health",env,ctx);
   const source=await readApp("/source",env,ctx);
@@ -66,6 +98,8 @@ export default{
     const url=new URL(req.url);
     if(req.method==="GET"&&url.pathname==="/v1/selftest/zenodo-runtime")return providerRuntimeSelftest("zenodo",env);
     if(req.method==="GET"&&url.pathname==="/v1/selftest/kaggle-runtime")return providerRuntimeSelftest("kaggle",env);
+    if(req.method==="GET"&&url.pathname==="/v1/selftest/geonames-runtime")return geonamesRuntimeSelftest(env);
+    if(req.method==="GET"&&url.pathname==="/v1/selftest/mobilitydatabase-runtime")return mobilityRuntimeSelftest(env);
     if(req.method==="GET"&&url.pathname==="/v1/admin/context"){
       if(url.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"admin context is service-binding internal only"},403);
       return adminContext(env,ctx);
