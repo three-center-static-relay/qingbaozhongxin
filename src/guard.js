@@ -53,8 +53,9 @@ async function radarRoute(req,env){
 async function openapiWithDatasetExposure(req,env,ctx){
   const response=await base.fetch(req,env,ctx),body=await response.json().catch(()=>null);
   if(!body||typeof body!=="object"||!body.paths)return json({ok:false,error:"OPENAPI_BASE_UNAVAILABLE"},503);
-  body.paths["/v1/provider/{provider}/readiness"]={get:{summary:"Read provider configuration and live-operation readiness"}};
-  body.paths["/v1/provider/{provider}/operations"]={get:{summary:"List approved live operations for one provider"}};
+  const providerParameter={name:"provider",in:"path",required:true,schema:{type:"string"}};
+  body.paths["/v1/provider/{provider}/readiness"]={get:{summary:"Read provider configuration and live-operation readiness",parameters:[providerParameter]}};
+  body.paths["/v1/provider/{provider}/operations"]={get:{summary:"List approved live operations for one provider",parameters:[providerParameter]}};
   body.paths["/v1/dataset-radar/meta"]={get:{summary:"List active dataset collectors and fixed-domain dataset portals; metadata only"}};
   body.paths["/v1/dataset-radar/latest"]={get:{summary:"Read the latest bounded dataset/notebook candidate metadata snapshot"}};
   return json(body,response.status);
