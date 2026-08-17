@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+// Diagnostic-only fresh production matrix; the current gate may temporarily run contract-only isolation.
 
 const BASE="https://intelligence-worker.a15280020511.workers.dev";
 const nonce=`med-${Date.now()}-${Math.random().toString(16).slice(2,8)}`;
