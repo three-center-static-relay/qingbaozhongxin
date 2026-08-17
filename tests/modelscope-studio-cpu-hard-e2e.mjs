@@ -18,7 +18,7 @@ try{
   assert.ok(Number(h?.memory_gb)>=30,`Hardware memory ${h?.memory_gb}`);
   const receipt=body?.runtime_receipt||{};
   assert.equal(receipt?.ok,true);
-  assert.equal(receipt?.revision,"studio-cpu-runtime-v1-20260817");
+  assert.equal(receipt?.revision,"studio-cpu-runtime-v2-20260817");
   assert.ok(Number(receipt?.cpu_effective)>=8,`Effective CPU ${receipt?.cpu_effective}`);
   assert.ok(Number(receipt?.memory_gb_effective)>=30,`Effective memory ${receipt?.memory_gb_effective}`);
   assert.equal(receipt?.square_sum_correct,true);
