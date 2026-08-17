@@ -1,55 +1,33 @@
-// Collaboration runtime keeps heavy spatial transforms deferred to Compute Center for Worker-size stability.
 import {runAdapter as runMap} from "../adapters-extra4.js";
 import {runAdapter as runGM} from "../adapters-geonames-mobility.js";
-import {runAdapter as runOpenData} from "./geospatial-commercial-open-data.js";
-import {buildCommercialWebEvidence} from "./network-intelligence-commercial.js";
-import {GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION} from "./geospatial-commercial.js";
-
-const text=(v,n=200)=>String(v??"").trim().slice(0,n);
-const clamp=(v,min,max,d)=>{const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,Math.trunc(n))):d};
-function fail(message,status=400,details){throw Object.assign(new Error(message),{status,details})}
-function point(v){const s=text(v,48);if(!/^-?\d{1,2}(?:\.\d{1,8})?,-?\d{1,3}(?:\.\d{1,8})?$/.test(s))fail("INVALID_COORDINATE");const [lat,lng]=s.split(",").map(Number);if(lat<-90||lat>90||lng<-180||lng>180)fail("INVALID_COORDINATE");return{lat,lng,s:`${lat},${lng}`}}
-function country(v){const s=text(v,2).toUpperCase();if(!s)return"";if(!/^[A-Z]{2}$/.test(s))fail("INVALID_COUNTRY_CODE");return s}
-function has(env,...names){return names.some(n=>Boolean(text(env?.[n],4096)))}
-async function sha256(v){const h=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(JSON.stringify(v)));return[...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,"0")).join("")}
-async function layer(name,kind,fn){const started=Date.now();try{const data=await fn(),digest_sha256=await sha256(data);return{name,ok:true,evidence_kind:kind,digest_sha256,elapsed_ms:Date.now()-started,data}}catch(e){return{name,ok:false,evidence_kind:kind,error:String(e?.message||"LAYER_FAILED").slice(0,160),http_status:e?.status||null,elapsed_ms:Date.now()-started}}
-function tencentItems(result){const d=result?.data?.data;return Array.isArray(d)?d:[]}
-function sourceReceipt(x){return x?.ok&&x?.digest_sha256?{source:x.name,digest_sha256:x.digest_sha256,evidence_kind:x.evidence_kind}:null}
+import {runAdapter as runWeb} from "../adapters-extra39.js";
+const text=(v,n=200)=>String(v??"").trim().slice(0,n),clamp=(v,a,b,d)=>{const n=Number(v);return Number.isFinite(n)?Math.max(a,Math.min(b,Math.trunc(n))):d};
+const has=(e,...n)=>n.some(k=>Boolean(text(e?.[k],4096)));
+function fail(m,s=400){throw Object.assign(new Error(m),{status:s})}
+function point(v){const s=text(v,48);if(!/^-?\d{1,2}(?:\.\d{1,8})?,-?\d{1,3}(?:\.\d{1,8})?$/.test(s))fail("INVALID_COORDINATE");const[lat,lng]=s.split(",").map(Number);if(lat<-90||lat>90||lng<-180||lng>180)fail("INVALID_COORDINATE");return{lat,lng,s}}
+async function digest(v){const h=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(JSON.stringify(v)));return[...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+async function layer(name,kind,fn){try{const data=await fn();return{name,ok:true,evidence_kind:kind,digest_sha256:await digest(data),data}}catch(e){return{name,ok:false,evidence_kind:kind,error:String(e?.message||"LAYER_FAILED").slice(0,120),http_status:e?.status||null}}
+const items=x=>Array.isArray(x?.data?.data)?x.data.data:[];
+async function webEvidence(place,city,competitors,env,maxProviders=2){
+  const providers=[["tavily","TAVILY_API_KEY"],["exa","EXA_API_KEY"],["firecrawl","FIRECRAWL_API_KEY"]].filter(([,k])=>has(env,k)).slice(0,maxProviders),queries=[
+    ["tenant_brand_mix",`${city} ${place} 品牌 商户 餐饮 零售 招商`],
+    ["recent_operations",`${city} ${place} 2025 2026 活动 开业 调整改造 招商`],
+    ["competition_context",`${city} ${place} ${competitors.join(" ")} 商圈 竞争 商业体`]
+  ],out=[],receipts=[];
+  for(const[p]of providers)for(const[family,query]of queries)try{const r=await runWeb(p,"search",{query,limit:3,country:"CN"},env),data={provider:p,family,items:Array.isArray(r?.items)?r.items.slice(0,3):[]},d=await digest(data);out.push(data);receipts.push({source:`web_${p}_${family}`,digest_sha256:d,evidence_kind:"public-web-proxy"})}catch(e){out.push({provider:p,family,error:String(e?.message||"WEB_SEARCH_FAILED").slice(0,100)})}
+  return{providers:providers.map(x=>x[0]),queries:out,source_receipts:receipts,item_count:out.reduce((n,x)=>n+(x.items?.length||0),0),evidence_kind:"public-web-proxy"};
+}
 export const OPERATIONS={geospatial_commercial:["combined_context"]};
-
 export async function runAdapter(provider,operation,args={},env={}){
   if(provider!=="geospatial_commercial"||operation!=="combined_context")fail("ADAPTER_OPERATION_NOT_APPROVED",403);
-  const placeName=text(args.place_name,120),city=text(args.city,80),province=text(args.province,80),municipality=text(args.municipality||args.city,100),cc=country(args.country_code||"CN"),p=point(args.location),h3Resolution=clamp(args.h3_resolution,6,12,9);
-  if(!placeName)fail("ARG_REQUIRED:place_name");if(!city)fail("ARG_REQUIRED:city");
-  const layers=[];
-  layers.push(await layer("h3","derived-deferred-to-compute",async()=>({location:p.s,resolution:h3Resolution,cell:null,status:"deferred-to-compute-center"})));
-  layers.push(await layer("esa_worldcover","observed-open-raster-index",async()=>runOpenData("esa_worldcover","tile_info",{location:p.s,year:2021},env)));
-  if(has(env,"BAIDU_MAP_AK","BAIDU_MAP_API_KEY"))layers.push(await layer("baidu_traffic","observed-road-traffic",async()=>runMap("baidu_maps","traffic_around",{center:p.s,radius:clamp(args.traffic_radius_m,100,1000,500),coord_type_input:"wgs84",coord_type_output:"bd09ll"},env)));else layers.push({name:"baidu_traffic",ok:false,skipped:true,evidence_kind:"observed-road-traffic",error:"NOT_CONFIGURED"});
-  if(has(env,"TENCENT_LBS_API_KEY","TENCENT_MAP_API_KEY")){
-    layers.push(await layer("tencent_target_place","observed-map-poi",async()=>runMap("tencent_maps","place_text",{keyword:placeName,region:city,limit:8},env)));
-    layers.push(await layer("tencent_nearby_malls","observed-map-poi",async()=>runMap("tencent_maps","place_nearby",{keyword:"购物中心",location:p.s,radius:clamp(args.competition_radius_m,500,5000,3000),limit:20},env)));
-    layers.push(await layer("tencent_nearby_metro","observed-map-poi",async()=>runMap("tencent_maps","place_nearby",{keyword:"地铁站",location:p.s,radius:clamp(args.transit_radius_m,300,3000,1500),limit:20},env)));
-    layers.push(await layer("tencent_nearby_bus","observed-map-poi",async()=>runMap("tencent_maps","place_nearby",{keyword:"公交站",location:p.s,radius:clamp(args.bus_radius_m,200,2000,1000),limit:20},env)));
-  }else layers.push({name:"tencent_map_context",ok:false,skipped:true,evidence_kind:"observed-map-poi",error:"NOT_CONFIGURED"});
-  if(has(env,"GEONAMES_USERNAME"))layers.push(await layer("geonames","reference-place-admin",async()=>runGM("geonames","nearby",{lat:p.lat,lng:p.lng,radius:10,limit:20,lang:"zh"},env)));else layers.push({name:"geonames",ok:false,skipped:true,evidence_kind:"reference-place-admin",error:"NOT_CONFIGURED"});
-  if(has(env,"MOBILITYDATABASE_REFRESH_TOKEN","MOBILITYDATABASE_ACCESS_TOKEN","MOBILITYDATABASE_API_TOKEN")&&cc&&municipality)layers.push(await layer("mobilitydatabase","transit-feed-metadata",async()=>runGM("mobilitydatabase","gtfs_search",{country_code:cc,municipality,limit:20},env)));else layers.push({name:"mobilitydatabase",ok:false,skipped:true,evidence_kind:"transit-feed-metadata",error:has(env,"MOBILITYDATABASE_REFRESH_TOKEN","MOBILITYDATABASE_ACCESS_TOKEN","MOBILITYDATABASE_API_TOKEN")?"COUNTRY_AND_MUNICIPALITY_REQUIRED":"NOT_CONFIGURED"});
-  let web=null;
-  if(has(env,"TAVILY_API_KEY","EXA_API_KEY","FIRECRAWL_API_KEY")){
-    try{web=await buildCommercialWebEvidence({place_name:placeName,city,province,competitor_names:args.competitor_names,max_providers:clamp(args.max_web_providers,1,3,2),results_per_query:clamp(args.web_results_per_query,1,8,4),query_families:args.query_families},env);const digest_sha256=await sha256(web);layers.push({name:"network_intelligence",ok:true,evidence_kind:"public-web-proxy",digest_sha256,data:web})}catch(e){layers.push({name:"network_intelligence",ok:false,evidence_kind:"public-web-proxy",error:String(e?.message||"WEB_ENRICHMENT_FAILED").slice(0,160),http_status:e?.status||null})}
-  }else layers.push({name:"network_intelligence",ok:false,skipped:true,evidence_kind:"public-web-proxy",error:"NOT_CONFIGURED"});
-  const successful=layers.filter(x=>x.ok),receipts=successful.map(sourceReceipt).filter(Boolean);
-  const target=tencentItems(layers.find(x=>x.name==="tencent_target_place")?.data)?.[0]||null;
-  const malls=tencentItems(layers.find(x=>x.name==="tencent_nearby_malls")?.data),metros=tencentItems(layers.find(x=>x.name==="tencent_nearby_metro")?.data),buses=tencentItems(layers.find(x=>x.name==="tencent_nearby_bus")?.data);
-  const nearest=(arr)=>arr.filter(x=>Number.isFinite(Number(x?._distance))).sort((a,b)=>Number(a._distance)-Number(b._distance))[0]||null;
-  return{
-    provider:"geospatial_commercial",operation:"combined_context",domain_version:GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION,
-    collaboration:{network_intelligence_branch:"network-intelligence-collection",geospatial_branch:"geospatial-commercial",compute_handoff:true},
-    place:{name:placeName,city,province:province||null,country_code:cc,requested_location:p.s,resolved_target:target?{title:target.title||null,address:target.address||null,location:target.location||null,distance_m:target._distance??null}:null},
-    observed_mobile_lbs:false,real_footfall:false,dwell_time_observed:false,origin_destination_observed:false,cross_mall_audience_overlap_observed:false,payment_spend_observed:false,
-    network_assisted:Boolean(web),successful_layers:successful.length,layer_count:layers.length,layers,source_receipts:receipts,
-    spatial_signals:{nearby_mall_count:malls.length,nearest_other_mall:nearest(malls.filter(x=>!String(x?.title||"").includes(placeName))),nearby_metro_count:metros.length,nearest_metro:nearest(metros),nearby_bus_count:buses.length,nearest_bus:nearest(buses)},
-    web_signals:web?{unique_item_count:web.unique_item_count,domain_diversity:web.domain_diversity,family_item_counts:web.family_item_counts,configured_providers:web.configured_providers}:null,
-    compute_handoff:{recommended_models:["location_intelligence.commercial_spatial_fusion","location_intelligence.site_ranking","location_intelligence.white_space","location_intelligence.competitor_diversion"],normalization_required:true,network_used_by_compute:false,deferred_transforms:["h3"],source_receipts:receipts},
-    limitations:["public-web-signals-are-proxy-only","map-poi-and-road-traffic-do-not-equal-person-footfall","no-observed-phone-footfall","no-observed-dwell-time","no-observed-mobile-od","no-cross-mall-audience-overlap","no-private-consumer-profile-or-payment-spend","do-not-claim-baidu-huiyan-or-tencent-location-big-data-equivalence"]
-  };
+  const place=text(args.place_name,120),city=text(args.city,80),p=point(args.location),municipality=text(args.municipality||city,100),country=text(args.country_code||"CN",2).toUpperCase(),competitors=(Array.isArray(args.competitor_names)?args.competitor_names:[]).map(x=>text(x,80)).filter(Boolean).slice(0,6);if(!place||!city)fail("ARG_REQUIRED:place_name_or_city");
+  const layers=[await layer("spatial_index","derived-deferred-to-compute",async()=>({location:p.s,h3_resolution:clamp(args.h3_resolution,6,12,9),status:"deferred-to-compute-center"}))];
+  if(has(env,"BAIDU_MAP_AK","BAIDU_MAP_API_KEY"))layers.push(await layer("baidu_traffic","observed-road-traffic",()=>runMap("baidu_maps","traffic_around",{center:p.s,radius:clamp(args.traffic_radius_m,100,1000,500),coord_type_input:"wgs84",coord_type_output:"bd09ll"},env)));
+  if(has(env,"TENCENT_LBS_API_KEY","TENCENT_MAP_API_KEY"))for(const[n,k,r]of [["target","购物中心",500],["malls","购物中心",3000],["metro","地铁站",1500],["bus","公交站",1000]])layers.push(await layer(`tencent_${n}`,"observed-map-poi",()=>n==="target"?runMap("tencent_maps","place_text",{keyword:place,region:city,limit:8},env):runMap("tencent_maps","place_nearby",{keyword:k,location:p.s,radius:r,limit:20},env)));
+  if(has(env,"GEONAMES_USERNAME"))layers.push(await layer("geonames","reference-place-admin",()=>runGM("geonames","nearby",{lat:p.lat,lng:p.lng,radius:10,limit:20,lang:"zh"},env)));
+  if(has(env,"MOBILITYDATABASE_REFRESH_TOKEN","MOBILITYDATABASE_ACCESS_TOKEN","MOBILITYDATABASE_API_TOKEN")&&country&&municipality)layers.push(await layer("mobilitydatabase","transit-feed-metadata",()=>runGM("mobilitydatabase","gtfs_search",{country_code:country,municipality,limit:20},env)));
+  let web=null;if(has(env,"TAVILY_API_KEY","EXA_API_KEY","FIRECRAWL_API_KEY")){web=await webEvidence(place,city,competitors,env,clamp(args.max_web_providers,1,3,2));layers.push({name:"network_intelligence",ok:true,evidence_kind:"public-web-proxy",digest_sha256:await digest(web),data:web})}
+  const good=layers.filter(x=>x.ok),receipts=good.map(x=>({source:x.name,digest_sha256:x.digest_sha256,evidence_kind:x.evidence_kind}));if(web)receipts.push(...web.source_receipts);
+  const mall=items(layers.find(x=>x.name==="tencent_malls")?.data),metro=items(layers.find(x=>x.name==="tencent_metro")?.data),bus=items(layers.find(x=>x.name==="tencent_bus")?.data),near=a=>a.filter(x=>Number.isFinite(Number(x?._distance))).sort((x,y)=>Number(x._distance)-Number(y._distance))[0]||null;
+  return{provider,operation,collaboration:{network_intelligence_branch:"network-intelligence-collection",geospatial_branch:"geospatial-commercial",compute_handoff:true},place:{name:place,city,location:p.s},network_assisted:Boolean(web),observed_mobile_lbs:false,real_footfall:false,dwell_time_observed:false,origin_destination_observed:false,cross_mall_audience_overlap_observed:false,payment_spend_observed:false,successful_layers:good.length,layer_count:layers.length,layers,source_receipts:receipts,spatial_signals:{nearby_mall_count:mall.length,nearest_metro:near(metro),nearby_bus_count:bus.length,nearest_bus:near(bus)},web_signals:web?{providers:web.providers,item_count:web.item_count}:null,compute_handoff:{recommended_models:["location_intelligence.commercial_spatial_fusion","location_intelligence.site_ranking","location_intelligence.white_space","location_intelligence.competitor_diversion"],deferred_transforms:["h3","population-area-aggregation","bulk-poi-building-raster-features"],network_used_by_compute:false},limitations:["public-web-signals-are-proxy-only","map-poi-and-road-traffic-do-not-equal-person-footfall","no-observed-phone-footfall","no-observed-dwell-time","no-observed-mobile-od","no-cross-mall-audience-overlap","no-private-consumer-profile-or-payment-spend"]};
 }
