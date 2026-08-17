@@ -38,6 +38,25 @@ function kaggleHeaders(env){
   if(env.KAGGLE_USERNAME&&env.KAGGLE_KEY)return{authorization:`Basic ${btoa(`${String(env.KAGGLE_USERNAME)}:${String(env.KAGGLE_KEY)}`)}`};
   err("UPSTREAM_AUTH_FAILED",503,{provider:"kaggle",required_secret_groups:[["KAGGLE_API_TOKEN"],["KAGGLE_USERNAME","KAGGLE_KEY"]]});
 }
+function publicHttpUrl(v){
+  const raw=required(v,"url",700);let u;try{u=new URL(raw)}catch{err("INVALID_PUBLIC_URL")}
+  if(!["http:","https:"].includes(u.protocol)||u.username||u.password)err("INVALID_PUBLIC_URL");
+  const h=u.hostname.toLowerCase();
+  const blocked=h==="localhost"||h.endsWith(".localhost")||h==="0.0.0.0"||h==="127.0.0.1"||h==="::1"||/^10\./.test(h)||/^192\.168\./.test(h)||/^169\.254\./.test(h)||/^172\.(1[6-9]|2\d|3[01])\./.test(h);
+  if(blocked)err("PRIVATE_OR_LOCAL_URL_DENIED",403);
+  return u.toString();
+}
+function commonCrawlCollection(v){if(v===undefined||v===null||v==="")return"";const s=text(v,32).toUpperCase();if(!/^CC-MAIN-\d{4}-\d{2}$/.test(s))err("INVALID_COMMON_CRAWL_COLLECTION");return s}
+async function commonCrawlCollections(){const r=await fetchBounded("https://index.commoncrawl.org/collinfo.json");const items=Array.isArray(r.body)?r.body.filter(x=>x&&typeof x==="object").slice(0,30):[];if(!items.length)err("UPSTREAM_BAD_RESPONSE",502,{provider:"common_crawl"});return items}
+async function commonCrawlLatest(){const items=await commonCrawlCollections(),x=items[0];return{provider:"common_crawl",operation:"latest_index",public_archive:true,items:items.map(y=>({id:y.id,name:y.name||null,timegate:y.timegate||null,"cdx-api":y["cdx-api"]||null})),latest:{id:x.id,name:x.name||null,timegate:x.timegate||null,"cdx-api":x["cdx-api"]||null}}}
+async function commonCrawlLookup(args){
+  const target=publicHttpUrl(args.url),limit=clamp(args.limit,1,50,20);let collection=commonCrawlCollection(args.collection);
+  if(!collection){const items=await commonCrawlCollections();collection=String(items[0].id||"");if(!/^CC-MAIN-\d{4}-\d{2}$/.test(collection))err("UPSTREAM_BAD_RESPONSE",502,{provider:"common_crawl"})}
+  const u=new URL(`https://index.commoncrawl.org/${collection}-index`);u.searchParams.set("url",target);u.searchParams.set("output","json");u.searchParams.append("filter","status:200");u.searchParams.set("collapse","digest");
+  const r=await fetchBounded(u,{},"text",20000),rows=[];
+  for(const line of r.body.split(/\r?\n/)){if(rows.length>=limit)break;const s=line.trim();if(!s)continue;let x;try{x=JSON.parse(s)}catch{continue}if(x&&typeof x==="object")rows.push({url:x.url||null,timestamp:x.timestamp||null,status:x.status||null,mime:x.mime||null,digest:x.digest||null,filename:x.filename||null,offset:x.offset||null,length:x.length||null,languages:x.languages||null})}
+  return{provider:"common_crawl",operation:"index_lookup",collection,target_url:target,public_archive:true,raw_warc_fetched:false,arbitrary_live_target_fetch:false,items:rows,limit};
+}
 
 export const OPERATIONS={
   zenodo:["search","oai_list_records"],
@@ -45,7 +64,8 @@ export const OPERATIONS={
   kaggle:["datasets_search","dataset_files"],
   harvard_dataverse:["search"],
   pangaea:["oai_list_records"],
-  figshare:["search"]
+  figshare:["search"],
+  common_crawl:["latest_index","index_lookup"]
 };
 
 async function zenodoSearch(args,env){
@@ -82,5 +102,7 @@ export async function runAdapter(provider,operation,args={},env={}){
   if(provider==="harvard_dataverse"&&operation==="search")return dataverseSearch(args,env);
   if(provider==="pangaea"&&operation==="oai_list_records")return pangaeaList(args);
   if(provider==="figshare"&&operation==="search")return figshareSearch(args,env);
+  if(provider==="common_crawl"&&operation==="latest_index")return commonCrawlLatest();
+  if(provider==="common_crawl"&&operation==="index_lookup")return commonCrawlLookup(args);
   err("ADAPTER_OPERATION_NOT_APPROVED",403,{provider,operation,allowed:OPERATIONS[provider]||[]});
 }
