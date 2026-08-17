@@ -1,10 +1,15 @@
 import assert from "node:assert/strict";
 import {buildPointContext,OPERATIONS as BUNDLE_OPERATIONS} from "../src/domains/geospatial-commercial-bundle.js";
-import {OPERATIONS} from "../src/adapters.js";
+import {OPERATIONS,runAdapter as runUnifiedAdapter} from "../src/adapters.js";
 
 assert.deepEqual(BUNDLE_OPERATIONS.geospatial_commercial,["point_context"]);
 assert.ok(OPERATIONS.geospatial_commercial.includes("capabilities"));
 assert.ok(OPERATIONS.geospatial_commercial.includes("point_context"));
+assert.ok(OPERATIONS.esa_worldcover.includes("tile_info"));
+assert.ok(OPERATIONS.openaq.includes("locations_nearby"));
+assert.ok(OPERATIONS.h3.includes("latlng_to_cell"));
+assert.ok(OPERATIONS.openrouteservice.includes("isochrones"));
+assert.ok(OPERATIONS.worldmove.includes("source_info"));
 
 const originalFetch=globalThis.fetch;
 try{
@@ -64,6 +69,14 @@ try{
   assert.equal(minimal.source_receipts.length,3);
   assert.equal(seen.length,1); // only the always-public WorldCover tile_info dispatcher; NASA+H3 are local/fixed direct layers
   assert.equal(seen[0].provider,"esa_worldcover");
+
+  const unifiedMinimal=await runUnifiedAdapter("geospatial_commercial","point_context",{location:"26.0647,119.2868"},{});
+  assert.equal(unifiedMinimal.successful_layers,3);
+  assert.equal(unifiedMinimal.layers.find(x=>x.name==="esa_worldcover").data.data.tile,"N24E117");
+  assert.equal(unifiedMinimal.layers.find(x=>x.name==="h3").data.cell,"8941b530807ffff");
+
+  const h3=await runUnifiedAdapter("h3","latlng_to_cell",{location:[119.2868,26.0647],resolution:9},{});
+  assert.equal(h3.cell,"8941b530807ffff");
 } finally {globalThis.fetch=originalFetch;}
 
-console.log(JSON.stringify({ok:true,suite:"geospatial-commercial-point-context",free_only:true,mandatory_public_layers:["h3","esa_worldcover","nasa_power_climatology"],optional_free_layers:["baidu_traffic","openaq","geonames","mobilitydatabase"],observed_mobile_lbs:false,paid_fallback:false}));
+console.log(JSON.stringify({ok:true,suite:"geospatial-commercial-point-context",free_only:true,unified_dispatch:true,extra44_wired:true,mandatory_public_layers:["h3","esa_worldcover","nasa_power_climatology"],optional_free_layers:["baidu_traffic","openaq","geonames","mobilitydatabase"],observed_mobile_lbs:false,paid_fallback:false}));
