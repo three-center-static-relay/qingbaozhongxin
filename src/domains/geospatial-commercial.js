@@ -1,4 +1,4 @@
-export const GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION="geospatial-commercial-v1-20260816";
+export const GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION="geospatial-commercial-v2-20260817";
 
 export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
   id:"geospatial-commercial",
@@ -16,8 +16,11 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
   provider_groups:{
     china_maps:["amap","baidu_maps","tencent_maps"],
     global_geocoding:["geonames"],
+    global_admin_boundaries:["geoboundaries"],
     spatial_index:["h3"],
+    routing_accessibility:["openrouteservice"],
     population_demography:["worldpop"],
+    commercial_poi:["overture_maps","foursquare_os_places"],
     buildings_urban_form:["ghsl","overture_maps","dlr_wsf"],
     land_cover_change:["esa_worldcover","copernicus_lcfm"],
     activity_proxies:["night_lights"],
@@ -29,10 +32,10 @@ export const GEOSPATIAL_COMMERCIAL_DOMAIN=Object.freeze({
     knowledge_crosscheck:["wikidata"]
   },
   feature_layers:[
-    "place_identity","administrative_hierarchy","population_total","age_sex_structure","population_density",
+    "place_identity","administrative_hierarchy","administrative_boundary_geometry","population_total","age_sex_structure","population_density",
     "poi_density","poi_mix","brand_competition","building_surface","building_volume","nonresidential_built_form",
     "settlement_extent","land_cover_10m","land_cover","urban_change","night_activity_proxy","road_accessibility","walking_accessibility",
-    "driving_accessibility","real_time_traffic","public_transit_feed_availability","synthetic_mobility_prior",
+    "driving_accessibility","real_time_traffic","public_transit_feed_availability","public_transit_realtime_source_availability","micromobility_feed_availability","synthetic_mobility_prior",
     "air_quality_exposure","weather_climate_context","hazard_context","earth_observation_change","spatial_quality_provenance"
   ],
   analysis_families:[
