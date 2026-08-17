@@ -1,4 +1,4 @@
-// Cloudflare validation trigger 2026-08-17; no runtime semantics.
+// Fresh production E2E trigger 2026-08-17; no runtime semantics.
 const TIMEOUT_MS=12000;
 const MAX_BYTES=1500000;
 const clean=(v,n=4096)=>String(v??"").trim().slice(0,n);
