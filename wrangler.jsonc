@@ -8,5 +8,5 @@
   "version_metadata": {"binding": "CF_VERSION_METADATA"},
   "browser": {"binding": "BROWSER"},
   "build": {"command": "node tests/browser-run-cn-e2e-contract.mjs"},
-  "vars": {"BROWSER_RUN_E2E_TARGET": "https://www.gov.cn/"}
+  "vars": {"BROWSER_RUN_E2E_TARGET": "https://www.gov.cn/", "BROWSER_RUN_E2E_REV": "20260817-1"}
 }
