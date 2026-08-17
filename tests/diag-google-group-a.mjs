@@ -1,0 +1,7 @@
+import assert from "node:assert/strict"; const BASE="https://intelligence-worker.a15280020511.workers.dev";
+async function run(provider,operation,args={}){const task_id=`ga-${provider}-${Date.now()}-${Math.random()}`;const r=await fetch(`${BASE}/v1/run`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({task_id,provider,operation,timeout_seconds:90,args})});const b=await r.json().catch(()=>null);assert.equal(r.status,200,`${provider}:HTTP_${r.status}:${JSON.stringify(b)}`);assert.equal(b?.ok,true,`${provider}:NOT_OK:${JSON.stringify(b)}`);return b.result}
+const yt=await run("youtube","search",{query:"OpenAI",limit:1});assert.ok(Array.isArray(yt?.items)&&yt.items.length>0,"youtube empty");
+const books=await run("google_books","search",{query:"economics",limit:1});assert.ok(Array.isArray(books?.items)&&books.items.length>0,"books empty");
+const fact=await run("google_factcheck","search",{query:"climate change",limit:1});assert.ok(Array.isArray(fact?.items)||Array.isArray(fact?.claims)||Array.isArray(fact?.data?.claims),"factcheck malformed");
+const crux=await run("google_crux","record",{origin:"https://www.google.com"});assert.ok(crux?.data?.record||crux?.record,"crux empty");
+console.log(JSON.stringify({ok:true,group:"A",youtube:true,books:true,factcheck:true,crux:true}));
