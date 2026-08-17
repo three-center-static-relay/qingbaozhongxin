@@ -1,6 +1,7 @@
 {
   "name": "intelligence-worker",
   "private": true,
+  "diagnostic_revision": "baolong-baidu-traffic-1",
   "scripts": {
     "stress": "node tests/stress.mjs",
     "test:copernicus": "node tests/copernicus-cds.mjs",
