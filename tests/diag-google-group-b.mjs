@@ -1,0 +1,7 @@
+import assert from "node:assert/strict"; const BASE="https://intelligence-worker.a15280020511.workers.dev";
+async function run(provider,operation,args={}){const task_id=`gb-${provider}-${Date.now()}-${Math.random()}`;const r=await fetch(`${BASE}/v1/run`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({task_id,provider,operation,timeout_seconds:90,args})});const b=await r.json().catch(()=>null);assert.equal(r.status,200,`${provider}:HTTP_${r.status}:${JSON.stringify(b)}`);assert.equal(b?.ok,true,`${provider}:NOT_OK:${JSON.stringify(b)}`);return b.result}
+const civic=await run("google_civic","elections",{});assert.ok(Array.isArray(civic?.items)||Array.isArray(civic?.data?.elections)||Array.isArray(civic?.elections),"civic malformed");
+const kg=await run("google_knowledge_graph","search",{query:"China",limit:1});assert.ok((Array.isArray(kg?.items)&&kg.items.length>0)||(Array.isArray(kg?.data?.itemListElement)&&kg.data.itemListElement.length>0),"kg empty");
+const ps=await run("google_pagespeed","analyze",{url:"https://example.com",strategy:"mobile",category:"performance"});assert.ok(ps?.data?.id||ps?.id,"pagespeed empty");
+const bq=await run("bigquery","query",{query:"SELECT word, word_count FROM `bigquery-public-data.samples.shakespeare` ORDER BY word_count DESC LIMIT 1",limit:1,maximum_bytes_billed:20000000});assert.ok(Array.isArray(bq?.data?.rows)&&bq.data.rows.length>0,"bigquery empty");
+console.log(JSON.stringify({ok:true,group:"B",civic:true,knowledge_graph:true,pagespeed:true,bigquery:true}));
