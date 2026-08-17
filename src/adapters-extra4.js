@@ -1,8 +1,10 @@
+import {geospatialCommercialManifest} from "./domains/geospatial-commercial.js";
 const MAX_BYTES=1500000,TIMEOUT_MS=12000;
 const text=(v,n=300)=>String(v??"").trim().slice(0,n);
 const clamp=(n,a,b,d)=>{n=Number(n);return Number.isFinite(n)?Math.max(a,Math.min(b,Math.trunc(n))):d};
 const required=(o,k)=>{const v=o?.[k];if(v===undefined||v===null||String(v).trim()==="")throw Object.assign(new Error(`ARG_REQUIRED:${k}`),{status:400});return v};
-async function getJson(url){const c=new AbortController(),t=setTimeout(()=>c.abort(),TIMEOUT_MS);try{const r=await fetch(url,{headers:{accept:"application/json"},signal:c.signal}),raw=await r.text();if(new TextEncoder().encode(raw).length>MAX_BYTES)throw Object.assign(new Error("UPSTREAM_RESPONSE_TOO_LARGE"),{status:502});let body;try{body=raw?JSON.parse(raw):null}catch{throw Object.assign(new Error("UPSTREAM_BAD_JSON"),{status:502})}if(!r.ok)throw Object.assign(new Error("UPSTREAM_HTTP_ERROR"),{status:502,details:{http_status:r.status,body}});return body}catch(e){if(e?.name==="AbortError")throw Object.assign(new Error("UPSTREAM_TIMEOUT"),{status:504});throw e}finally{clearTimeout(t)}}
+async function requestJson(url,init={}){const c=new AbortController(),t=setTimeout(()=>c.abort(),TIMEOUT_MS);try{const r=await fetch(url,{...init,headers:{accept:"application/json",...(init.headers||{})},signal:c.signal}),raw=await r.text();if(new TextEncoder().encode(raw).length>MAX_BYTES)throw Object.assign(new Error("UPSTREAM_RESPONSE_TOO_LARGE"),{status:502});let body;try{body=raw?JSON.parse(raw):null}catch{throw Object.assign(new Error("UPSTREAM_BAD_JSON"),{status:502})}if(!r.ok)throw Object.assign(new Error("UPSTREAM_HTTP_ERROR"),{status:502,details:{http_status:r.status,body}});return body}catch(e){if(e?.name==="AbortError")throw Object.assign(new Error("UPSTREAM_TIMEOUT"),{status:504});throw e}finally{clearTimeout(t)}}
+const getJson=url=>requestJson(url);
 function coordLatLng(v){const s=text(v,48);if(!/^-?\d{1,2}(?:\.\d{1,8})?,-?\d{1,3}(?:\.\d{1,8})?$/.test(s))throw Object.assign(new Error("INVALID_COORDINATE"),{status:400});const [lat,lng]=s.split(",").map(Number);if(lat<-90||lat>90||lng<-180||lng>180)throw Object.assign(new Error("INVALID_COORDINATE"),{status:400});return s}
 function coordArray(v){const s=coordLatLng(v),[lat,lng]=s.split(",").map(Number);return{lat,lng,s}}
 function haversineKm(a,b){const r=6371,toRad=x=>x*Math.PI/180,dLat=toRad(b.lat-a.lat),dLon=toRad(b.lng-a.lng),x=Math.sin(dLat/2)**2+Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLon/2)**2;return 2*r*Math.asin(Math.sqrt(x))}
@@ -11,15 +13,37 @@ function trafficPolygon(v){const parts=Array.isArray(v)?v:String(v||"").split(";
 function coordTypeIn(v){return["bd09ll","gcj02","wgs84"].includes(v)?v:"bd09ll"}
 function coordTypeOut(v){return["bd09ll","gcj02"].includes(v)?v:"bd09ll"}
 function roadGrade(v){if(v===undefined||v===null||v==="")return"0";const p=String(v).split(",").map(x=>Number(x.trim()));if(!p.length||p.length>5||p.some(x=>!Number.isInteger(x)||x<0||x>5))throw Object.assign(new Error("INVALID_ROAD_GRADE"),{status:400});return[...new Set(p)].join(",")}
+function regionName(v){const s=text(v,60);if(!s||!/^[-\p{L}\p{N}\s·]{1,60}$/u.test(s))throw Object.assign(new Error("INVALID_REGION"),{status:400});return s}
+function norm(v){return text(v,300).toLowerCase().replace(/[\s\-—_·•()（）\[\]【】,:：，。/\\]/g,"")}
+function relevance(item,keyword){const q=norm(keyword),title=norm(item?.title),address=norm(item?.address),category=norm(item?.category);if(!q)return 0;let score=0;if(title===q)score+=1000;else if(title.includes(q))score+=700;else if(title.length>=2&&q.includes(title))score+=500;if(address.includes(q))score+=180;if(category.includes(q))score+=160;const chars=[...new Set(q)].filter(Boolean),hay=`${title}${address}${category}`,overlap=chars.length?chars.filter(ch=>hay.includes(ch)).length/chars.length:0;score+=Math.round(overlap*100);const d=Number(item?._distance);if(Number.isFinite(d))score+=Math.max(0,50-Math.min(50,d/100));return score}
+function rankTencent(body,keyword){const b=ensureTencent(body),items=Array.isArray(b?.data)?b.data:[];const ranked=items.map(x=>({...x,_relevance_score:relevance(x,keyword)})).sort((a,b)=>b._relevance_score-a._relevance_score||(Number(a?._distance)||1e12)-(Number(b?._distance)||1e12));return{...b,data:ranked,keyword_applied:text(keyword,80),relevance_ranked:true}}
 function baiduKey(env){return env.BAIDU_MAP_AK||env.BAIDU_MAP_API_KEY||""}
 function tencentKey(env){return env.TENCENT_LBS_API_KEY||env.TENCENT_MAP_API_KEY||""}
+function geonamesUser(env){return text(env.GEONAMES_USERNAME,120)}
 function ensureBaidu(body){if(Number(body?.status)!==0)throw Object.assign(new Error("UPSTREAM_BUSINESS_ERROR"),{status:502,details:{status:body?.status,message:body?.message}});return body}
 function ensureTencent(body){if(Number(body?.status)!==0)throw Object.assign(new Error("UPSTREAM_BUSINESS_ERROR"),{status:502,details:{status:body?.status,message:body?.message}});return body}
+function ensureGeoNames(body){if(body?.status)throw Object.assign(new Error("UPSTREAM_BUSINESS_ERROR"),{status:502,details:{status:body.status?.value,message:body.status?.message}});return body}
 function freeTraffic(body){const b=ensureBaidu(body);if(Array.isArray(b?.road_traffic))for(const road of b.road_traffic)if(road&&typeof road==="object")delete road.traffic_detail;return b}
 async function baiduTraffic(path,params,env){const ak=baiduKey(env);if(!ak)throw Object.assign(new Error("UPSTREAM_AUTH_FAILED"),{status:503});const u=new URL(`https://api.map.baidu.com${path}`);u.searchParams.set("ak",String(ak));for(const[k,v]of Object.entries(params))if(v!==undefined&&v!==null&&String(v)!=="")u.searchParams.set(k,String(v));return freeTraffic(await getJson(u))}
-export const OPERATIONS={baidu_maps:["geocode","reverse_geocode","traffic_road","traffic_bound","traffic_polygon","traffic_around"],tencent_maps:["geocode","reverse_geocode","place_nearby"]};
+async function tencentPlace(keyword,boundary,limit,key){const u=new URL("https://apis.map.qq.com/ws/place/v1/search");u.searchParams.set("keyword",text(keyword,80));u.searchParams.set("boundary",boundary);u.searchParams.set("page_size",String(clamp(limit,1,20,10)));u.searchParams.set("page_index","1");u.searchParams.set("key",String(key));return rankTencent(await getJson(u),keyword)}
+function countryCode(v){if(v===undefined||v===null||v==="")return"";const s=String(v).trim().toUpperCase();if(!/^[A-Z]{2}$/.test(s))throw Object.assign(new Error("INVALID_COUNTRY_CODE"),{status:400});return s}
+function countryCode3(v){const s=text(v,3).toUpperCase();if(!/^[A-Z]{3}$/.test(s))throw Object.assign(new Error("INVALID_COUNTRY_CODE_3"),{status:400});return s}
+function safeLang(v){if(v===undefined||v===null||v==="")return"";const s=String(v).trim();if(!/^[A-Za-z-]{2,12}$/.test(s))throw Object.assign(new Error("INVALID_LANGUAGE"),{status:400});return s}
+async function geonames(path,params,env){const username=geonamesUser(env);if(!username)throw Object.assign(new Error("UPSTREAM_AUTH_FAILED"),{status:503});const u=new URL(`https://secure.geonames.org/${path}`);u.searchParams.set("username",username);for(const[k,v]of Object.entries(params||{}))if(v!==undefined&&v!==null&&String(v)!=="")u.searchParams.set(k,String(v));return ensureGeoNames(await getJson(u))}
+async function mobilityToken(env){const direct=text(env.MOBILITYDATABASE_ACCESS_TOKEN,4096);if(direct)return direct;const refresh=text(env.MOBILITYDATABASE_REFRESH_TOKEN,4096);if(!refresh)throw Object.assign(new Error("UPSTREAM_AUTH_FAILED"),{status:503});const body=await requestJson("https://api.mobilitydatabase.org/v1/tokens",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({refresh_token:refresh})});const token=text(body?.access_token||body?.token,4096);if(!token)throw Object.assign(new Error("UPSTREAM_AUTH_FAILED"),{status:503,details:{reason:"TOKEN_EXCHANGE_RETURNED_NO_ACCESS_TOKEN"}});return token}
+async function mobilityGet(path,args,env){const token=await mobilityToken(env),u=new URL(`https://api.mobilitydatabase.org${path}`);u.searchParams.set("limit",String(clamp(args.limit,1,50,20)));u.searchParams.set("offset",String(clamp(args.offset,0,5000,0)));if(args.provider)u.searchParams.set("provider",text(args.provider,100));if(args.country_code)u.searchParams.set("country_code",countryCode(args.country_code));if(args.subdivision_name)u.searchParams.set("subdivision_name",text(args.subdivision_name,100));if(args.municipality)u.searchParams.set("municipality",text(args.municipality,100));if(args.is_official!==undefined)u.searchParams.set("is_official",args.is_official===true?"true":"false");return requestJson(u,{headers:{authorization:`Bearer ${token}`}})}
+async function geoBoundaryMetadata(args){const iso=countryCode3(required(args,"country_code3")),adm=String(args.adm_level??"ADM1").toUpperCase();if(!/^ADM[0-5]$/.test(adm))throw Object.assign(new Error("INVALID_ADM_LEVEL"),{status:400});const u=new URL(`https://www.geoboundaries.org/api/current/gbOpen/${iso}/${adm}/`);const data=await getJson(u);return{...data,release_type:"gbOpen",commercial_use_policy:"CC-BY-4.0-compatible; attribution required",geometry_fetch_policy:"metadata-and-fixed-upstream-links-only"}}
+export const OPERATIONS={
+  geospatial_commercial:["capabilities"],
+  baidu_maps:["geocode","reverse_geocode","traffic_road","traffic_bound","traffic_polygon","traffic_around"],
+  tencent_maps:["geocode","reverse_geocode","place_text","place_nearby"],
+  geonames:["search","nearby","admin","postal_search","elevation","timezone","country_info"],
+  mobilitydatabase:["metadata","gtfs_search","gtfs_rt_search","gbfs_search"],
+  geoboundaries:["boundary_metadata"]
+};
 export async function runAdapter(provider,operation,args,env){
   if(!OPERATIONS[provider]?.includes(operation))throw Object.assign(new Error("ADAPTER_OPERATION_NOT_APPROVED"),{status:403});
+  if(provider==="geospatial_commercial")return{provider,operation,data:geospatialCommercialManifest()};
   if(provider==="baidu_maps"){
     const ak=baiduKey(env);if(!ak)throw Object.assign(new Error("UPSTREAM_AUTH_FAILED"),{status:503});
     if(operation==="geocode"){const u=new URL("https://api.map.baidu.com/geocoding/v3/");u.searchParams.set("address",text(required(args,"address"),128));u.searchParams.set("output","json");u.searchParams.set("ak",String(ak));if(args.city)u.searchParams.set("city",text(args.city,60));return{provider,operation,data:ensureBaidu(await getJson(u))}}
@@ -33,7 +57,24 @@ export async function runAdapter(provider,operation,args,env){
     const key=tencentKey(env);if(!key)throw Object.assign(new Error("UPSTREAM_AUTH_FAILED"),{status:503});
     if(operation==="geocode"){const u=new URL("https://apis.map.qq.com/ws/geocoder/v1/");u.searchParams.set("address",text(required(args,"address"),200));u.searchParams.set("key",String(key));if(args.region)u.searchParams.set("region",text(args.region,60));return{provider,operation,data:ensureTencent(await getJson(u))}}
     if(operation==="reverse_geocode"){const u=new URL("https://apis.map.qq.com/ws/geocoder/v1/");u.searchParams.set("location",coordLatLng(required(args,"location")));u.searchParams.set("key",String(key));u.searchParams.set("get_poi",args.get_poi===false?"0":"1");return{provider,operation,data:ensureTencent(await getJson(u))}}
-    if(operation==="place_nearby"){const center=coordLatLng(required(args,"location")),radius=clamp(args.radius,10,5000,1000),u=new URL("https://apis.map.qq.com/ws/place/v1/search");u.searchParams.set("keyword",text(required(args,"keyword"),80));u.searchParams.set("boundary",`nearby(${center},${radius})`);u.searchParams.set("page_size",String(clamp(args.limit,1,20,10)));u.searchParams.set("page_index","1");u.searchParams.set("key",String(key));return{provider,operation,data:ensureTencent(await getJson(u))}}
+    if(operation==="place_text"){const keyword=text(required(args,"keyword"),80),region=regionName(required(args,"region"));return{provider,operation,data:await tencentPlace(keyword,`region(${region},0)`,args.limit,key)}}
+    if(operation==="place_nearby"){const keyword=text(required(args,"keyword"),80),center=coordLatLng(required(args,"location")),radius=clamp(args.radius,10,5000,1000);return{provider,operation,data:await tencentPlace(keyword,`nearby(${center},${radius})`,args.limit,key)}}
   }
+  if(provider==="geonames"){
+    if(operation==="search")return{provider,operation,free_tier_only:true,data:await geonames("searchJSON",{q:text(required(args,"q"),120),country:countryCode(args.country),maxRows:clamp(args.limit,1,50,20),lang:safeLang(args.lang),style:"FULL"},env)};
+    if(operation==="nearby"){const c=coordArray(required(args,"location"));return{provider,operation,free_tier_only:true,data:await geonames("findNearbyJSON",{lat:c.lat,lng:c.lng,radius:clamp(args.radius_km,1,30,10),maxRows:clamp(args.limit,1,50,20),lang:safeLang(args.lang)},env)}}
+    if(operation==="admin"){const c=coordArray(required(args,"location"));return{provider,operation,free_tier_only:true,data:await geonames("countrySubdivisionJSON",{lat:c.lat,lng:c.lng,radius:clamp(args.radius_km,0,40,0),maxRows:clamp(args.limit,1,20,5),lang:safeLang(args.lang)},env)}}
+    if(operation==="postal_search")return{provider,operation,free_tier_only:true,data:await geonames("postalCodeSearchJSON",{postalcode:text(args.postalcode,32),placename:text(args.placename,100),country:countryCode(args.country),maxRows:clamp(args.limit,1,50,20)},env)};
+    if(operation==="elevation"){const c=coordArray(required(args,"location"));return{provider,operation,free_tier_only:true,data:await geonames("srtm1JSON",{lat:c.lat,lng:c.lng},env)}}
+    if(operation==="timezone"){const c=coordArray(required(args,"location"));return{provider,operation,free_tier_only:true,data:await geonames("timezoneJSON",{lat:c.lat,lng:c.lng},env)}}
+    if(operation==="country_info")return{provider,operation,free_tier_only:true,data:await geonames("countryInfoJSON",{country:countryCode(args.country),lang:safeLang(args.lang)},env)};
+  }
+  if(provider==="mobilitydatabase"){
+    if(operation==="metadata"){const token=await mobilityToken(env);return{provider,operation,free_account_only:true,data:await requestJson("https://api.mobilitydatabase.org/v1/metadata",{headers:{authorization:`Bearer ${token}`}})}}
+    if(operation==="gtfs_search")return{provider,operation,free_account_only:true,data:await mobilityGet("/v1/gtfs_feeds",args,env)};
+    if(operation==="gtfs_rt_search")return{provider,operation,free_account_only:true,data:await mobilityGet("/v1/gtfs_rt_feeds",args,env)};
+    if(operation==="gbfs_search")return{provider,operation,free_account_only:true,data:await mobilityGet("/v1/gbfs_feeds",args,env)};
+  }
+  if(provider==="geoboundaries"&&operation==="boundary_metadata")return{provider,operation,public_open_data:true,data:await geoBoundaryMetadata(args)};
   throw Object.assign(new Error("ADAPTER_NOT_IMPLEMENTED"),{status:501});
 }
