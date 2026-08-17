@@ -6,7 +6,7 @@
   "workers_dev": true,
   "version_metadata": {"binding": "CF_VERSION_METADATA"},
   "secrets": {"required": ["ZENODO_TOKEN", "KAGGLE_API_TOKEN"]},
-  "build": {"command": "node tests/medical-live-core-wave5.mjs"},
+  "build": {"command": "node tests/diag-wave5-negative-only.mjs"},
   "triggers": {"crons": ["23 18 * * *"]},
   "durable_objects": {"bindings": [{"name": "CENTER_GATE", "class_name": "CenterGate"}]},
   "exports": {"CenterGate": {"type":"durable-object","storage":"sqlite"}},
