@@ -1,0 +1,7 @@
+import assert from "node:assert/strict"; const BASE="https://intelligence-worker.a15280020511.workers.dev";
+async function run(provider,operation,args={}){const task_id=`gc-${provider}-${Date.now()}-${Math.random()}`;const r=await fetch(`${BASE}/v1/run`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({task_id,provider,operation,timeout_seconds:90,args})});const b=await r.json().catch(()=>null);assert.equal(r.status,200,`${provider}:HTTP_${r.status}:${JSON.stringify(b)}`);assert.equal(b?.ok,true,`${provider}:NOT_OK:${JSON.stringify(b)}`);return b.result}
+const ee=await run("earthengine","asset_get",{asset:"GOOGLE/DYNAMICWORLD/V1"});assert.match(String(ee?.data?.name||""),/GOOGLE\/DYNAMICWORLD\/V1/,"earthengine empty");
+const eo=await run("google_earth_observation","catalog",{});assert.ok(Array.isArray(eo?.items)&&eo.items.length>0,"earth observation empty");
+const trends=await run("google_trends_public","top_terms",{country_code:"US",limit:1});assert.ok(Array.isArray(trends?.data?.rows),"trends malformed");
+const patents=await run("google_patents_public","search",{query:"battery",country_code:"US",limit:1});assert.ok(Array.isArray(patents?.items)&&patents.items.length>0,"patents empty");assert.equal(Number(patents?.bigquery_bytes_billed),0,"patents billed BigQuery bytes");
+console.log(JSON.stringify({ok:true,group:"C",earthengine:true,earth_observation:true,trends_public:true,patents:true}));
