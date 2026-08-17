@@ -1,12 +1,27 @@
 export const FREE_COMMERCIAL_SPATIAL_CATALOG={
   geospatial_commercial:{
-    stack_version:"free-commercial-spatial-v4-20260817",
+    stack_version:"free-commercial-spatial-v5-20260817",
     category:"domain-branch-geospatial-commercial",
     access:"public",
     adapter:"geospatial_commercial.domain",
     integration:"shared-evidence-multi-provider-domain-manifest",
     scope:"free-only-commercial-geospatial-capability-manifest-and-feature-plan",
     billing:"local-manifest-no-api-fee",
+    arbitrary_url:false
+  },
+  copernicus_cdse_stac:{
+    stack_version:"free-commercial-spatial-v5-20260817",
+    category:"copernicus-earth-observation-satellite-catalog",
+    access:"public",
+    adapter:"copernicus_cdse_stac.catalog+items+assets",
+    integration:"official-CDSE-STAC-v1",
+    scope:"collections-spatiotemporal-item-search-single-item-and-asset-references",
+    endpoint:"https://stac.dataspace.copernicus.eu/v1",
+    billing:"public-catalog-access-no-api-key",
+    asset_access:"catalog-metadata-public; asset bytes may require CDSE OIDC or S3 credentials depending on asset",
+    binary_proxy:false,
+    compute_handoff:"copernicus-openeo-load_stac",
+    evidence_policy:"retain collection item datetime bbox platform cloud-cover asset metadata and canonical STAC item reference",
     arbitrary_url:false
   },
   baidu_maps:{
