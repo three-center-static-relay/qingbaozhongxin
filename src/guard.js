@@ -49,6 +49,7 @@ async function radarRoute(req,env){
   }
   return null
 }
+// Surface already-public dataset discovery/readiness routes to GPT Actions without exposing raw data or secret values.
 async function openapiWithDatasetExposure(req,env,ctx){
   const response=await base.fetch(req,env,ctx),body=await response.json().catch(()=>null);
   if(!body||typeof body!=="object"||!body.paths)return json({ok:false,error:"OPENAPI_BASE_UNAVAILABLE"},503);
