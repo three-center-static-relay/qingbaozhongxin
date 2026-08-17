@@ -1,10 +1,10 @@
-export const NETWORK_INTELLIGENCE_HARDENING_VERSION="network-intelligence-hardening-v2-20260817";
+export const NETWORK_INTELLIGENCE_HARDENING_VERSION="network-intelligence-hardening-v3-20260817";
 
 export const NETWORK_INTELLIGENCE_HARDENING=Object.freeze({
   version:NETWORK_INTELLIGENCE_HARDENING_VERSION,
   purpose:"Discover, preserve and structure high-value public information with explicit provenance; keep inference downstream in compute.",
   acquisition_pipeline:[
-    "search-discovery","official-source-resolution","static-public-page-collection","dynamic-public-page-rendering-when-required","historical-snapshot-discovery","document-and-table-parsing","content-hash-and-provenance","entity-event-relationship-extraction","commercial-spatial-evidence-bundle","compute-handoff"
+    "search-discovery","official-source-resolution","static-public-page-collection","cloudflare-browser-run-rendering-when-javascript-is-required","historical-snapshot-discovery","document-and-table-parsing","content-hash-and-provenance","entity-event-relationship-extraction","commercial-spatial-evidence-bundle","compute-handoff"
   ],
   existing_runtime_tools:{
     exa:{role:"semantic-web-discovery",status:"existing",bounded:true},
@@ -18,10 +18,16 @@ export const NETWORK_INTELLIGENCE_HARDENING=Object.freeze({
   },
   added_tools:{
     common_crawl:{role:"historical-public-web-snapshot-index",execution:"cloudflare-worker-bounded-index-only",access:"public",raw_warc_proxy:false,arbitrary_target_fetch:false},
+    cloudflare_browser_run:{role:"javascript-rendered-public-page-collector",execution:"cloudflare-browser-binding-quick-action-content",access:"workers-binding-no-api-token",production_status:"configured-on-branch",free_plan_included_usage_note:"10-browser-minutes-per-day-as-of-2026-08",automatic_fallback:false,arbitrary_target_fetch:false,notes:"Use only fixed allowlisted public-source URLs when static fetch is insufficient; preserve X-Browser-Ms-Used for usage accounting."},
     scrapy:{role:"fixed-source-static-crawler",execution:"external-runtime",license:"BSD-3-Clause",production_status:"accepted-runtime-tool",notes:"Use only allowlisted public sources with bounded depth/rate/cache."},
     playwright:{role:"javascript-rendered-public-page-collector",execution:"external-runtime",license:"Apache-2.0",production_status:"accepted-runtime-tool",notes:"Rendering only; no login/CAPTCHA/access-control bypass."},
     warcio:{role:"WARC-evidence-read-write",execution:"external-runtime",license:"Apache-2.0",production_status:"accepted-runtime-tool",notes:"Preserve public evidence snapshots and replay metadata."},
     selectolax:{role:"fast-html-css-parser",execution:"external-runtime",license:"MIT-wrapper; use Lexbor backend",production_status:"accepted-runtime-tool",notes:"Prefer Lexbor backend for bounded static HTML extraction."}
+  },
+  browser_run_policy:{
+    binding:"BROWSER",quick_action:"content",compatibility_date_minimum:"2026-03-24",configured_compatibility_date:"2026-08-15",api_token_required:false,
+    fixed_allowlisted_sources_only:true,static_fetch_first:true,automatic_browser_fallback:false,usage_receipt_header:"X-Browser-Ms-Used",browser_time_budget_observable:true,
+    login_or_cookie_injection:false,http_auth_injection:false,captcha_bypass:false,anti_bot_evasion:false,arbitrary_url_proxy:false,paid_overage_auto_opt_in:false
   },
   commercial_spatial_handoff:{
     contract_version:"commercial-spatial-evidence-v1-20260817",
