@@ -1,3 +1,5 @@
+import {GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION} from "./geospatial-commercial.js";
+
 export const OPERATIONS={geospatial_commercial:["point_context"]};
 
 export async function buildPointContext(args={},env={},dispatch){
@@ -6,6 +8,7 @@ export async function buildPointContext(args={},env={},dispatch){
   return{
     provider:"geospatial_commercial",
     operation:"point_context",
+    domain_version:GEOSPATIAL_COMMERCIAL_DOMAIN_VERSION,
     free_only:true,
     location,
     observed_mobile_lbs:false,
