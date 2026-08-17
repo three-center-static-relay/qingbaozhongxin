@@ -49,8 +49,19 @@ async function radarRoute(req,env){
   }
   return null
 }
+// Surface already-public dataset discovery/readiness routes to GPT Actions without exposing raw data or secret values.
+async function openapiWithDatasetExposure(req,env,ctx){
+  const response=await base.fetch(req,env,ctx),body=await response.json().catch(()=>null);
+  if(!body||typeof body!=="object"||!body.paths)return json({ok:false,error:"OPENAPI_BASE_UNAVAILABLE"},503);
+  const providerParameter={name:"provider",in:"path",required:true,schema:{type:"string"}};
+  body.paths["/v1/provider/{provider}/readiness"]={get:{summary:"Read provider configuration and live-operation readiness",parameters:[providerParameter]}};
+  body.paths["/v1/provider/{provider}/operations"]={get:{summary:"List approved live operations for one provider",parameters:[providerParameter]}};
+  body.paths["/v1/dataset-radar/meta"]={get:{summary:"List active dataset collectors and fixed-domain dataset portals; metadata only"}};
+  body.paths["/v1/dataset-radar/latest"]={get:{summary:"Read the latest bounded dataset/notebook candidate metadata snapshot"}};
+  return json(body,response.status);
+}
 export default{
-  async fetch(req,env,ctx){try{const rr=await radarRoute(req,env);if(rr)return rr;const u=new URL(req.url);if(req.method==="POST"&&u.pathname==="/v1/cancel")return await cancel(req,env);if(req.method==="POST"&&u.pathname==="/v1/selftest"){if(u.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"selftest is service-binding internal only"},403);return await selftest(env,ctx)}return await base.fetch(req,env,ctx)}catch(e){return json({ok:false,error:e?.message||"INTERNAL_ERROR",message:"Request failed"},e?.status||500)}},
+  async fetch(req,env,ctx){try{const u=new URL(req.url);if(req.method==="GET"&&u.pathname==="/openapi.json")return await openapiWithDatasetExposure(req,env,ctx);const rr=await radarRoute(req,env);if(rr)return rr;if(req.method==="POST"&&u.pathname==="/v1/cancel")return await cancel(req,env);if(req.method==="POST"&&u.pathname==="/v1/selftest"){if(u.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"selftest is service-binding internal only"},403);return await selftest(env,ctx)}return await base.fetch(req,env,ctx)}catch(e){return json({ok:false,error:e?.message||"INTERNAL_ERROR",message:"Request failed"},e?.status||500)}},
   async scheduled(controller,env,ctx){
     const scheduledTime=controller?.scheduledTime||Date.now();
     ctx.waitUntil((async()=>{
