@@ -18,7 +18,7 @@ assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.geoboundaries.license,"CC-BY-4.0");
 assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.mobilitydatabase.billing_policy.includes("no paid"),true);
 assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.openaq.billing_policy.includes("no custom-paid"),true);
 assert.equal(FREE_COMMERCIAL_SPATIAL_CATALOG.esa_worldcover.license,"CC-BY-4.0");
-assert.deepEqual(OPERATIONS.geospatial_commercial,["capabilities"]);
+assert.deepEqual(OPERATIONS.geospatial_commercial,["capabilities","point_context"]);
 assert.ok(OPERATIONS.geonames.includes("search"));
 assert.ok(OPERATIONS.mobilitydatabase.includes("gtfs_search"));
 assert.ok(OPERATIONS.mobilitydatabase.includes("gtfs_rt_search"));
@@ -108,4 +108,4 @@ try{
   await assert.rejects(()=>runOpenData("openaq","locations_nearby",{location:"26,119"},{}),e=>e?.status===503&&e?.message==="UPSTREAM_AUTH_FAILED");
 } finally {globalThis.fetch=originalFetch;}
 
-console.log(JSON.stringify({ok:true,suite:"geospatial-commercial-domain",domain:GEOSPATIAL_COMMERCIAL_DOMAIN.version,free_only:true,new_free_sources:["geonames","geoboundaries","mobilitydatabase","openaq","esa_worldcover"],raw_feed_proxy:false,arbitrary_url:false}));
+console.log(JSON.stringify({ok:true,suite:"geospatial-commercial-domain",domain:GEOSPATIAL_COMMERCIAL_DOMAIN.version,free_only:true,new_free_sources:["geonames","geoboundaries","mobilitydatabase","openaq","esa_worldcover"],point_context:true,raw_feed_proxy:false,arbitrary_url:false}));
