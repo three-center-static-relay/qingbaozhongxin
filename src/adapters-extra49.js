@@ -1,6 +1,6 @@
 const round=(v,d=1)=>{const p=10**d;return Math.round((Number(v)+Number.EPSILON)*p)/p};
 function err(message,status=400,details){throw Object.assign(new Error(message),{status,details})}
-function num(v,name,min=-Infinity,max=Infinity){const n=Number(v);if(!Number.isFinite(n)||n<min||n>max)err(`INVALID_${name.toUpperCase()}`);return n}
+function num(v,name,min=-Infinity,max=Infinity){if(v===null||v===undefined||typeof v==="boolean"||Array.isArray(v)||(typeof v==="string"&&!v.trim())||(typeof v==="object"&&v!==null))err(`INVALID_${name.toUpperCase()}`);const n=Number(v);if(!Number.isFinite(n)||n<min||n>max)err(`INVALID_${name.toUpperCase()}`);return n}
 function bool(v,name){if(typeof v!=="boolean")err(`INVALID_${name.toUpperCase()}`);return v}
 function sex(v){const s=String(v??"").trim().toLowerCase();if(!["male","female"].includes(s))err("INVALID_SEX");return s}
 function creatinineMgDl(value,unit){const u=String(unit||"mg/dL").trim().toLowerCase();if(["mg/dl","mgdl"].includes(u))return num(value,"serum_creatinine",0.01,30);if(["umol/l","µmol/l","μmol/l"].includes(u)){const si=num(value,"serum_creatinine",0.884,2652);return si/88.4}err("INVALID_CREATININE_UNIT")}
