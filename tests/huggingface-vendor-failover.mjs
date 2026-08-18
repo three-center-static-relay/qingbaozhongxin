@@ -21,6 +21,7 @@ try{
   assert.equal(recovered.verification_degraded,true);
   assert.equal(recovered.source_attempts[0].reachable,false);
   assert.equal(recovered.source_attempts[1].free_evidence_found,true);
+  assert.equal(recovered.access.registration_required,true,"verified free + missing key should request registration");
   assert.deepEqual(calls,[
     "https://docs.z.ai/guides/overview/pricing",
     "https://docs.z.ai/guides/llm/glm-4.7"
@@ -34,7 +35,7 @@ try{
   assert.equal(unavailable.reachable_source_count,0);
   assert.equal(unavailable.verification_degraded,true);
   assert.equal(unavailable.access.required_secret,"ZAI_API_KEY");
-  assert.equal(unavailable.access.registration_required,true);
+  assert.equal(unavailable.access.registration_required,false,"unverified free status must not ask the operator to register a key");
 }finally{
   globalThis.fetch=originalFetch;
 }
