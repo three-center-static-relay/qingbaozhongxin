@@ -20,6 +20,7 @@ The system is fail-closed:
 - missing/non-boolean `is_free` -> `unknown`.
 - `pricing.input === 0` or `pricing.output === 0` does **not** independently prove free status.
 - Hugging Face monthly account credits are separate from provider/model free status and must not be treated as `is_free`.
+- Hugging Face documents `is_free` as provider-level current free-of-charge status and notes that it may represent a temporary promotion; vendor/provider confirmation is therefore required before treating a model as durable-free.
 
 ## Normalized provider fields
 
@@ -75,9 +76,31 @@ Pricing is reported as USD per million tokens when supplied by the Router.
 }
 ```
 
+## Production runtime canary
+
+A bounded read-only canary is exposed at:
+
+`GET /v1/selftest/huggingface-router-runtime`
+
+It always checks the fixed model `zai-org/GLM-4.7-Flash` through `router_model` and returns normalized provider metadata including the real upstream `is_free` signal when present.
+
+The canary does **not** call chat/completions or any inference endpoint:
+
+- `inference_called: false`
+- `model_tokens_used: 0`
+- `cost_incurred: false`
+
+Interpretation:
+
+- `ok: true` means the Router model endpoint returned the expected model and at least one provider.
+- `free_status_verified: true` means at least one provider explicitly returned a boolean `is_free` field.
+- `has_explicit_free_provider: true` means at least one provider explicitly returned `is_free: true` at that moment.
+- `free_status_verified: false` means the Router response did not expose an explicit free-status signal for the canary model; do not infer free from zero pricing.
+
 ## Security constraints
 
 - Exact model ids are validated as `owner/model`; arbitrary URLs are rejected.
 - The Worker only calls allowlisted Hugging Face Hub/Router endpoints.
 - Tokens are passed only in the Authorization header and are never returned.
 - Missing upstream fields remain `null`/`unknown`; no zero-value fabrication is allowed.
+- The runtime canary is metadata-only and cannot be pointed at arbitrary URLs or arbitrary model ids.
