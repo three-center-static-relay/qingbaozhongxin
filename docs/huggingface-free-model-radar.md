@@ -1,4 +1,4 @@
-# Hugging Face Free-Model Radar
+# Hugging Face Free-Model Radar v2
 
 ## Purpose
 
