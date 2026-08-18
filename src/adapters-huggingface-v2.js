@@ -24,6 +24,7 @@ function provider(p){
     provider:text(p?.provider,80)||null,
     status:text(p?.status,24)||null,
     is_free:explicitFree,
+    free_status:explicitFree===true?"free":explicitFree===false?"not_free":"unknown",
     pricing,
     zero_priced:zeroPriced,
     free_evidence:evidence,
@@ -42,7 +43,8 @@ function model(m){
   const zero=providers.filter(p=>p.zero_priced===true);
   const candidates=providers.filter(p=>p.is_free===true||p.zero_priced===true);
   const explicit=providers.filter(p=>typeof p.is_free==="boolean");
-  const status=promo.length?"provider_promo_free":zero.length?"zero_price_candidate":explicit.length===providers.length&&providers.length?"not_free":"unknown";
+  const radarStatus=promo.length?"provider_promo_free":zero.length?"zero_price_candidate":explicit.length===providers.length&&providers.length?"not_free":"unknown";
+  const legacyFreeStatus=promo.length?"free":zero.length?"candidate":radarStatus==="not_free"?"not_free":"unknown";
   return {
     id:text(m?.id,220)||null,
     object:text(m?.object,40)||null,
@@ -57,8 +59,13 @@ function model(m){
     promo_free_provider_count:promo.length,
     zero_priced_provider_count:zero.length,
     free_candidate_provider_count:candidates.length,
-    free_radar_status:status,
-    requires_vendor_confirmation:promo.length===0&&zero.length>0
+    free_radar_status:radarStatus,
+    requires_vendor_confirmation:promo.length===0&&zero.length>0,
+    free_providers:promo,
+    free_provider_count:promo.length,
+    has_explicit_free_provider:promo.length>0,
+    unknown_free_status_provider_count:providers.filter(p=>p.is_free===null).length,
+    free_status:legacyFreeStatus
   };
 }
 async function list(env){
