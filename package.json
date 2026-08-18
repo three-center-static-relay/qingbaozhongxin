@@ -13,7 +13,7 @@
     "test:production-sciencedb-e2e": "node tests/sciencedb-production-e2e.mjs",
     "test:build-gate": "node tests/cloudflare-build-gate-contract.mjs && node tests/capability-manifest-contract.mjs && node tests/copernicus-cdse-stac.mjs && node tests/sciencedb-oai.mjs && node tests/public-dataset-wave2.mjs && node tests/dataset-source-status.mjs && node tests/dataset-exposure.mjs && node tests/geonames-mobility-auth-contract.mjs && node tests/llamaparse-v2.mjs && node tests/medical-wave5-aggregate-smoke.mjs && node tests/geospatial-commercial-domain.mjs && node tests/geospatial-commercial-point-context.mjs && node tests/catalog-version-gate-hygiene.mjs && node tests/modelscope-runtime-selftest.mjs",
     "cf:build": "npm run test:build-gate",
-    "cf:preview": "npm run cf:build && npx wrangler versions upload",
+    "cf:preview": "npm run cf:build && npx wrangler deploy --dry-run",
     "cf:deploy": "npm run cf:build && npx wrangler deploy",
     "test:production-zenodo-e2e": "node tests/zenodo-oai-production-e2e.mjs",
     "test:production-geonames-mobility-e2e": "node tests/geonames-mobility-production-e2e.mjs",
@@ -24,7 +24,7 @@
     "@cloudflare/playwright": "1.3.0"
   },
   "devDependencies": {
-    "wrangler": "^4.0.0",
-    "msw": "^2.0.0"
+    "wrangler": "4.123.0",
+    "msw": "2.15.0"
   }
 }

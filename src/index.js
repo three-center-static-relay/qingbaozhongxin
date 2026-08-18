@@ -15,12 +15,12 @@ function redact(v){if(Array.isArray(v))return v.map(redact);if(v&&typeof v==="ob
 async function parseJson(req){const len=Number(req.headers.get("content-length")||0);if(len>MAX_BODY_BYTES)throw Object.assign(new Error("BODY_TOO_LARGE"),{status:413});const t=await req.text();if(new TextEncoder().encode(t).length>MAX_BODY_BYTES)throw Object.assign(new Error("BODY_TOO_LARGE"),{status:413});if(!t)return{};try{return JSON.parse(t)}catch{throw Object.assign(new Error("INVALID_REQUEST"),{status:400})}}
 async function sha256Text(text){const data=new TextEncoder().encode(text),hash=await crypto.subtle.digest("SHA-256",data);return[...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,"0")).join("")}
 async function sourceDigest(){return sha256Text(JSON.stringify({service:SERVICE,api_version:API_VERSION,policy:POLICY,capabilities:CAPABILITIES,catalog:CATALOG_VERSION}))}
-function gate(env){return env.CENTER_GATE.get(env.CENTER_GATE.idFromName("global"))}
-async function gateCall(env,path,method="GET",body){const init={method,headers:{"content-type":"application/json"}};if(body!==undefined)init.body=JSON.stringify(body);const r=await gate(env).fetch(new Request(`https://gate.internal${path}`,init));const b=await r.json().catch(()=>({ok:false,error:"GATE_BAD_RESPONSE"}));return{http:r.status,...b}}
+function gate(env,shard="global"){return env.CENTER_GATE.get(env.CENTER_GATE.idFromName(shard))}
+async function gateCall(env,path,method="GET",body,shard="global"){const init={method,headers:{"content-type":"application/json"}};if(body!==undefined)init.body=JSON.stringify(body);const r=await gate(env,shard).fetch(new Request(`https://gate.internal${path}`,init));const b=await r.json().catch(()=>({ok:false,error:"GATE_BAD_RESPONSE"}));return{http:r.status,...b}}
 const acquire=(env,taskId,kind,leaseSeconds)=>gateCall(env,"/acquire","POST",{task_id:taskId,kind,lease_seconds:leaseSeconds});
 const release=(env,taskId)=>gateCall(env,"/release","POST",{task_id:taskId});
-const saveTask=(env,taskId,patch)=>gateCall(env,`/task/${encodeURIComponent(taskId)}`,"POST",patch);
-const loadTask=(env,taskId)=>gateCall(env,`/task/${encodeURIComponent(taskId)}`);
+const saveTask=(env,taskId,patch)=>gateCall(env,`/task/${encodeURIComponent(taskId)}`,"POST",patch,`task:${taskId}`);
+const loadTask=(env,taskId)=>gateCall(env,`/task/${encodeURIComponent(taskId)}`,"GET",undefined,`task:${taskId}`);
 const checkRate=env=>gateCall(env,"/rate","POST",{limit:int(env.RATE_LIMIT_PER_MIN,DEFAULT_RATE_PER_MIN)});
 
 export class CenterGate{
