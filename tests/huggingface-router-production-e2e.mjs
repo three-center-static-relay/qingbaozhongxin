@@ -14,7 +14,7 @@ try{
   assert.equal(body?.selftest,"huggingface-router-runtime",`deployed production does not expose HF Router canary; HTTP ${response.status}, error=${body?.error||"unknown"}`);
   console.log(JSON.stringify({
     ok:true,
-    diagnostic_stage:"route-presence-after-production-contract-merge",
+    diagnostic_stage:"route-presence-recheck-20260818-2046-cst",
     http_status:response.status,
     selftest:body.selftest,
     runtime_ok:body.ok??null,
@@ -25,6 +25,10 @@ try{
     free_status_verified:body.free_status_verified??null,
     has_explicit_free_provider:body.has_explicit_free_provider??null,
     free_provider_count:body.free_provider_count??null,
+    providers:Array.isArray(body?.providers)?body.providers.map(p=>({provider:p.provider,status:p.status,is_free:p.is_free,pricing:p.pricing})):null,
+    inference_called:body.inference_called??null,
+    model_tokens_used:body.model_tokens_used??null,
+    cost_incurred:body.cost_incurred??null,
     secrets_redacted:true
   }));
 }finally{
