@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 
 const BASE="https://intelligence-worker.a15280020511.workers.dev";
+const DIAGNOSTIC_RUN="2026-08-18T21:30+08:00";
 const taskId=`hf-free-status-e2e-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
 const controller=new AbortController();
 const timer=setTimeout(()=>controller.abort(),30000);
@@ -31,5 +32,5 @@ try{
   assert.equal(result?.vendor?.access?.required_secret,"ZAI_API_KEY");
   assert.equal(result?.paid_fallback_allowed,false);
   assert.match(String(body?.result_digest||""),/^[a-f0-9]{64}$/,"production result must include digest");
-  console.log(JSON.stringify({ok:true,production_e2e:true,model_id:result.model_id,final_free_status:result.final_free_status,recommended_access:result.recommended_access,vendor_free_verified:true,key_present:result.vendor.access.key_present,registration_required:result.vendor.access.registration_required,required_secret:result.vendor.access.required_secret,paid_fallback_allowed:false,result_digest:body.result_digest,secrets_redacted:true}));
+  console.log(JSON.stringify({ok:true,diagnostic_run:DIAGNOSTIC_RUN,production_e2e:true,model_id:result.model_id,final_free_status:result.final_free_status,recommended_access:result.recommended_access,vendor_free_verified:true,key_present:result.vendor.access.key_present,registration_required:result.vendor.access.registration_required,required_secret:result.vendor.access.required_secret,paid_fallback_allowed:false,result_digest:body.result_digest,secrets_redacted:true}));
 }finally{clearTimeout(timer)}
