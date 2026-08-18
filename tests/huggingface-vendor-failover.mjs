@@ -41,3 +41,28 @@ try{
 }
 
 console.log("huggingface-vendor-failover: PASS");
+
+// Temporary fail-closed production acceptance probe. Remove after final acceptance.
+{
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),60000);
+  try{
+    const response=await fetch("https://intelligence-worker.a15280020511.workers.dev/v1/run",{
+      method:"POST",
+      signal:controller.signal,
+      headers:{"content-type":"application/json",accept:"application/json"},
+      body:JSON.stringify({
+        task_id:`hf-free-status-main-http200-${Date.now()}`,
+        provider:"huggingface",
+        operation:"free_model_status",
+        timeout_seconds:50,
+        args:{model_id:"zai-org/GLM-4.7-Flash"}
+      })
+    });
+    const raw=await response.text();
+    assert.equal(response.status,200,`production free_model_status must return HTTP 200; got ${response.status}; body=${raw.slice(0,300)}`);
+    console.log(JSON.stringify({ok:true,stage:"production-http-200",http_status:response.status,body_prefix:raw.slice(0,300),secrets_redacted:true}));
+  }finally{
+    clearTimeout(timer);
+  }
+}
