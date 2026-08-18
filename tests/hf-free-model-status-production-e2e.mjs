@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 
+// Cloudflare Git Integration push trigger: 2026-08-18T15:40Z
 const BASE="https://intelligence-worker.a15280020511.workers.dev";
 const controller=new AbortController();
 const timer=setTimeout(()=>controller.abort(),60000);
