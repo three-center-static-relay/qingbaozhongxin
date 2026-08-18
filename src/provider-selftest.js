@@ -10,10 +10,10 @@ export const PROVIDER_CANARIES=Object.freeze([
   {id:"wind-aifin-stock",provider:"aifin_market",operation:"get_stock_price_indicators",args:{windcode:"600519.SH"},cost_class:"provider-account-read"}
 ]);
 
-function gate(env){return env.CENTER_GATE.get(env.CENTER_GATE.idFromName("global"))}
-async function gateRead(env,path){
+function gate(env,shard="global"){return env.CENTER_GATE.get(env.CENTER_GATE.idFromName(shard))}
+async function gateRead(env,path,shard="global"){
   if(!env.CENTER_GATE?.get||!env.CENTER_GATE?.idFromName)return{ok:false,error:"CENTER_GATE_UNAVAILABLE"};
-  const r=await gate(env).fetch(new Request(`https://gate.internal${path}`,{method:"GET"}));
+  const r=await gate(env,shard).fetch(new Request(`https://gate.internal${path}`,{method:"GET"}));
   return{http_status:r.status,...await r.json().catch(()=>({ok:false,error:"GATE_BAD_RESPONSE"}))};
 }
 function validateResult(spec,result){
@@ -50,7 +50,7 @@ async function runOne(app,env,ctx,spec){
     payload={ok:false,error:String(error?.message||error)};
     response={ok:false,status:500};
   }
-  const taskState=await gateRead(env,`/task/${encodeURIComponent(taskId)}`),lockState=await gateRead(env,"/state");
+  const taskState=await gateRead(env,`/task/${encodeURIComponent(taskId)}`,`task:${taskId}`),lockState=await gateRead(env,"/state");
   const digestOk=typeof payload?.result_digest==="string"&&payload.result_digest.length===64;
   const terminal=taskState?.task?.status||null,lockReleased=lockState?.ok===true&&!lockState?.active;
   const checked=payload?.ok===true?validateResult(spec,payload.result):{business_ok:false,observed:{error:payload?.error||"UPSTREAM_FAILED"}};

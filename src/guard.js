@@ -25,15 +25,15 @@ export class CenterGate extends BaseCenterGate{
     return super.fetch(req);
   }
 }
-function gate(env){return env.CENTER_GATE.get(env.CENTER_GATE.idFromName("global"))}
-async function g(env,p,m="GET",b){const i={method:m,headers:{"content-type":"application/json"}};if(b!==undefined)i.body=JSON.stringify(b);const r=await gate(env).fetch(new Request(`https://gate.internal${p}`,i));return{http:r.status,...await r.json().catch(()=>({ok:false,error:"GATE_BAD_RESPONSE"}))}}
-async function cancel(req,env){const b=await req.json().catch(()=>({})),id=String(b.task_id||"");if(!id)return json({ok:false,error:"INVALID_REQUEST",message:"task_id required"},400);const t=await g(env,`/task/${encodeURIComponent(id)}`);if(!t.task)return json({ok:false,error:"INVALID_REQUEST",message:"Task not found"},404);const r=await g(env,`/task/${encodeURIComponent(id)}/cancel`,"POST",{});return json({ok:r.ok,task:r.task||t.task,cancellation_pending:true,lock_retained:true,note:"Cancellation never releases the single-task lock before the execution path reaches a terminal state or the lease expires."},202)}
+function gate(env,shard="global"){return env.CENTER_GATE.get(env.CENTER_GATE.idFromName(shard))}
+async function g(env,p,m="GET",b,shard="global"){const i={method:m,headers:{"content-type":"application/json"}};if(b!==undefined)i.body=JSON.stringify(b);const r=await gate(env,shard).fetch(new Request(`https://gate.internal${p}`,i));return{http:r.status,...await r.json().catch(()=>({ok:false,error:"GATE_BAD_RESPONSE"}))}}
+async function cancel(req,env){const b=await req.json().catch(()=>({})),id=String(b.task_id||""),shard=`task:${id}`;if(!id)return json({ok:false,error:"INVALID_REQUEST",message:"task_id required"},400);const t=await g(env,`/task/${encodeURIComponent(id)}`,"GET",undefined,shard);if(!t.task)return json({ok:false,error:"INVALID_REQUEST",message:"Task not found"},404);const r=await g(env,`/task/${encodeURIComponent(id)}/cancel`,"POST",{},shard);return json({ok:r.ok,task:r.task||t.task,cancellation_pending:true,lock_retained:true,note:"Cancellation never releases the single-task lock before the execution path reaches a terminal state or the lease expires."},202)}
 async function selftest(env,ctx){
   const taskId=`selftest-intelligence-${crypto.randomUUID()}`;
   const request=new Request("https://intelligence.internal/v1/run",{method:"POST",headers:{"content-type":"application/json","x-three-center-selftest":"1"},body:JSON.stringify({task_id:taskId,provider:"worldbank",operation:"indicator",timeout_seconds:30,args:{country:"CHN",indicator:"SP.POP.TOTL",date:"2023",limit:1}})});
   const started=Date.now();
   const r=await base.fetch(request,env,ctx),body=await r.json().catch(()=>null),items=body?.result?.items;
-  const nonempty=Array.isArray(items)&&items.length>0,hasDigest=typeof body?.result_digest==="string"&&body.result_digest.length===64,task=await g(env,`/task/${encodeURIComponent(taskId)}`),terminal=task?.task?.status==="pass";
+  const nonempty=Array.isArray(items)&&items.length>0,hasDigest=typeof body?.result_digest==="string"&&body.result_digest.length===64,task=await g(env,`/task/${encodeURIComponent(taskId)}`,"GET",undefined,`task:${taskId}`),terminal=task?.task?.status==="pass";
   const lock=await g(env,"/state"),released=!lock?.active;
   const ok=r.ok&&body?.ok===true&&nonempty&&hasDigest&&terminal&&released;
   return json({ok,business_e2e:true,cost_class:"public-zero-key",provider:"worldbank",operation:"indicator",task_id:taskId,http_status:r.status,nonempty,result_digest:hasDigest?body.result_digest:null,terminal_status:task?.task?.status||null,lock_released:released,elapsed_ms:Date.now()-started},ok?200:503);
