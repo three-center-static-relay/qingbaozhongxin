@@ -16,7 +16,7 @@ export const VENDOR_FREE_POLICIES={
     evidence_label:"GLM-4.7-Flash",
     evidence_pattern:/\bFree\b/i,
     evidence_window_bytes:2500,
-    policy_note:"Z.AI primary pricing documentation marks GLM-4.7-Flash input/output as Free; this does not imply Hugging Face Router routes are free."
+    policy_note:"Z.AI primary pricing documentation marks GLM-4.7-Flash as Free for vendor-direct API access; this does not imply Hugging Face Router routes are free."
   }
 };
 
