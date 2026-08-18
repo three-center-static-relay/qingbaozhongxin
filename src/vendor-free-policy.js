@@ -1,3 +1,4 @@
+// vendor-free-policy failover v2; fixed primary-source chain, fail-closed degradation
 const MAX_BYTES=2000000;
 const SOURCE_TIMEOUT_MS=8000;
 const text=(v,n=300)=>String(v??"").trim().slice(0,n);
