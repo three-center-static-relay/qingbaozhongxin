@@ -1,3 +1,4 @@
+// diagnostic-trigger: hf-envelope-20260818-2220 (temporary branch only; no runtime effect)
 import {vendorPolicyFor,verifyVendorFree} from "./vendor-free-policy.js";
 
 const MAX_BYTES=1500000;
