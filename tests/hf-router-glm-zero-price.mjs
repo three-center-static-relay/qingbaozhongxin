@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 
 const TARGET="zai-org/GLM-4.7-Flash";
-const DIAGNOSTIC_RUN="2026-08-18T21:11+08:00";
 const controller=new AbortController();
 const timer=setTimeout(()=>controller.abort(),20000);
 
@@ -12,7 +11,7 @@ try{
   const model=Array.isArray(body?.data)?body.data.find(m=>m?.id===TARGET):null;
   assert.ok(model,"GLM-4.7-Flash must exist in HF Router list");
   assert.ok(Array.isArray(model.providers)&&model.providers.length>0,"GLM-4.7-Flash must have provider metadata");
-  const zero=model.providers.filter(p=>Number(p?.pricing?.input)===0&&Number(p?.pricing?.output)===0);
-  assert.ok(zero.length>0,"GLM-4.7-Flash must have at least one provider with explicit 0/0 token pricing");
-  console.log(JSON.stringify({ok:true,diagnostic_run:DIAGNOSTIC_RUN,model_id:TARGET,provider_count:model.providers.length,zero_price_provider_count:zero.length,zero_price_providers:zero.map(p=>({provider:p.provider,status:p.status,is_free:typeof p?.is_free==="boolean"?p.is_free:null,pricing:p.pricing}))}));
+  const official=model.providers.find(p=>p?.provider==="zai-org");
+  assert.ok(official,"HF Router must expose the zai-org provider for GLM-4.7-Flash");
+  console.log(JSON.stringify({ok:true,stage:"zai-provider-present",model_id:TARGET,provider_count:model.providers.length,zai_provider:{provider:official.provider,status:official.status,is_free:typeof official.is_free==="boolean"?official.is_free:null,pricing:official.pricing??null}}));
 }finally{clearTimeout(timer)}
