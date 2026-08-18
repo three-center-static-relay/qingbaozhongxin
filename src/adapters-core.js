@@ -16,9 +16,75 @@ async function fetchJson(url,init={},timeoutMs=DEFAULT_TIMEOUT_MS){
   }catch(e){if(e?.name==="AbortError")throw Object.assign(new Error("UPSTREAM_TIMEOUT"),{status:504});throw e}finally{clearTimeout(t)}
 }
 function doiPath(v){const s=text(v,300);if(!/^10\.\d{4,9}\/.+/.test(s))throw Object.assign(new Error("INVALID_DOI"),{status:400});return s.split("/").map(encodeURIComponent).join("/")}
+function hfHeaders(env){const h={};if(env?.HUGGINGFACE_TOKEN)h.authorization=`Bearer ${env.HUGGINGFACE_TOKEN}`;return h}
+function hfModelId(v){const s=text(v,220);if(!/^[A-Za-z0-9][A-Za-z0-9._-]{0,99}\/[A-Za-z0-9][A-Za-z0-9._-]{0,119}$/.test(s))throw Object.assign(new Error("INVALID_HF_MODEL_ID"),{status:400});return s}
+function hfModelPath(v){return hfModelId(v).split("/").map(encodeURIComponent).join("/")}
+const finiteOrNull=v=>Number.isFinite(Number(v))?Number(v):null;
+function normalizeHfRouterProvider(p){
+  const pricing=p?.pricing&&typeof p.pricing==="object"?{input:finiteOrNull(p.pricing.input),output:finiteOrNull(p.pricing.output)}:{input:null,output:null};
+  return {
+    provider:text(p?.provider,80)||null,
+    status:text(p?.status,24)||null,
+    is_free:typeof p?.is_free==="boolean"?p.is_free:null,
+    free_status:typeof p?.is_free==="boolean"?(p.is_free?"free":"not_free"):"unknown",
+    pricing,
+    context_length:finiteOrNull(p?.context_length),
+    supports_tools:typeof p?.supports_tools==="boolean"?p.supports_tools:null,
+    supports_structured_output:typeof p?.supports_structured_output==="boolean"?p.supports_structured_output:null,
+    first_token_latency_ms:finiteOrNull(p?.first_token_latency_ms),
+    throughput:finiteOrNull(p?.throughput),
+    is_model_author:typeof p?.is_model_author==="boolean"?p.is_model_author:null
+  };
+}
+function normalizeHfRouterModel(m){
+  const providers=Array.isArray(m?.providers)?m.providers.map(normalizeHfRouterProvider):[];
+  const freeProviders=providers.filter(p=>p.is_free===true);
+  return {
+    id:text(m?.id,220)||null,
+    object:text(m?.object,40)||null,
+    created:finiteOrNull(m?.created),
+    owned_by:text(m?.owned_by,120)||null,
+    architecture:m?.architecture&&typeof m.architecture==="object"?m.architecture:null,
+    providers,
+    free_providers:freeProviders,
+    free_provider_count:freeProviders.length,
+    has_explicit_free_provider:freeProviders.length>0,
+    free_status:freeProviders.length>0?"free":"no_explicit_free_provider"
+  };
+}
+function filterHfRouterModels(items,args={},forceFree=false){
+  const query=text(args.query,220).toLowerCase(),provider=text(args.provider,80).toLowerCase();
+  const liveOnly=args.live_only===true,toolsOnly=args.supports_tools===true,structuredOnly=args.supports_structured_output===true,freeOnly=forceFree||args.free_only===true;
+  return items.filter(m=>{
+    if(query&&!String(m.id||"").toLowerCase().includes(query))return false;
+    let ps=m.providers||[];
+    if(provider)ps=ps.filter(p=>String(p.provider||"").toLowerCase()===provider);
+    if(liveOnly)ps=ps.filter(p=>p.status==="live");
+    if(toolsOnly)ps=ps.filter(p=>p.supports_tools===true);
+    if(structuredOnly)ps=ps.filter(p=>p.supports_structured_output===true);
+    if(freeOnly)ps=ps.filter(p=>p.is_free===true);
+    return provider||liveOnly||toolsOnly||structuredOnly||freeOnly?ps.length>0:true;
+  });
+}
+async function hfRouterList(args,env,forceFree=false){
+  const limit=clamp(args.limit,1,100,20),r=await fetchJson("https://router.huggingface.co/v1/models",{headers:hfHeaders(env)},15000);
+  const raw=Array.isArray(r.body?.data)?r.body.data:[];
+  const normalized=raw.map(normalizeHfRouterModel);
+  const filtered=filterHfRouterModels(normalized,args,forceFree).slice(0,limit);
+  return {
+    provider:"huggingface",
+    operation:forceFree?"free_models":"router_models",
+    source:"hf-router-v1-models",
+    free_semantics:"provider is free only when upstream is_free === true; missing is_free is unknown",
+    pricing_unit:"USD_per_million_tokens",
+    total_seen:normalized.length,
+    matched:filtered.length,
+    items:filtered
+  };
+}
 
 export const OPERATIONS={
-  mcp_registry:["search"],worldbank:["indicator"],crossref:["works"],semantic_scholar:["paper_search"],openaire:["research_products"],clinicaltrials:["studies"],open_meteo:["forecast"],apis_guru:["providers"],huggingface:["models"],openalex:["works"],unpaywall:["doi"],tavily:["search"],serpapi:["search"],fred:["series_observations"],alpha_vantage:["daily"]
+  mcp_registry:["search"],worldbank:["indicator"],crossref:["works"],semantic_scholar:["paper_search"],openaire:["research_products"],clinicaltrials:["studies"],open_meteo:["forecast"],apis_guru:["providers"],huggingface:["models","router_models","router_model","free_models"],openalex:["works"],unpaywall:["doi"],tavily:["search"],serpapi:["search"],fred:["series_observations"],alpha_vantage:["daily"]
 };
 
 export async function runAdapter(provider,operation,args,env){
@@ -50,7 +116,15 @@ export async function runAdapter(provider,operation,args,env){
     const r=await fetchJson("https://api.apis.guru/v2/providers.json");const data=r.body?.data||r.body||[];return {provider,operation,items:Array.isArray(data)?data.slice(0,500):data};
   }
   if(provider==="huggingface"){
-    const q=text(req(args,"query"),200),limit=clamp(args.limit,1,20,10),u=new URL("https://huggingface.co/api/models");u.searchParams.set("search",q);u.searchParams.set("limit",String(limit));u.searchParams.set("sort","downloads");u.searchParams.set("direction","-1");const h={};if(env.HUGGINGFACE_TOKEN)h.authorization=`Bearer ${env.HUGGINGFACE_TOKEN}`;const r=await fetchJson(u,{headers:h});return {provider,operation,items:Array.isArray(r.body)?r.body:[]};
+    if(operation==="models"){
+      const q=text(req(args,"query"),200),limit=clamp(args.limit,1,20,10),u=new URL("https://huggingface.co/api/models");u.searchParams.set("search",q);u.searchParams.set("limit",String(limit));u.searchParams.set("sort","downloads");u.searchParams.set("direction","-1");const r=await fetchJson(u,{headers:hfHeaders(env)});return {provider,operation,source:"hf-hub-models-api",items:Array.isArray(r.body)?r.body:[]};
+    }
+    if(operation==="router_models")return hfRouterList(args,env,false);
+    if(operation==="free_models")return hfRouterList(args,env,true);
+    if(operation==="router_model"){
+      const modelId=hfModelId(req(args,"model_id")),r=await fetchJson(`https://router.huggingface.co/v1/models/${hfModelPath(modelId)}`,{headers:hfHeaders(env)},15000),item=normalizeHfRouterModel(r.body);
+      return {provider,operation,source:"hf-router-v1-model",free_semantics:"provider is free only when upstream is_free === true; missing is_free is unknown",pricing_unit:"USD_per_million_tokens",item};
+    }
   }
   if(provider==="openalex"){
     if(!env.OPENALEX_API_KEY)throw Object.assign(new Error("UPSTREAM_AUTH_FAILED"),{status:503});const q=text(req(args,"query"),300),limit=clamp(args.limit,1,20,10),u=new URL("https://api.openalex.org/works");u.searchParams.set("search",q);u.searchParams.set("per-page",String(limit));u.searchParams.set("api_key",String(env.OPENALEX_API_KEY));u.searchParams.set("select","id,doi,title,display_name,publication_year,publication_date,type,language,cited_by_count,is_retracted,primary_location,authorships");const r=await fetchJson(u);return {provider,operation,meta:r.body?.meta||null,items:r.body?.results||[]};
