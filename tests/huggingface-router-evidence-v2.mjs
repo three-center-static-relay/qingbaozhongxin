@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import {OPERATIONS,runAdapter} from "../src/adapters-huggingface-v2.js";
 
-assert.deepEqual(OPERATIONS.huggingface,["router_models","router_model","free_models","free_candidates"]);
+for(const op of ["router_models","router_model","free_models","free_candidates","vendor_check_candidates","vendor_free_status","free_model_status"]){
+  assert.ok(OPERATIONS.huggingface.includes(op),`missing Hugging Face operation ${op}`);
+}
 
 const originalFetch=globalThis.fetch;
 const fixture={data:[
@@ -18,7 +20,7 @@ const fixture={data:[
 ]};
 
 globalThis.fetch=async input=>{
-  assert.equal(String(input),"https://router.huggingface.co/v1/models","v2 must use the stable global Router list");
+  assert.equal(String(input),"https://router.huggingface.co/v1/models","v2/v3 Router operations must use the stable global Router list");
   return new Response(JSON.stringify(fixture),{status:200,headers:{"content-type":"application/json"}});
 };
 
@@ -35,15 +37,16 @@ try{
   assert.equal(glm.zero_priced_providers[0].free_evidence,"zero_price_candidate");
   assert.equal(glm.zero_priced_providers[0].requires_vendor_confirmation,true);
 
-  const candidates=await runAdapter("huggingface","free_models",{limit:10},{});
-  assert.deepEqual(candidates.items.map(x=>x.id).sort(),["example/Promo-Free","zai-org/GLM-4.7-Flash"]);
-  assert.ok(!candidates.items.some(x=>x.id==="example/Paid"));
-  assert.match(candidates.free_semantics,/vendor confirmation/);
+  const hfFree=await runAdapter("huggingface","free_models",{limit:10},{});
+  assert.deepEqual(hfFree.items.map(x=>x.id).sort(),["example/Promo-Free","zai-org/GLM-4.7-Flash"]);
+  assert.ok(!hfFree.items.some(x=>x.id==="example/Paid"));
+  assert.match(hfFree.free_semantics,/HF route evidence|free_models/i);
 
   const one=await runAdapter("huggingface","router_model",{model_id:"zai-org/GLM-4.7-Flash"},{});
   assert.equal(one.source,"hf-router-v1-models-list-filter");
   assert.equal(one.item.id,"zai-org/GLM-4.7-Flash");
   assert.equal(one.item.free_radar_status,"zero_price_candidate");
+  assert.ok(one.vendor_policy,"known vendor policy metadata should be surfaced without verification fetch");
 
   await assert.rejects(()=>runAdapter("huggingface","router_model",{model_id:"https://evil.invalid/model"},{}),/INVALID_HF_MODEL_ID/);
 }finally{globalThis.fetch=originalFetch}
