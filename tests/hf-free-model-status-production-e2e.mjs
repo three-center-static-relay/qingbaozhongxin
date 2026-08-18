@@ -10,7 +10,7 @@ try{
     signal:controller.signal,
     headers:{"content-type":"application/json",accept:"application/json"},
     body:JSON.stringify({
-      task_id:`hf-free-status-transport-${Date.now()}`,
+      task_id:`hf-free-status-http200-${Date.now()}`,
       provider:"huggingface",
       operation:"free_model_status",
       timeout_seconds:50,
@@ -18,6 +18,6 @@ try{
     })
   });
   const raw=await response.text();
-  assert.ok(Number.isInteger(response.status)&&response.status>=100&&response.status<=599,"transport must yield an HTTP response");
-  console.log(JSON.stringify({ok:true,stage:"transport-only",http_status:response.status,body_prefix:raw.slice(0,300),secrets_redacted:true}));
+  assert.equal(response.status,200,`production free_model_status must return HTTP 200; got ${response.status}; body=${raw.slice(0,300)}`);
+  console.log(JSON.stringify({ok:true,stage:"http-200",http_status:response.status,body_prefix:raw.slice(0,300),secrets_redacted:true}));
 }finally{clearTimeout(timer)}
