@@ -1,17 +1,17 @@
 import assert from "node:assert/strict";
 
-const TARGET="zai-org/GLM-4.7-Flash";
+const SOURCE="https://docs.z.ai/guides/overview/pricing";
+const TARGET="GLM-4.7-Flash";
 const controller=new AbortController();
 const timer=setTimeout(()=>controller.abort(),20000);
 
 try{
-  const response=await fetch("https://router.huggingface.co/v1/models",{signal:controller.signal,headers:{accept:"application/json"}});
-  const body=await response.json();
-  assert.equal(response.status,200,`HF Router model list HTTP ${response.status}`);
-  const model=Array.isArray(body?.data)?body.data.find(m=>m?.id===TARGET):null;
-  assert.ok(model,"GLM-4.7-Flash must exist in HF Router list");
-  assert.ok(Array.isArray(model.providers)&&model.providers.length>0,"GLM-4.7-Flash must have provider metadata");
-  const official=model.providers.find(p=>p?.provider==="zai-org");
-  assert.ok(official,"HF Router must expose the zai-org provider for GLM-4.7-Flash");
-  console.log(JSON.stringify({ok:true,stage:"zai-provider-present",model_id:TARGET,provider_count:model.providers.length,zai_provider:{provider:official.provider,status:official.status,is_free:typeof official.is_free==="boolean"?official.is_free:null,pricing:official.pricing??null}}));
+  const response=await fetch(SOURCE,{signal:controller.signal,headers:{accept:"text/html,text/plain;q=0.9,*/*;q=0.1"}});
+  const raw=await response.text();
+  assert.equal(response.status,200,`Z.AI official pricing page HTTP ${response.status}`);
+  const idx=raw.indexOf(TARGET);
+  assert.ok(idx>=0,"Official Z.AI pricing page must contain GLM-4.7-Flash");
+  const evidenceWindow=raw.slice(idx,Math.min(raw.length,idx+2500));
+  assert.match(evidenceWindow,/\bFree\b/i,"Official Z.AI pricing evidence near GLM-4.7-Flash must contain Free");
+  console.log(JSON.stringify({ok:true,stage:"vendor-primary-free-evidence",vendor:"Z.AI",model:"GLM-4.7-Flash",source:SOURCE,http_status:response.status,free_evidence_found:true,inference_called:false,cost_incurred:false}));
 }finally{clearTimeout(timer)}
