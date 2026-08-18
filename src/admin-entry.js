@@ -6,6 +6,7 @@ export {CenterGate};
 const ORIGIN="https://intelligence.internal";
 const SERVICE="intelligence-worker";
 const DEPLOYMENT_ATTESTATION="required-secrets-zenodo-kaggle-v1";
+const HF_RADAR_CANARY_MODEL="zai-org/GLM-4.7-Flash";
 const json=(body,status=200)=>Response.json(body,{status,headers:{"cache-control":"no-store"}});
 
 async function readApp(path,env,ctx){
@@ -49,6 +50,52 @@ async function providerRuntimeSelftest(provider,env){
     return json({ok:itemCount>0,selftest:`${provider}-runtime`,secret_present:secretPresent,upstream_http_status:200,item_count:itemCount,total:result?.total??null,error:null,upstream_error_class:null,secrets_redacted:true});
   }catch(error){
     return json({ok:false,selftest:`${provider}-runtime`,secret_present:secretPresent,upstream_http_status:Number(error?.details?.http_status)||null,error:String(error?.message||`${provider.toUpperCase()}_SELFTEST_FAILED`),adapter_status:Number(error?.status)||500,upstream_error_class:isZenodo?classifyZenodo403(error):null,secrets_redacted:true});
+  }
+}
+
+async function huggingFaceRouterRuntimeSelftest(env){
+  const tokenPresent=Boolean(String(env.HUGGINGFACE_TOKEN||"").trim());
+  try{
+    const result=await runAdapter("huggingface","router_model",{model_id:HF_RADAR_CANARY_MODEL},env);
+    const item=result?.item||null;
+    const providers=Array.isArray(item?.providers)?item.providers:[];
+    const explicitSignals=providers.filter(p=>typeof p?.is_free==="boolean");
+    const freeProviders=providers.filter(p=>p?.is_free===true);
+    const shapeOk=item?.id===HF_RADAR_CANARY_MODEL&&providers.length>0;
+    return json({
+      ok:shapeOk,
+      selftest:"huggingface-router-runtime",
+      model_id:HF_RADAR_CANARY_MODEL,
+      source:result?.source||null,
+      token_present:tokenPresent,
+      upstream_http_status:200,
+      provider_count:providers.length,
+      providers,
+      free_status:item?.free_status||"unknown",
+      has_explicit_free_provider:item?.has_explicit_free_provider===true,
+      explicit_free_signal_count:explicitSignals.length,
+      free_provider_count:freeProviders.length,
+      free_status_verified:explicitSignals.length>0,
+      pricing_unit:result?.pricing_unit||null,
+      inference_called:false,
+      model_tokens_used:0,
+      cost_incurred:false,
+      secrets_redacted:true
+    },shapeOk?200:503);
+  }catch(error){
+    return json({
+      ok:false,
+      selftest:"huggingface-router-runtime",
+      model_id:HF_RADAR_CANARY_MODEL,
+      token_present:tokenPresent,
+      upstream_http_status:Number(error?.details?.http_status)||null,
+      error:String(error?.message||"HUGGINGFACE_ROUTER_SELFTEST_FAILED"),
+      adapter_status:Number(error?.status)||500,
+      inference_called:false,
+      model_tokens_used:0,
+      cost_incurred:false,
+      secrets_redacted:true
+    },503);
   }
 }
 
@@ -97,6 +144,7 @@ export default{
     const url=new URL(req.url);
     if(req.method==="GET"&&url.pathname==="/v1/selftest/zenodo-runtime")return providerRuntimeSelftest("zenodo",env);
     if(req.method==="GET"&&url.pathname==="/v1/selftest/kaggle-runtime")return providerRuntimeSelftest("kaggle",env);
+    if(req.method==="GET"&&url.pathname==="/v1/selftest/huggingface-router-runtime")return huggingFaceRouterRuntimeSelftest(env);
     if(req.method==="GET"&&url.pathname==="/v1/selftest/modelscope-runtime")return modelScopeRuntimeSelftest(env);
     if(req.method==="GET"&&url.pathname==="/v1/admin/context"){
       if(url.hostname!=="intelligence.internal")return json({ok:false,error:"POLICY_DENIED",message:"admin context is service-binding internal only"},403);

@@ -3,7 +3,7 @@ import {GLOBAL_HIGH_VALUE_CATALOG} from "./catalog-global-highvalue.js";
 import {SPLUS_CATALOG} from "./catalog-splus.js";
 import {AIFIN_CATALOG} from "./catalog-aifin.js";
 import {FREE_COMMERCIAL_SPATIAL_CATALOG} from "./catalog-free-commercial-spatial.js";
-export const CATALOG_VERSION="2026-08-17.02";
+export const CATALOG_VERSION="2026-08-18.01";
 export const EXCLUDED_PROVIDERS=EXISTING_EXCLUDED;
 export const CATALOG={
   ...EXISTING_CATALOG,
@@ -11,7 +11,7 @@ export const CATALOG={
   ...SPLUS_CATALOG,
   ...AIFIN_CATALOG,
   ...FREE_COMMERCIAL_SPATIAL_CATALOG,
-  huggingface:{...EXISTING_CATALOG.huggingface,category:"ai-dataset-model-hub",access:"optional-key",secrets:["HUGGINGFACE_TOKEN"],adapter:"huggingface.models+datasets-search",integration:"official-hub-rest",scope:"public-model-and-dataset-discovery",endpoint:"https://huggingface.co/api",registration_url:"https://huggingface.co/settings/tokens",arbitrary_url:false},
+  huggingface:{...EXISTING_CATALOG.huggingface,category:"ai-dataset-model-hub+free-model-radar",access:"optional-key",secrets:["HUGGINGFACE_TOKEN"],adapter:"huggingface.hub-models+router-models+free-radar",integration:"official-hub-rest+official-router-openai-models",scope:"public-model-discovery+provider-status+pricing+explicit-is-free+context+tools+structured-output+latency+throughput",endpoint:"https://huggingface.co/api;https://router.huggingface.co/v1/models",registration_url:"https://huggingface.co/settings/tokens",free_semantics:"free only when provider is_free is explicitly true; missing is_free is unknown; HF monthly credits are not model-free status",arbitrary_url:false},
   kaggle:{category:"community-dataset-hub",access:"key",secret_groups:[["KAGGLE_API_TOKEN"],["KAGGLE_USERNAME","KAGGLE_KEY"]],adapter:"kaggle.datasets-search+files",integration:"official-kaggle-api",scope:"bounded-public-dataset-discovery-and-file-metadata",endpoint:"https://www.kaggle.com/api/v1",registration_url:"https://www.kaggle.com/settings/api",auth_note:"prefer KAGGLE_API_TOKEN; legacy KAGGLE_USERNAME+KAGGLE_KEY remains supported",arbitrary_url:false},
   zenodo:{...EXISTING_CATALOG.zenodo,access:"optional-key",secrets:["ZENODO_TOKEN"],adapter:"zenodo.search",integration:"official-rest",scope:"public-record-and-dataset-discovery",endpoint:"https://zenodo.org/api/records",registration_url:"https://zenodo.org/account/settings/applications/tokens/new/",arbitrary_url:false},
   harvard_dataverse:{...EXISTING_CATALOG.harvard_dataverse,access:"public",optional_secrets:["HARVARD_DATAVERSE_API_TOKEN","DATAVERSE_API_TOKEN"],adapter:"harvard_dataverse.search",integration:"official-dataverse-search-api",scope:"public-datasets-files-dataverses; token optional for unpublished authorized content",endpoint:"https://dataverse.harvard.edu/api/search",arbitrary_url:false},
