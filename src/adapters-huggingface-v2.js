@@ -100,23 +100,34 @@ function publicVendorPolicy(modelIdValue){
   const p=vendorPolicyFor(modelIdValue);if(!p)return null;
   return {vendor:p.vendor,access_mode:p.access_mode,api_model:p.api_model,required_secret:p.required_secret,registration_url:p.registration_url,primary_source:p.primary_source};
 }
+function publicRouterError(error){
+  if(!error)return null;
+  return {code:text(error?.message||"HF_ROUTER_FAILED",120),http_status:Number(error?.details?.http_status)||null,status:Number(error?.status)||null};
+}
 export const OPERATIONS={huggingface:["router_models","router_model","free_models","free_candidates","vendor_check_candidates","vendor_free_status","free_model_status"]};
 export async function runAdapter(providerName,operation,args={},env={}){
   if(providerName!=="huggingface"||!OPERATIONS.huggingface.includes(operation))throw Object.assign(new Error("ADAPTER_OPERATION_NOT_APPROVED"),{status:403});
   if(operation==="vendor_free_status")return {provider:"huggingface",operation,...await verifyVendorFree(modelId(args.model_id),env)};
+  if(operation==="free_model_status"){
+    const id=modelId(args.model_id);
+    const [routerOutcome,vendor]=await Promise.all([
+      (async()=>{try{const items=await list(env),item=items.find(m=>m.id===id);if(!item)throw Object.assign(new Error("HF_ROUTER_MODEL_NOT_FOUND"),{status:404});return {item,error:null}}catch(error){return {item:null,error}}})(),
+      verifyVendorFree(id,env)
+    ]);
+    const item=routerOutcome.item,routerError=routerOutcome.error;
+    if(vendor.vendor_free_verified){
+      return {provider:"huggingface",operation,model_id:id,final_free_status:"vendor_confirmed_free",recommended_access:"vendor_direct_api",router:item,router_evidence_available:Boolean(item),router_error:publicRouterError(routerError),vendor,paid_fallback_allowed:false,secrets_redacted:true};
+    }
+    if(routerError)throw routerError;
+    const status=item.promo_free_provider_count>0?"provider_promo_free":item.zero_priced_provider_count>0?"zero_price_candidate":"not_confirmed_free";
+    const recommendedAccess=item.promo_free_provider_count>0?"hf_router_free_provider":item.zero_priced_provider_count>0?"hf_router_zero_price_candidate":"none";
+    return {provider:"huggingface",operation,model_id:id,final_free_status:status,recommended_access:recommendedAccess,router:item,router_evidence_available:true,router_error:null,vendor,paid_fallback_allowed:false,secrets_redacted:true};
+  }
   const items=await list(env);
   if(operation==="router_model"){
     const id=modelId(args.model_id),item=items.find(m=>m.id===id);
     if(!item)throw Object.assign(new Error("HF_ROUTER_MODEL_NOT_FOUND"),{status:404});
     return {provider:"huggingface",operation,source:"hf-router-v1-models-list-filter",pricing_unit:"USD_per_million_tokens",free_semantics:"HF route evidence and vendor-direct free evidence are separate; is_free=true is provider current/promo free",vendor_policy:publicVendorPolicy(id),item};
-  }
-  if(operation==="free_model_status"){
-    const id=modelId(args.model_id),item=items.find(m=>m.id===id);
-    if(!item)throw Object.assign(new Error("HF_ROUTER_MODEL_NOT_FOUND"),{status:404});
-    const vendor=await verifyVendorFree(id,env);
-    const status=vendor.vendor_free_verified?"vendor_confirmed_free":item.promo_free_provider_count>0?"provider_promo_free":item.zero_priced_provider_count>0?"zero_price_candidate":"not_confirmed_free";
-    const recommendedAccess=vendor.vendor_free_verified?"vendor_direct_api":item.promo_free_provider_count>0?"hf_router_free_provider":item.zero_priced_provider_count>0?"hf_router_zero_price_candidate":"none";
-    return {provider:"huggingface",operation,model_id:id,final_free_status:status,recommended_access:recommendedAccess,router:item,vendor,paid_fallback_allowed:false,secrets_redacted:true};
   }
   let mode="all";
   if(operation==="free_models")mode="hf-free";
