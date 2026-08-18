@@ -19,7 +19,7 @@ function doiPath(v){const s=text(v,300);if(!/^10\.\d{4,9}\/.+/.test(s))throw Obj
 function hfHeaders(env){const h={};if(env?.HUGGINGFACE_TOKEN)h.authorization=`Bearer ${env.HUGGINGFACE_TOKEN}`;return h}
 function hfModelId(v){const s=text(v,220);if(!/^[A-Za-z0-9][A-Za-z0-9._-]{0,99}\/[A-Za-z0-9][A-Za-z0-9._-]{0,119}$/.test(s))throw Object.assign(new Error("INVALID_HF_MODEL_ID"),{status:400});return s}
 function hfModelPath(v){return hfModelId(v).split("/").map(encodeURIComponent).join("/")}
-const finiteOrNull=v=>Number.isFinite(Number(v))?Number(v):null;
+const finiteOrNull=v=>v===null||v===undefined||v===""?null:(Number.isFinite(Number(v))?Number(v):null);
 function normalizeHfRouterProvider(p){
   const pricing=p?.pricing&&typeof p.pricing==="object"?{input:finiteOrNull(p.pricing.input),output:finiteOrNull(p.pricing.output)}:{input:null,output:null};
   return {
@@ -38,7 +38,8 @@ function normalizeHfRouterProvider(p){
 }
 function normalizeHfRouterModel(m){
   const providers=Array.isArray(m?.providers)?m.providers.map(normalizeHfRouterProvider):[];
-  const freeProviders=providers.filter(p=>p.is_free===true);
+  const freeProviders=providers.filter(p=>p.is_free===true),unknownProviders=providers.filter(p=>p.is_free===null);
+  const freeStatus=freeProviders.length>0?"free":(unknownProviders.length>0?"unknown":"not_free");
   return {
     id:text(m?.id,220)||null,
     object:text(m?.object,40)||null,
@@ -48,8 +49,9 @@ function normalizeHfRouterModel(m){
     providers,
     free_providers:freeProviders,
     free_provider_count:freeProviders.length,
+    unknown_free_status_provider_count:unknownProviders.length,
     has_explicit_free_provider:freeProviders.length>0,
-    free_status:freeProviders.length>0?"free":"no_explicit_free_provider"
+    free_status:freeStatus
   };
 }
 function filterHfRouterModels(items,args={},forceFree=false){
