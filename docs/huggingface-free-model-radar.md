@@ -1,155 +1,111 @@
-# Hugging Face Free-Model Radar v2
+# Hugging Face Free-Model Radar v3
 
 ## Purpose
 
-Use Hugging Face as the first-layer global model intelligence radar while keeping model-vendor/provider primary documentation as the second evidence layer.
+Use Hugging Face as the first-layer global model radar and vendor/provider primary documentation as the second evidence layer. The system distinguishes **model/vendor-direct free** from **Hugging Face Router route free**.
 
 ## Approved operations
 
-- `models`: existing Hugging Face Hub model search.
-- `router_models`: read the official Hugging Face Router `/v1/models` inventory and normalize provider metadata.
-- `router_model`: resolve one exact `owner/model` from the stable global Router inventory.
-- `free_models`: backward-compatible free-candidate radar.
-- `free_candidates`: explicit free-candidate radar.
+- `models`: Hub model discovery.
+- `router_models`: Router provider inventory.
+- `router_model`: exact model resolved from the global Router inventory.
+- `free_models`: only HF-route evidence (`is_free=true` or explicit 0/0 pricing).
+- `free_candidates`: broader radar including model-author/provider routes that need vendor verification.
+- `vendor_check_candidates`: model-author routes requiring vendor-primary verification.
+- `vendor_free_status`: verify an allowlisted model against its vendor primary policy source.
+- `free_model_status`: combine HF Router evidence and vendor-primary evidence into one final decision.
 
 ## Evidence hierarchy
 
-Hugging Face Router fields answer different questions and must not be collapsed into one boolean.
+### HF provider current/promo free
 
-### 1. Provider promotional/current-free signal
+`is_free === true` -> `provider_promo_free`.
 
-`is_free === true` means Hugging Face currently marks that provider route free of charge. The Router documentation describes this as a provider-level signal that may be a temporary promotion.
+Hugging Face defines this as current provider free-of-charge status and notes it may be a temporary promotion.
 
-Classification: `provider_promo_free`.
+### HF zero-price candidate
 
-### 2. Zero-price candidate
+Explicit `pricing.input === 0` and `pricing.output === 0` -> `zero_price_candidate`.
 
-When both fields are explicitly numeric zero:
+This is a Router-route candidate, not durable vendor confirmation.
 
-- `pricing.input === 0`
-- `pricing.output === 0`
+### Vendor-check candidate
 
-but `is_free !== true`, the route is classified as `zero_price_candidate`.
+A provider marked `is_model_author === true` may enter `vendor_check_candidate` even when HF does not mark that route free. This prevents missing models whose vendor offers a separate free direct API while aggregation/router routes remain paid.
 
-This is sufficient for discovery but **not** sufficient for durable-free promotion. It must carry `requires_vendor_confirmation: true` until primary vendor/provider documentation confirms the policy.
+### Vendor-confirmed free
 
-### 3. Vendor-confirmed free
+A fixed allowlisted vendor-primary pricing/policy source is fetched and checked. A positive result -> `vendor_confirmed_free`.
 
-The intelligence workflow checks the model vendor/provider's primary documentation after discovery. If the primary source explicitly states that the model/tier is free, that separate evidence may promote the candidate to `vendor_confirmed_free` in the downstream candidate registry.
+Vendor confirmation does **not** relabel a paid HF Router route as free. It changes the recommended access path to the vendor-direct API.
 
-The Hugging Face adapter itself does not fabricate this status from Router fields.
+## GLM-4.7-Flash reference case
 
-### 4. Unknown / paid
+Fresh Cloudflare diagnostics on 2026-08-18 established:
 
-- Explicit non-zero prices with no free signal are not free candidates.
-- Missing price and missing `is_free` remain `unknown`.
-- Hugging Face monthly account credits are separate from model/provider free status.
+1. HF Router global `/v1/models` contains `zai-org/GLM-4.7-Flash` with Provider metadata.
+2. Provider entries expose boolean `is_free` signals, but no Provider returned `is_free=true` in the diagnostic.
+3. No HF Router Provider had explicit 0/0 input/output token pricing in the diagnostic.
+4. Cloudflare successfully fetched the fixed Z.AI official pricing page and found `GLM-4.7-Flash` with nearby `Free` evidence.
 
-## Why the evidence model changed
+Therefore the correct classification is:
 
-A real Cloudflare-side Router diagnostic on 2026-08-18 found `zai-org/GLM-4.7-Flash` in the global `/v1/models` inventory with provider metadata and explicit boolean `is_free` signals, but no provider was marked `is_free: true`. Independent Z.AI primary documentation simultaneously described GLM-4.7-Flash as free.
+- HF Router free route: **not confirmed**.
+- Vendor-direct model: **`vendor_confirmed_free`**.
+- Recommended access: **`vendor_direct_api`**.
+- API model: `glm-4.7-flash`.
+- Required secret: `ZAI_API_KEY`.
+- Paid fallback: **disabled**.
 
-Therefore `is_free === true` cannot be the sole global-free-model criterion. It is retained as a strong provider-level signal, while zero pricing becomes a discovery candidate that requires vendor confirmation.
-
-## Normalized provider fields
-
-- `provider`
-- `status`
-- `is_free`
-- `free_status` (legacy compatibility)
-- `pricing.input`
-- `pricing.output`
-- `zero_priced`
-- `free_evidence`
-- `requires_vendor_confirmation`
-- `context_length`
-- `supports_tools`
-- `supports_structured_output`
-- `first_token_latency_ms`
-- `throughput`
-- `is_model_author`
-
-Pricing is reported as USD per million tokens when supplied by the Router.
-
-## Model-level fields
-
-- `promo_free_providers`
-- `zero_priced_providers`
-- `free_candidate_providers`
-- `promo_free_provider_count`
-- `zero_priced_provider_count`
-- `free_candidate_provider_count`
-- `explicit_free_signal_count`
-- `free_radar_status`
-- `requires_vendor_confirmation`
-
-Legacy aliases remain available for compatibility:
-
-- `free_providers`
-- `free_provider_count`
-- `has_explicit_free_provider`
-- `free_status`
-
-## Radar flow
-
-1. Read the global Router `/v1/models` inventory.
-2. Discover candidates where a provider has `is_free === true` or explicit input/output prices of zero.
-3. Label the evidence source instead of collapsing it to a single free boolean.
-4. Deduplicate by model id and provider.
-5. Check the vendor/provider primary documentation for zero-priced candidates and for any model intended for durable production use.
-6. Compare confirmed candidates against the expert-center candidate registry.
-7. If an existing provider key is available, run a bounded capability canary.
-8. If a useful candidate needs a new key/account, notify the operator to register it.
-9. If a previously free route becomes paid or loses supporting evidence, remove it from the free production pool rather than silently falling back to paid usage.
-
-## Example request
+## Final status request
 
 ```json
 {
   "provider": "huggingface",
-  "operation": "free_candidates",
-  "args": {
-    "query": "GLM",
-    "live_only": true,
-    "supports_tools": true,
-    "limit": 20
-  }
-}
-```
-
-## Example exact-model request
-
-```json
-{
-  "provider": "huggingface",
-  "operation": "router_model",
+  "operation": "free_model_status",
   "args": {
     "model_id": "zai-org/GLM-4.7-Flash"
   }
 }
 ```
 
-`router_model` resolves the exact ID from the global `/v1/models` response. This avoids depending on a single-model response shape that differed during real Cloudflare diagnostics.
+Expected decision fields include:
 
-## Production runtime canary
+- `final_free_status`
+- `recommended_access`
+- `router`
+- `vendor.vendor_free_verified`
+- `vendor.evidence`
+- `vendor.access.required_secret`
+- `vendor.access.key_present`
+- `vendor.access.registration_required`
+- `vendor.access.registration_url`
+- `paid_fallback_allowed`
 
-A bounded read-only canary is exposed at:
+## Registration workflow
 
-`GET /v1/selftest/huggingface-router-runtime`
+If vendor-primary evidence confirms free access but the required key is absent, return `registration_required=true` and the official key-management URL. Do not substitute a paid Router route.
 
-It always checks the fixed model `zai-org/GLM-4.7-Flash` and does not call chat/completions or inference endpoints:
+For the Z.AI direct path the canonical environment variable is `ZAI_API_KEY`.
 
-- `inference_called: false`
-- `model_tokens_used: 0`
-- `cost_incurred: false`
+## Global radar flow
 
-The canary should expose both legacy explicit-`is_free` fields and the v2 evidence fields so operational monitoring can distinguish provider-promo-free from zero-price candidates.
+1. Discover relevant/recent/high-value models from Hugging Face Hub and Router.
+2. Read Provider status, pricing, tool support, structured-output support, latency and throughput.
+3. Keep explicit HF free/zero-price routes as Router candidates.
+4. Send model-author routes to the vendor-check queue even if HF route pricing is paid or absent.
+5. Verify allowlisted vendor primary pricing/policy sources.
+6. Produce one final status using `free_model_status`.
+7. If vendor-direct free and key exists, send to a bounded capability canary.
+8. If vendor-direct free and key is absent, notify the operator to register the named key.
+9. If all free evidence disappears, remove the model from the free production pool; never silently fall back to paid inference.
 
 ## Security constraints
 
-- Exact model ids are validated as `owner/model`; arbitrary URLs are rejected.
-- The Worker only calls allowlisted Hugging Face Hub/Router endpoints.
-- Tokens are passed only in the Authorization header and are never returned.
-- Missing upstream fields remain `null`/`unknown`; no zero-value fabrication is allowed.
-- Zero pricing is accepted as a radar candidate, never silently promoted to vendor-confirmed durable free.
-- The runtime canary is metadata-only and cannot be pointed at arbitrary URLs or arbitrary model ids.
+- Exact model IDs are validated as `owner/model`.
+- Vendor URLs come only from an internal allowlisted policy registry; callers cannot supply arbitrary URLs.
+- Vendor verification is metadata/page reading only; no inference call is made.
+- Secret values are never returned.
+- Missing evidence remains unverified.
+- Model/vendor-direct free and HF Router free are never conflated.
+- Paid fallback remains disabled for the free-model workflow.
