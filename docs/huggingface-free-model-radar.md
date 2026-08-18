@@ -12,7 +12,7 @@ Use Hugging Face as the first-layer global model radar and vendor/provider prima
 - `free_models`: only HF-route evidence (`is_free=true` or explicit 0/0 pricing).
 - `free_candidates`: broader radar including model-author/provider routes that need vendor verification.
 - `vendor_check_candidates`: model-author routes requiring vendor-primary verification.
-- `vendor_free_status`: verify an allowlisted model against its vendor primary policy source.
+- `vendor_free_status`: verify an allowlisted model against vendor primary policy sources.
 - `free_model_status`: combine HF Router evidence and vendor-primary evidence into one final decision.
 
 ## Evidence hierarchy
@@ -21,7 +21,7 @@ Use Hugging Face as the first-layer global model radar and vendor/provider prima
 
 `is_free === true` -> `provider_promo_free`.
 
-Hugging Face defines this as current provider free-of-charge status and notes it may be a temporary promotion.
+This is a Provider-route signal. It does not establish that every route to the same model is free.
 
 ### HF zero-price candidate
 
@@ -35,9 +35,17 @@ A provider marked `is_model_author === true` may enter `vendor_check_candidate` 
 
 ### Vendor-confirmed free
 
-A fixed allowlisted vendor-primary pricing/policy source is fetched and checked. A positive result -> `vendor_confirmed_free`.
+Fixed allowlisted vendor-primary documentation is checked. A positive result -> `vendor_confirmed_free`.
 
 Vendor confirmation does **not** relabel a paid HF Router route as free. It changes the recommended access path to the vendor-direct API.
+
+For Z.AI GLM-4.7-Flash, the verifier uses an ordered primary-source failover chain:
+
+1. Z.AI pricing page.
+2. Z.AI GLM-4.7 model guide.
+3. Z.AI release notes.
+
+The first explicit confirmation wins. A failed source is recorded as degraded evidence and the next fixed official source is checked. If every source is unavailable, the result is `unverified`; free status is never inferred from failure.
 
 ## GLM-4.7-Flash reference case
 
@@ -46,12 +54,12 @@ Fresh Cloudflare diagnostics on 2026-08-18 established:
 1. HF Router global `/v1/models` contains `zai-org/GLM-4.7-Flash` with Provider metadata.
 2. Provider entries expose boolean `is_free` signals, but no Provider returned `is_free=true` in the diagnostic.
 3. No HF Router Provider had explicit 0/0 input/output token pricing in the diagnostic.
-4. Cloudflare successfully fetched the fixed Z.AI official pricing page and found `GLM-4.7-Flash` with nearby `Free` evidence.
+4. Cloudflare successfully fetched Z.AI primary documentation and found explicit free-model evidence for `GLM-4.7-Flash`.
 
 Therefore the correct classification is:
 
 - HF Router free route: **not confirmed**.
-- Vendor-direct model: **`vendor_confirmed_free`**.
+- Vendor-direct model: **`vendor_confirmed_free`** when the live vendor-primary check succeeds.
 - Recommended access: **`vendor_direct_api`**.
 - API model: `glm-4.7-flash`.
 - Required secret: `ZAI_API_KEY`.
@@ -75,7 +83,10 @@ Expected decision fields include:
 - `recommended_access`
 - `router`
 - `vendor.vendor_free_verified`
+- `vendor.vendor_free_status`
 - `vendor.evidence`
+- `vendor.source_attempts`
+- `vendor.verification_degraded`
 - `vendor.access.required_secret`
 - `vendor.access.key_present`
 - `vendor.access.registration_required`
@@ -84,9 +95,13 @@ Expected decision fields include:
 
 ## Registration workflow
 
-If vendor-primary evidence confirms free access but the required key is absent, return `registration_required=true` and the official key-management URL. Do not substitute a paid Router route.
+Registration notification is fail-closed:
 
-For the Z.AI direct path the canonical environment variable is `ZAI_API_KEY`.
+- vendor free **confirmed** + key missing -> `registration_required=true`.
+- vendor free **confirmed** + key present -> `registration_required=false`.
+- vendor status `unverified` or `not_confirmed` -> `registration_required=false`; do not ask the operator to register a key from uncertain evidence.
+
+Do not substitute a paid Router route. For the Z.AI direct path the canonical environment variable is `ZAI_API_KEY`.
 
 ## Global radar flow
 
@@ -94,11 +109,12 @@ For the Z.AI direct path the canonical environment variable is `ZAI_API_KEY`.
 2. Read Provider status, pricing, tool support, structured-output support, latency and throughput.
 3. Keep explicit HF free/zero-price routes as Router candidates.
 4. Send model-author routes to the vendor-check queue even if HF route pricing is paid or absent.
-5. Verify allowlisted vendor primary pricing/policy sources.
+5. Verify fixed allowlisted vendor primary sources with failover.
 6. Produce one final status using `free_model_status`.
 7. If vendor-direct free and key exists, send to a bounded capability canary.
 8. If vendor-direct free and key is absent, notify the operator to register the named key.
-9. If all free evidence disappears, remove the model from the free production pool; never silently fall back to paid inference.
+9. If vendor evidence is unavailable, remain `unverified` and do not prompt registration.
+10. If all free evidence disappears, remove the model from the free production pool; never silently fall back to paid inference.
 
 ## Security constraints
 
