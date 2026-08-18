@@ -13,5 +13,7 @@ try{
   const model=body.data.find(m=>m?.id===TARGET);
   assert.ok(model,"GLM-4.7-Flash must be present in Router model list");
   assert.ok(Array.isArray(model.providers)&&model.providers.length>0,"Target model must have provider metadata");
-  console.log(JSON.stringify({ok:true,stage:"router-list-target-shape",model_id:model.id,provider_count:model.providers.length,providers:model.providers.map(p=>({provider:p.provider,status:p.status,is_free:typeof p?.is_free==="boolean"?p.is_free:null,pricing:p.pricing??null}))}));
+  const explicit=model.providers.filter(p=>typeof p?.is_free==="boolean");
+  assert.ok(explicit.length>0,"At least one target provider must expose boolean is_free");
+  console.log(JSON.stringify({ok:true,stage:"router-list-explicit-is-free",model_id:model.id,provider_count:model.providers.length,explicit_signal_count:explicit.length,providers:model.providers.map(p=>({provider:p.provider,status:p.status,is_free:typeof p?.is_free==="boolean"?p.is_free:null,pricing:p.pricing??null}))}));
 }finally{clearTimeout(timer)}
