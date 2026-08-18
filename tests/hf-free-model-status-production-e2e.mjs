@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 
 const BASE="https://intelligence-worker.a15280020511.workers.dev";
-const DIAGNOSTIC_RUN="2026-08-18T22:08+08:00";
+const DIAGNOSTIC_RUN="2026-08-18T22:10+08:00";
 const controller=new AbortController();
 const timer=setTimeout(()=>controller.abort(),30000);
 
