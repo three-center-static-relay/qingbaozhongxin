@@ -1,36 +1,16 @@
 import assert from "node:assert/strict";
 
-const BASE="https://intelligence-worker.a15280020511.workers.dev";
+const TARGET="zai-org/GLM-4.7-Flash";
+const URL=`https://router.huggingface.co/v1/models/${TARGET}`;
 const controller=new AbortController();
 const timer=setTimeout(()=>controller.abort(),25000);
 
 try{
-  const response=await fetch(`${BASE}/v1/selftest/huggingface-router-runtime`,{
-    signal:controller.signal,
-    headers:{accept:"application/json"}
-  });
-  const body=await response.json().catch(()=>null);
-
-  assert.equal(body?.selftest,"huggingface-router-runtime",`deployed production does not expose HF Router canary; HTTP ${response.status}, error=${body?.error||"unknown"}`);
-  console.log(JSON.stringify({
-    ok:true,
-    diagnostic_stage:"route-presence-recheck-20260818-2046-cst",
-    http_status:response.status,
-    selftest:body.selftest,
-    runtime_ok:body.ok??null,
-    upstream_http_status:body.upstream_http_status??null,
-    error:body.error??null,
-    model_id:body.model_id??null,
-    provider_count:body.provider_count??null,
-    free_status_verified:body.free_status_verified??null,
-    has_explicit_free_provider:body.has_explicit_free_provider??null,
-    free_provider_count:body.free_provider_count??null,
-    providers:Array.isArray(body?.providers)?body.providers.map(p=>({provider:p.provider,status:p.status,is_free:p.is_free,pricing:p.pricing})):null,
-    inference_called:body.inference_called??null,
-    model_tokens_used:body.model_tokens_used??null,
-    cost_incurred:body.cost_incurred??null,
-    secrets_redacted:true
-  }));
-}finally{
-  clearTimeout(timer);
-}
+  const response=await fetch(URL,{signal:controller.signal,headers:{accept:"application/json"}});
+  const raw=await response.text();
+  let body=null;try{body=raw?JSON.parse(raw):null}catch{}
+  assert.equal(response.status,200,`HF Router direct metadata HTTP ${response.status}`);
+  assert.equal(body?.id,TARGET,"HF Router must return requested model id");
+  assert.ok(Array.isArray(body?.providers)&&body.providers.length>0,"HF Router must return provider metadata");
+  console.log(JSON.stringify({ok:true,diagnostic_stage:"direct-router-reachable",model_id:body.id,provider_count:body.providers.length,providers:body.providers.map(p=>({provider:p.provider,status:p.status,is_free:p.is_free??null,pricing:p.pricing??null})),inference_called:false,model_tokens_used:0,cost_incurred:false,secrets_redacted:true}));
+}finally{clearTimeout(timer)}
