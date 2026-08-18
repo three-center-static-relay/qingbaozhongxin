@@ -152,7 +152,7 @@ export async function verifyVendorFree(modelId,env={}){
       api_base_url:policy.api_base_url,
       required_secret:policy.required_secret,
       key_present:keyPresent,
-      registration_required:!keyPresent,
+      registration_required:verified&&!keyPresent,
       registration_url:policy.registration_url
     },
     router_free_inference:false,
