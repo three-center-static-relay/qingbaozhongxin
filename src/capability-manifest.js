@@ -25,6 +25,8 @@ export function intelligenceCapabilityManifest({catalogVersion="unknown",provide
     cap({id:"intelligence.legal-evidence",type:"composite",domain:"legal",operations:["legal.search","regulation.retrieve","case.evidence"],dependencies:["intelligence.provider-query"],health:providerHealth,reliability:0.75,accuracy:0.8},observedAt),
     cap({id:"intelligence.situational-fusion",type:"composite",domain:"intelligence",operations:["observation.normalize","entity.track","all-source.fuse","pattern-of-life.update","confidence.score","dissent.surface"],dependencies:["intelligence.provider-query"],health:"ready",reliability:0.88,accuracy:0.84},observedAt),
     cap({id:"intelligence.warning-and-retask",type:"composite",domain:"intelligence",operations:["anomaly.detect","priority.rank","warning.classify","collection.gap-detect","collection.retask"],dependencies:["intelligence.situational-fusion"],health:"ready",reliability:0.87,accuracy:0.82},observedAt),
+    cap({id:"intelligence.requirements-management",type:"composite",domain:"intelligence",operations:["priority-requirement.register","requirement.prioritize","indicator.define","warning-sensitivity.define"],dependencies:["intelligence.situational-fusion"],health:"ready",reliability:0.9,accuracy:0.86},observedAt),
+    cap({id:"intelligence.collection-orchestration",type:"composite",domain:"intelligence",operations:["collection.plan","collection-satisfaction.score","source-independence.assess","collection-gap.rank","retask.recommend"],dependencies:["intelligence.requirements-management","intelligence.warning-and-retask"],health:"ready",reliability:0.88,accuracy:0.84},observedAt),
     cap({id:"intelligence.ai-analysis-advisory",type:"composite",domain:"intelligence",operations:["analysis.packet","alternative-hypotheses","uncertainty.explain","dissent.review","collection-priority.recommend"],dependencies:["intelligence.situational-fusion"],health:"ready",reliability:0.82,accuracy:0.8},observedAt)
   ];
   return{abi_version:CAPABILITY_ABI_VERSION,center:"intelligence",generated_at:observedAt,catalog_version:catalogVersion,provider_summary:{total,configured},capabilities,ecology:[
@@ -34,6 +36,9 @@ export function intelligenceCapabilityManifest({catalogVersion="unknown",provide
     {from:"intelligence.provider-query",relation:"FEEDS",to:"intelligence.situational-fusion"},
     {from:"intelligence.situational-fusion",relation:"PRODUCES",to:"world-model.track"},
     {from:"intelligence.warning-and-retask",relation:"REQUIRES",to:"intelligence.situational-fusion"},
+    {from:"intelligence.requirements-management",relation:"GUIDES",to:"intelligence.collection-orchestration"},
+    {from:"intelligence.collection-orchestration",relation:"REQUIRES",to:"intelligence.warning-and-retask"},
+    {from:"intelligence.collection-orchestration",relation:"COMPLEMENTS",to:"governance.task-planner"},
     {from:"intelligence.warning-and-retask",relation:"COMPLEMENTS",to:"governance.task-planner"},
     {from:"intelligence.ai-analysis-advisory",relation:"REQUIRES",to:"intelligence.situational-fusion"},
     {from:"intelligence.ai-analysis-advisory",relation:"COMPLEMENTS",to:"expert.deliberation"},
