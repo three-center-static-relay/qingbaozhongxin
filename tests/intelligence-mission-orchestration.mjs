@@ -1,0 +1,9 @@
+import assert from "node:assert/strict";
+import {buildMissionCollectionPlan,missionMeta} from "../src/intelligence-mission-orchestration.js";
+const now=Date.parse("2026-08-22T14:30:00Z");
+const requirements=[{requirement_id:"pir-market",question_summary:"Detect material change in a strategic market",priority:.95,warning_sensitivity:.8,domains:["business"],indicator_tags:["supplier-shift"],max_age_hours:72}];
+const picture={tracks:[{track_key:"business:entity-x",domain:"business",last_observed:"2026-08-22T14:10:00Z",priority_score:.78,warning_level:"WARNING",confidence:.73,source_independence_ratio:.8,contradiction_ratio:.3,deception_risk:.1,information_gain_priority:.42,tail_risk_override:false,recent_indicators:["supplier-shift"]}]};
+const plan=buildMissionCollectionPlan(requirements,picture,now);
+assert.equal(plan.ok,true);assert.equal(plan.requirements_count,1);assert.equal(plan.assessments[0].matched_track_count,1);assert.equal(plan.assessments[0].warning_state,"WARNING");assert(plan.assessments[0].retask_recommendations.includes("COLLECT_DISCONFIRMING_EVIDENCE"));assert(plan.assessments[0].retask_recommendations.includes("PRIORITIZE_HIGH_INFORMATION_VALUE_COLLECTION"));assert(plan.assessments[0].retask_recommendations.includes("ESCALATE_TO_LA_AND_EXPERT_REVIEW"));assert.equal(plan.principles.requirements_driven,true);assert.equal(plan.principles.decision_authority,false);assert.equal(missionMeta().mode,"general-purpose-strategic-intelligence");
+const noEvidence=buildMissionCollectionPlan([{requirement_id:"pir-empty",priority:1,domains:["policy"]}],{tracks:[]},now);assert(noEvidence.assessments[0].collection_gaps.includes("NO_RELEVANT_TRACK"));assert(noEvidence.assessments[0].retask_recommendations.includes("BROADEN_DISCOVERY_WITH_APPROVED_SOURCES"));
+console.log(JSON.stringify({ok:true,suite:"intelligence-mission-orchestration",warning:plan.assessments[0].warning_state,collection_priority:plan.assessments[0].collection_priority}));
