@@ -22,11 +22,21 @@ export function intelligenceCapabilityManifest({catalogVersion="unknown",provide
     cap({id:"intelligence.literature-search",domain:"research",operations:["literature.search","citation.retrieve","academic.evidence"],dependencies:["intelligence.provider-query"],health:providerHealth,reliability:0.82,accuracy:0.86},observedAt),
     cap({id:"intelligence.dataset-radar",type:"composite",domain:"datasets",operations:["dataset.discover","dataset.classify","world.observe"],dependencies:["intelligence.provider-query"],health:"ready",latency:"background",timeout_ms:180000,reliability:0.8,accuracy:0.78},observedAt),
     cap({id:"intelligence.geospatial-evidence",type:"composite",domain:"geospatial",operations:["geospatial.search","poi.retrieve","mobility.evidence"],dependencies:["intelligence.provider-query"],health:providerHealth,reliability:0.76,accuracy:0.78},observedAt),
-    cap({id:"intelligence.legal-evidence",type:"composite",domain:"legal",operations:["legal.search","regulation.retrieve","case.evidence"],dependencies:["intelligence.provider-query"],health:providerHealth,reliability:0.75,accuracy:0.8},observedAt)
+    cap({id:"intelligence.legal-evidence",type:"composite",domain:"legal",operations:["legal.search","regulation.retrieve","case.evidence"],dependencies:["intelligence.provider-query"],health:providerHealth,reliability:0.75,accuracy:0.8},observedAt),
+    cap({id:"intelligence.situational-fusion",type:"composite",domain:"intelligence",operations:["observation.normalize","entity.track","all-source.fuse","pattern-of-life.update","confidence.score","dissent.surface"],dependencies:["intelligence.provider-query"],health:"ready",reliability:0.88,accuracy:0.84},observedAt),
+    cap({id:"intelligence.warning-and-retask",type:"composite",domain:"intelligence",operations:["anomaly.detect","priority.rank","warning.classify","collection.gap-detect","collection.retask"],dependencies:["intelligence.situational-fusion"],health:"ready",reliability:0.87,accuracy:0.82},observedAt),
+    cap({id:"intelligence.ai-analysis-advisory",type:"composite",domain:"intelligence",operations:["analysis.packet","alternative-hypotheses","uncertainty.explain","dissent.review","collection-priority.recommend"],dependencies:["intelligence.situational-fusion"],health:"ready",reliability:0.82,accuracy:0.8},observedAt)
   ];
   return{abi_version:CAPABILITY_ABI_VERSION,center:"intelligence",generated_at:observedAt,catalog_version:catalogVersion,provider_summary:{total,configured},capabilities,ecology:[
     {from:"intelligence.literature-search",relation:"REQUIRES",to:"intelligence.provider-query"},
     {from:"intelligence.dataset-radar",relation:"PRODUCES",to:"world-model.observation"},
+    {from:"intelligence.dataset-radar",relation:"FEEDS",to:"intelligence.situational-fusion"},
+    {from:"intelligence.provider-query",relation:"FEEDS",to:"intelligence.situational-fusion"},
+    {from:"intelligence.situational-fusion",relation:"PRODUCES",to:"world-model.track"},
+    {from:"intelligence.warning-and-retask",relation:"REQUIRES",to:"intelligence.situational-fusion"},
+    {from:"intelligence.warning-and-retask",relation:"COMPLEMENTS",to:"governance.task-planner"},
+    {from:"intelligence.ai-analysis-advisory",relation:"REQUIRES",to:"intelligence.situational-fusion"},
+    {from:"intelligence.ai-analysis-advisory",relation:"COMPLEMENTS",to:"expert.deliberation"},
     {from:"intelligence.geospatial-evidence",relation:"COMPLEMENTS",to:"compute.geospatial-analysis"},
     {from:"intelligence.legal-evidence",relation:"COMPLEMENTS",to:"expert.deliberation"}
   ]};
